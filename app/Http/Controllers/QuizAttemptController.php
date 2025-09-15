@@ -8,9 +8,63 @@ use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
+/**
+ * @OA\Tag(
+ *     name="QuizAttempts",
+ *     description="Endpoints to attempt quizzes and grade essays (Admin)"
+ * )
+ */
 class QuizAttemptController extends Controller
 {
-    // POST /api/quizzes/{id}/attempts
+    /**
+     * @OA\Post(
+     *     path="/api/quizzes/{id}/attempts",
+     *     tags={"QuizAttempts"},
+     *     summary="Submit a quiz attempt for authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Quiz ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"answers"},
+     *             @OA\Property(
+     *                 property="answers",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="question_id", type="integer", example=10),
+     *                     @OA\Property(property="user_answer", type="string", example="A")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Quiz attempt submitted",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="attempt_id", type="integer", example=1),
+     *             @OA\Property(property="score", type="number", example=80),
+     *             @OA\Property(property="is_passed", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="feedback",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="question_id", type="integer", example=5),
+     *                     @OA\Property(property="user_answer", type="string", example="My essay answer"),
+     *                     @OA\Property(property="message", type="string", example="Requires manual grading")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(Request $request, $id)
     {
         $request->validate([
@@ -62,7 +116,40 @@ class QuizAttemptController extends Controller
         ], 201);
     }
 
-    // PUT /api/quiz-attempts/{id}/grade (Admin)
+    /**
+     * @OA\Put(
+     *     path="/api/quiz-attempts/{id}/grade",
+     *     tags={"QuizAttempts"},
+     *     summary="Manually grade a quiz attempt (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Quiz Attempt ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"question_id","score"},
+     *             @OA\Property(property="question_id", type="integer", example=5),
+     *             @OA\Property(property="score", type="number", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Grade updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="attempt_id", type="integer", example=1),
+     *             @OA\Property(property="message", type="string", example="Grade updated."),
+     *             @OA\Property(property="new_score", type="number", example=90)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Quiz attempt or question not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function grade(Request $request, $id)
     {
         $request->validate([

@@ -6,9 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
+/**
+ * @OA\Tag(
+ *     name="Courses",
+ *     description="Endpoints for managing courses"
+ * )
+ */
 class CourseController extends Controller
 {
-    // GET /api/courses
+      /**
+     * @OA\Get(
+     *     path="/api/courses",
+     *     tags={"Courses"},
+     *     summary="Get all courses",
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by category ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         required=false,
+     *         description="Search by keyword in title or description",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of courses"
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $query = Course::query();
@@ -27,14 +57,51 @@ class CourseController extends Controller
         return response()->json($courses);
     }
 
-    // GET /api/courses/{id}
+    /**
+     * @OA\Get(
+     *     path="/api/courses/{id}",
+     *     tags={"Courses"},
+     *     summary="Get a single course by ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course details including lessons, FAQs, and notices"
+     *     ),
+     *     @OA\Response(response=404, description="Course not found")
+     * )
+     */
     public function show($id)
     {
         $course = Course::with(['lessons', 'faqs', 'notices'])->findOrFail($id);
         return response()->json($course);
     }
 
-    // POST /api/courses (Admin)
+     /**
+     * @OA\Post(
+     *     path="/api/courses",
+     *     tags={"Courses"},
+     *     summary="Create a new course (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","description"},
+     *             @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *             @OA\Property(property="price", type="number", example=49.99),
+     *             @OA\Property(property="category_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Course created successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -49,7 +116,33 @@ class CourseController extends Controller
         return response()->json($course, 201);
     }
 
-    // PUT /api/courses/{id} (Admin)
+  /**
+     * @OA\Put(
+     *     path="/api/courses/{id}",
+     *     tags={"Courses"},
+     *     summary="Update a course (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", example="Updated Title"),
+     *             @OA\Property(property="description", type="string", example="Updated description"),
+     *             @OA\Property(property="price", type="number", example=59.99),
+     *             @OA\Property(property="category_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Course updated successfully"),
+     *     @OA\Response(response=404, description="Course not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, $id)
     {
         $course = Course::findOrFail($id);

@@ -8,9 +8,48 @@ use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
+/**
+ * @OA\Tag(
+ *     name="LessonProgress",
+ *     description="Endpoints to update lesson progress for enrolled users"
+ * )
+ */
 class LessonProgressController extends Controller
 {
-    // PUT /api/lessons/{id}/progress
+/**
+     * @OA\Put(
+     *     path="/api/lessons/{id}/progress",
+     *     tags={"LessonProgress"},
+     *     summary="Update lesson progress for authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Lesson ID",
+     *         @OA\Schema(type="integer", example=5)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"is_completed"},
+     *             @OA\Property(property="is_completed", type="boolean", example=true, description="Mark lesson as completed or not")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lesson progress updated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="lesson_id", type="integer", example=5),
+     *             @OA\Property(property="progress_status", type="string", example="completed")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Lesson or enrollment not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function update(Request $request, $id)
     {
         $request->validate([

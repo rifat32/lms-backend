@@ -8,9 +8,35 @@ use App\Models\Course;
 use App\Models\Payment;
 use App\Models\Enrollment;
 
+/**
+ * @OA\Tag(
+ *     name="Reports",
+ *     description="Endpoints to fetch sales and enrollment reports (Admin only)"
+ * )
+ */
 class ReportController extends Controller
 {
-    // GET /api/reports/sales
+     /**
+     * @OA\Get(
+     *     path="/api/reports/sales",
+     *     tags={"Reports"},
+     *     summary="Get sales report for all courses (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Sales report retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="course_id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                 @OA\Property(property="total_revenue", type="number", example=5000),
+     *                 @OA\Property(property="total_sales_count", type="integer", example=20)
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function sales()
     {
         $courses = Course::with('payments')->get();
@@ -30,7 +56,26 @@ class ReportController extends Controller
         return response()->json($report);
     }
 
-    // GET /api/reports/enrollments
+   /**
+     * @OA\Get(
+     *     path="/api/reports/enrollments",
+     *     tags={"Reports"},
+     *     summary="Get enrollment count per course (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment report retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="course_id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                 @OA\Property(property="enrolled_students_count", type="integer", example=25)
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function enrollments()
     {
         $courses = Course::with('enrollments')->get();

@@ -11,9 +11,38 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use PDF; // Use barryvdh/laravel-dompdf
 
+/**
+ * @OA\Tag(
+ *     name="Certificates",
+ *     description="Endpoints for generating, downloading, and verifying certificates"
+ * )
+ */
 class CertificateController extends Controller
 {
-    // POST /api/courses/{id}/complete
+     /**
+     * @OA\Post(
+     *     path="/api/courses/{id}/complete",
+     *     tags={"Certificates"},
+     *     summary="Generate a certificate for a completed course",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user_id","course_id"},
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="course_id", type="integer", example=101)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Certificate generated successfully"),
+     *     @OA\Response(response=400, description="Course not completed yet")
+     * )
+     */
     public function generate(Request $request, $id)
     {
         $request->validate([
@@ -61,7 +90,22 @@ class CertificateController extends Controller
         ]);
     }
 
-    // GET /api/certificates/download/{id}
+      /**
+     * @OA\Get(
+     *     path="/api/certificates/download/{id}",
+     *     tags={"Certificates"},
+     *     summary="Download a certificate PDF",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Certificate ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Certificate PDF download"),
+     *     @OA\Response(response=404, description="File not found")
+     * )
+     */
     public function download($id)
     {
         $certificate = Certificate::findOrFail($id);
@@ -74,7 +118,35 @@ class CertificateController extends Controller
         return response()->download($file_path);
     }
 
-    // GET /api/certificates/verify/{code}
+    /**
+     * @OA\Get(
+     *     path="/api/certificates/verify/{code}",
+     *     tags={"Certificates"},
+     *     summary="Verify a certificate by code",
+     *     @OA\Parameter(
+     *         name="code",
+     *         in="path",
+     *         required=true,
+     *         description="Certificate code",
+     *         @OA\Schema(type="string", example="ABCD123XYZ")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Certificate is valid",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="is_valid", type="boolean", example=true),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="name", type="string", example="John Doe")
+     *             ),
+     *             @OA\Property(property="course", type="object",
+     *                 @OA\Property(property="title", type="string", example="Laravel Basics")
+     *             ),
+     *             @OA\Property(property="issued_at", type="string", example="2025-09-16 12:00:00")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Certificate not found")
+     * )
+     */
     public function verify($code)
     {
         $certificate = Certificate::with('enrollment.user', 'enrollment.course')
