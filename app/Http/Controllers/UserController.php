@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="users/{id}",
+     *     path="/users/{id}",
      *     tags={"Users"},
      *     summary="Get user details by ID",
      *     security={{"bearerAuth":{}}},
@@ -58,7 +58,7 @@ class UserController extends Controller
 
     /**
      * @OA\Put(
-     *     path="users/{id}",
+     *     path="/users/{id}",
      *     tags={"Users"},
      *     summary="Update user profile",
      *     security={{"bearerAuth":{}}},

@@ -17,7 +17,7 @@ class QuizController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="quizzes/{id}",
+     *     path="/quizzes/{id}",
      *     tags={"Quizzes"},
      *     summary="Get quiz details with questions and options",
      *     security={{"bearerAuth":{}}},

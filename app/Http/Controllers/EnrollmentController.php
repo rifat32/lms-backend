@@ -19,7 +19,7 @@ class EnrollmentController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="enrollments",
+     *     path="/enrollments",
      *     tags={"Enrollments"},
      *     summary="Enroll authenticated user in a course",
      *     security={{"bearerAuth":{}}},
@@ -62,7 +62,7 @@ class EnrollmentController extends Controller
 
     /**
      * @OA\Get(
-     *     path="users/{id}/enrollments",
+     *     path="/users/{id}/enrollments",
      *     tags={"Enrollments"},
      *     summary="Get all enrollments of a specific user",
      *     security={{"bearerAuth":{}}},

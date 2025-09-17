@@ -19,7 +19,7 @@ class LessonProgressController extends Controller
 {
     /**
      * @OA\Put(
-     *     path="lessons/{id}/progress",
+     *     path="/lessons/{id}/progress",
      *     tags={"LessonProgress"},
      *     summary="Update lesson progress for authenticated user",
      *     security={{"bearerAuth":{}}},

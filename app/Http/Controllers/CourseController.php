@@ -16,7 +16,7 @@ class CourseController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="courses",
+     *     path="/courses",
      *     tags={"Courses"},
      *     summary="Get all courses",
      *     @OA\Parameter(
@@ -59,7 +59,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="courses/{id}",
+     *     path="/courses/{id}",
      *     tags={"Courses"},
      *     summary="Get a single course by ID",
      *     @OA\Parameter(
@@ -84,7 +84,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="courses",
+     *     path="/courses",
      *     tags={"Courses"},
      *     summary="Create a new course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -118,7 +118,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="courses/{id}",
+     *     path="/courses/{id}",
      *     tags={"Courses"},
      *     summary="Update a course (Admin only)",
      *     security={{"bearerAuth":{}}},

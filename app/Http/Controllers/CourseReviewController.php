@@ -19,7 +19,7 @@ class CourseReviewController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="courses/{id}/reviews",
+     *     path="/courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Get all approved reviews for a course",
      *     @OA\Parameter(
@@ -69,7 +69,7 @@ class CourseReviewController extends Controller
 
     /**
      * @OA\Post(
-     *     path="courses/{id}/reviews",
+     *     path="/courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Submit a review for a course",
      *     security={{"bearerAuth":{}}},

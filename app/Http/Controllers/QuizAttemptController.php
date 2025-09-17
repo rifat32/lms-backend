@@ -19,7 +19,7 @@ class QuizAttemptController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="quizzes/{id}/attempts",
+     *     path="/quizzes/{id}/attempts",
      *     tags={"QuizAttempts"},
      *     summary="Submit a quiz attempt for authenticated user",
      *     security={{"bearerAuth":{}}},
@@ -118,7 +118,7 @@ class QuizAttemptController extends Controller
 
     /**
      * @OA\Put(
-     *     path="quiz-attempts/{id}/grade",
+     *     path="/quiz-attempts/{id}/grade",
      *     tags={"QuizAttempts"},
      *     summary="Manually grade a quiz attempt (Admin only)",
      *     security={{"bearerAuth":{}}},

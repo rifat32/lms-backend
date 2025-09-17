@@ -21,7 +21,7 @@ class CertificateController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="courses/{id}/complete",
+     *     path="/courses/{id}/complete",
      *     tags={"Certificates"},
      *     summary="Generate a certificate for a completed course",
      *     @OA\Parameter(
@@ -92,7 +92,7 @@ class CertificateController extends Controller
 
     /**
      * @OA\Get(
-     *     path="certificates/download/{id}",
+     *     path="/certificates/download/{id}",
      *     tags={"Certificates"},
      *     summary="Download a certificate PDF",
      *     @OA\Parameter(
@@ -120,7 +120,7 @@ class CertificateController extends Controller
 
     /**
      * @OA\Get(
-     *     path="certificates/verify/{code}",
+     *     path="/certificates/verify/{code}",
      *     tags={"Certificates"},
      *     summary="Verify a certificate by code",
      *     @OA\Parameter(

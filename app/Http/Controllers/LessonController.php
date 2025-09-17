@@ -16,7 +16,7 @@ class LessonController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="courses/{course_id}/lessons",
+     *     path="/courses/{course_id}/lessons",
      *     tags={"Lessons"},
      *     summary="Create a new lesson for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -60,7 +60,7 @@ class LessonController extends Controller
 
     /**
      * @OA\Put(
-     *     path="lessons/{id}",
+     *     path="/lessons/{id}",
      *     tags={"Lessons"},
      *     summary="Update an existing lesson (Admin only)",
      *     security={{"bearerAuth":{}}},
