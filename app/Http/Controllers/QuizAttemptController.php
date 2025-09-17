@@ -19,7 +19,7 @@ class QuizAttemptController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/quizzes/{id}/attempts",
+     *     path="/quizzes/{id}/attempts",
      *     tags={"QuizAttempts"},
      *     summary="Submit a quiz attempt for authenticated user",
      *     security={{"bearerAuth":{}}},
@@ -90,7 +90,7 @@ class QuizAttemptController extends Controller
             $question = Question::findOrFail($answer['question_id']);
 
             $is_correct = false;
-            if($question->question_type !== 'essay') {
+            if ($question->question_type !== 'essay') {
                 // For non-essay, check if answer matches correct option
                 $correct_option = $question->options()->where('is_correct', true)->first();
                 $is_correct = $correct_option && $correct_option->id == $answer['user_answer'];
@@ -118,7 +118,7 @@ class QuizAttemptController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/quiz-attempts/{id}/grade",
+     *     path="/quiz-attempts/{id}/grade",
      *     tags={"QuizAttempts"},
      *     summary="Manually grade a quiz attempt (Admin only)",
      *     security={{"bearerAuth":{}}},

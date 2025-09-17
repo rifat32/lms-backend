@@ -14,9 +14,9 @@ use Illuminate\Http\Request;
  */
 class LessonController extends Controller
 {
-  /**
+    /**
      * @OA\Post(
-     *     path="/api/courses/{course_id}/lessons",
+     *     path="/courses/{course_id}/lessons",
      *     tags={"Lessons"},
      *     summary="Create a new lesson for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -58,9 +58,9 @@ class LessonController extends Controller
         return response()->json($lesson, 201);
     }
 
-   /**
+    /**
      * @OA\Put(
-     *     path="/api/lessons/{id}",
+     *     path="/lessons/{id}",
      *     tags={"Lessons"},
      *     summary="Update an existing lesson (Admin only)",
      *     security={{"bearerAuth":{}}},

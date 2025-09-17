@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Auth;
  */
 class EnrollmentController extends Controller
 {
-     /**
+    /**
      * @OA\Post(
-     *     path="/api/enrollments",
+     *     path="/enrollments",
      *     tags={"Enrollments"},
      *     summary="Enroll authenticated user in a course",
      *     security={{"bearerAuth":{}}},
@@ -60,9 +60,9 @@ class EnrollmentController extends Controller
         return response()->json($enrollment, 201);
     }
 
-  /**
+    /**
      * @OA\Get(
-     *     path="/api/users/{id}/enrollments",
+     *     path="/users/{id}/enrollments",
      *     tags={"Enrollments"},
      *     summary="Get all enrollments of a specific user",
      *     security={{"bearerAuth":{}}},
@@ -103,7 +103,7 @@ class EnrollmentController extends Controller
             ->where('user_id', $id)
             ->get();
 
-        $data = $enrollments->map(function($enrollment) {
+        $data = $enrollments->map(function ($enrollment) {
             return [
                 'enrollment_id' => $enrollment->id,
                 'course' => [

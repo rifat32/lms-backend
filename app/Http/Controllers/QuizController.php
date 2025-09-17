@@ -15,9 +15,9 @@ use Illuminate\Http\Request;
  */
 class QuizController extends Controller
 {
-     /**
+    /**
      * @OA\Get(
-     *     path="/api/quizzes/{id}",
+     *     path="/quizzes/{id}",
      *     tags={"Quizzes"},
      *     summary="Get quiz details with questions and options",
      *     security={{"bearerAuth":{}}},
@@ -63,12 +63,12 @@ class QuizController extends Controller
         return response()->json([
             'id' => $quiz->id,
             'title' => $quiz->title,
-            'questions' => $quiz->questions->map(function($question) {
+            'questions' => $quiz->questions->map(function ($question) {
                 return [
                     'question_id' => $question->id,
                     'text' => $question->question_text,
                     'type' => $question->question_type,
-                    'options' => $question->options->map(function($option) {
+                    'options' => $question->options->map(function ($option) {
                         return [
                             'option_id' => $option->id,
                             'text' => $option->option_text

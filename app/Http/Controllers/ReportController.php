@@ -16,9 +16,9 @@ use App\Models\Enrollment;
  */
 class ReportController extends Controller
 {
-     /**
+    /**
      * @OA\Get(
-     *     path="/api/reports/sales",
+     *     path="/reports/sales",
      *     tags={"Reports"},
      *     summary="Get sales report for all courses (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -56,9 +56,9 @@ class ReportController extends Controller
         return response()->json($report);
     }
 
-   /**
+    /**
      * @OA\Get(
-     *     path="/api/reports/enrollments",
+     *     path="/reports/enrollments",
      *     tags={"Reports"},
      *     summary="Get enrollment count per course (Admin only)",
      *     security={{"bearerAuth":{}}},
