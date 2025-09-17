@@ -15,14 +15,13 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-              $table->unsignedBigInteger('quiz_id');
-    $table->text('question_text');
-    $table->enum('question_type', ['mcq', 'true_false', 'short_answer']);
-    $table->integer('points')->default(1);
-    $table->integer('time_limit')->nullable();
-    $table->timestamps();
+            $table->unsignedBigInteger('quiz_id');
+            $table->text('question_text');
+            $table->enum('question_type', ['mcq', 'true_false', 'short_answer']);
+            $table->integer('points')->default(1);
+            $table->integer('time_limit')->nullable();
 
-    $table->foreign('quiz_id')->references('id')->on('quizzes')->onDelete('cascade');
+            $table->foreign('quiz_id')->references('id')->on('quizzes')->onDelete('cascade');
             $table->timestamps();
         });
     }
