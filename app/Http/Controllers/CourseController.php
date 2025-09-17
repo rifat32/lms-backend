@@ -14,9 +14,9 @@ use Illuminate\Http\Request;
  */
 class CourseController extends Controller
 {
-      /**
+    /**
      * @OA\Get(
-     *     path="/api/courses",
+     *     path="courses",
      *     tags={"Courses"},
      *     summary="Get all courses",
      *     @OA\Parameter(
@@ -49,7 +49,7 @@ class CourseController extends Controller
 
         if ($request->has('keyword')) {
             $query->where('title', 'like', '%' . $request->keyword . '%')
-                  ->orWhere('description', 'like', '%' . $request->keyword . '%');
+                ->orWhere('description', 'like', '%' . $request->keyword . '%');
         }
 
         $courses = $query->get();
@@ -59,7 +59,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/courses/{id}",
+     *     path="courses/{id}",
      *     tags={"Courses"},
      *     summary="Get a single course by ID",
      *     @OA\Parameter(
@@ -82,9 +82,9 @@ class CourseController extends Controller
         return response()->json($course);
     }
 
-     /**
+    /**
      * @OA\Post(
-     *     path="/api/courses",
+     *     path="courses",
      *     tags={"Courses"},
      *     summary="Create a new course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -116,9 +116,9 @@ class CourseController extends Controller
         return response()->json($course, 201);
     }
 
-  /**
+    /**
      * @OA\Put(
-     *     path="/api/courses/{id}",
+     *     path="courses/{id}",
      *     tags={"Courses"},
      *     summary="Update a course (Admin only)",
      *     security={{"bearerAuth":{}}},

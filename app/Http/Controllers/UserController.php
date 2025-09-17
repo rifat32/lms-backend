@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserController extends Controller
 {
-     /**
+    /**
      * @OA\Get(
-     *     path="/api/users/{id}",
+     *     path="users/{id}",
      *     tags={"Users"},
      *     summary="Get user details by ID",
      *     security={{"bearerAuth":{}}},
@@ -55,10 +55,10 @@ class UserController extends Controller
         ]);
     }
 
- 
+
     /**
      * @OA\Put(
-     *     path="/api/users/{id}",
+     *     path="users/{id}",
      *     tags={"Users"},
      *     summary="Update user profile",
      *     security={{"bearerAuth":{}}},

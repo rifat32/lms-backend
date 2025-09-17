@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Auth;
  */
 class CourseReviewController extends Controller
 {
-   /**
+    /**
      * @OA\Get(
-     *     path="/api/courses/{id}/reviews",
+     *     path="courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Get all approved reviews for a course",
      *     @OA\Parameter(
@@ -54,7 +54,7 @@ class CourseReviewController extends Controller
             ->where('course_id', $course->id)
             ->where('status', 'approved') // only show approved reviews
             ->get()
-            ->map(function($review) {
+            ->map(function ($review) {
                 return [
                     'review_id' => $review->id,
                     'rating' => $review->rating,
@@ -67,9 +67,9 @@ class CourseReviewController extends Controller
         return response()->json($reviews);
     }
 
-  /**
+    /**
      * @OA\Post(
-     *     path="/api/courses/{id}/reviews",
+     *     path="courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Submit a review for a course",
      *     security={{"bearerAuth":{}}},

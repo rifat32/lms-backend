@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Auth;
  */
 class LessonProgressController extends Controller
 {
-/**
+    /**
      * @OA\Put(
-     *     path="/api/lessons/{id}/progress",
+     *     path="lessons/{id}/progress",
      *     tags={"LessonProgress"},
      *     summary="Update lesson progress for authenticated user",
      *     security={{"bearerAuth":{}}},

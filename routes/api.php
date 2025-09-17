@@ -6,6 +6,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseReviewController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\PaymentController;
@@ -41,7 +42,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
 
-     // Courses
+    // Courses
     Route::get('/courses', [CourseController::class, 'index']);
     Route::get('/courses/{id}', [CourseController::class, 'show']);
 
@@ -61,7 +62,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/lessons/{id}/progress', [LessonProgressController::class, 'update']);
 
 
-      // Get quiz with questions
+    // Get quiz with questions
     Route::get('/quizzes/{id}', [QuizController::class, 'show']);
 
     // Submit quiz attempt
@@ -71,20 +72,19 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:admin')->put('/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'grade']);
 
 
-     // Generate certificate after completing a course
+    // Generate certificate after completing a course
     Route::post('/courses/{id}/complete', [CertificateController::class, 'generate']);
-    
+
     // Download user's certificate
     Route::get('/certificates/download/{id}', [CertificateController::class, 'download']);
 
- Route::get('/courses/{id}/reviews', [CourseReviewController::class, 'store']);
+    Route::get('/courses/{id}/reviews', [CourseReviewController::class, 'store']);
 
-   // Sales report
+    // Sales report
     Route::get('/reports/sales', [ReportController::class, 'sales']);
 
     // Enrollments report
     Route::get('/reports/enrollments', [ReportController::class, 'enrollments']);
-   
 });
 
 // Get all reviews (auth optional)

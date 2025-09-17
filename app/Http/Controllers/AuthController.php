@@ -16,18 +16,18 @@ use Illuminate\Support\Facades\Hash;
  */
 class AuthController extends Controller
 {
-  /**
+    /**
      * @OA\Post(
-     *     path="/api/auth/register",
+     *     path="/auth/register",
      *     tags={"Auth"},
      *     summary="Register a new user",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"name","email","password","role"},
-     *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="secret123"),
+     *             @OA\Property(property="name", type="string", example="Student John"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.student@yopmail.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="12345678@We"),
      *             @OA\Property(property="role", type="string", example="student")
      *         )
      *     ),
@@ -66,15 +66,15 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/auth/login",
+     *     path="auth/login",
      *     tags={"Auth"},
      *     summary="Login user",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="secret123")
+     *             @OA\Property(property="email", type="string", format="email", example="john.student@yopmail.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="12345678@We")
      *         )
      *     ),
      *     @OA\Response(response=200, description="Login successful"),
