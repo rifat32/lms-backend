@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Laravel HRM Documentation",
+        "title": "LMS Documentation",
         "description": "L5 Swagger OpenApi description for hrm project",
         "contact": {
             "email": "drrifatalashwad0@gmail.com"
@@ -64,21 +64,67 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully"
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Student John"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "john.student@yopmail.com"
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "student"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-17T12:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email field is required"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "auth/login": {
+        "/auth/login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "Login user",
-                "operationId": "afd542192a0c3f60c1af223b81e87f89",
+                "operationId": "8cb7742ae98d0990acb2907c4e00bf24",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -107,21 +153,76 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login successful"
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Student"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john.student@yopmail.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "student"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Invalid credentials"
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "courses/{id}/complete": {
+        "/courses/{id}/complete": {
             "post": {
                 "tags": [
                     "Certificates"
                 ],
                 "summary": "Generate a certificate for a completed course",
-                "operationId": "e5e28a14c5ddb57b4787cd2fb54a9a60",
+                "operationId": "cc3cc432f620609578eb8931c5d26e3b",
                 "parameters": [
                     {
                         "name": "id",
@@ -167,13 +268,13 @@
                 }
             }
         },
-        "certificates/download/{id}": {
+        "/certificates/download/{id}": {
             "get": {
                 "tags": [
                     "Certificates"
                 ],
                 "summary": "Download a certificate PDF",
-                "operationId": "a52f3cb7efc12fe8db1486fab4905e09",
+                "operationId": "29616af5a5cec1d83764cd23161fec46",
                 "parameters": [
                     {
                         "name": "id",
@@ -195,13 +296,13 @@
                 }
             }
         },
-        "certificates/verify/{code}": {
+        "/certificates/verify/{code}": {
             "get": {
                 "tags": [
                     "Certificates"
                 ],
                 "summary": "Verify a certificate by code",
-                "operationId": "5bba722af19943ac54bc065ddebcb257",
+                "operationId": "56b4556b1012567d002b4ee3242950ff",
                 "parameters": [
                     {
                         "name": "code",
@@ -259,13 +360,13 @@
                 }
             }
         },
-        "courses": {
+        "/courses": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Get all courses",
-                "operationId": "d82cb3b2a355ce3d8a9df64a3b053192",
+                "operationId": "37c5c37794e46a7b0debd611ab297e9e",
                 "parameters": [
                     {
                         "name": "category_id",
@@ -297,7 +398,7 @@
                     "Courses"
                 ],
                 "summary": "Create a new course (Admin only)",
-                "operationId": "5273ba96e503af4808a5eb639cac57b8",
+                "operationId": "0faffeb3b3c57da1ca08bfe7386c04c5",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -345,13 +446,13 @@
                 ]
             }
         },
-        "courses/{id}": {
+        "/courses/{id}": {
             "get": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Get a single course by ID",
-                "operationId": "376753fdfb2b2237edc2fabf3b19d6d2",
+                "operationId": "620a543eae6a3776276ecc0249aa1322",
                 "parameters": [
                     {
                         "name": "id",
@@ -377,7 +478,7 @@
                     "Courses"
                 ],
                 "summary": "Update a course (Admin only)",
-                "operationId": "78055552a2e8b431492feb565a63052d",
+                "operationId": "37475a84f2c77f68772009862747119e",
                 "parameters": [
                     {
                         "name": "id",
@@ -435,13 +536,13 @@
                 ]
             }
         },
-        "courses/{id}/reviews": {
+        "/courses/{id}/reviews": {
             "get": {
                 "tags": [
                     "CourseReviews"
                 ],
                 "summary": "Get all approved reviews for a course",
-                "operationId": "8d9b55fd9354e30172079a3aa0afca8d",
+                "operationId": "8fc99cc2be54545fd1bacc31528d56e8",
                 "parameters": [
                     {
                         "name": "id",
@@ -499,7 +600,7 @@
                     "CourseReviews"
                 ],
                 "summary": "Submit a review for a course",
-                "operationId": "8bd3c15231956fb394356cd82f6ec24d",
+                "operationId": "5d5bc036aa9023ee7e394ecd3cbb1bd5",
                 "parameters": [
                     {
                         "name": "id",
@@ -572,13 +673,13 @@
                 ]
             }
         },
-        "enrollments": {
+        "/enrollments": {
             "post": {
                 "tags": [
                     "Enrollments"
                 ],
                 "summary": "Enroll authenticated user in a course",
-                "operationId": "46a10ea4003d6986b47c28dc399c767c",
+                "operationId": "e5137b3715bba1402b0c600de7369b52",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -638,13 +739,13 @@
                 ]
             }
         },
-        "users/{id}/enrollments": {
+        "/users/{id}/enrollments": {
             "get": {
                 "tags": [
                     "Enrollments"
                 ],
                 "summary": "Get all enrollments of a specific user",
-                "operationId": "19ca0bf3f75742f6b52f2404c0418319",
+                "operationId": "2a1b129eb68a49c357387046f87001e1",
                 "parameters": [
                     {
                         "name": "id",
@@ -721,13 +822,13 @@
                 ]
             }
         },
-        "courses/{course_id}/lessons": {
+        "/courses/{course_id}/lessons": {
             "post": {
                 "tags": [
                     "Lessons"
                 ],
                 "summary": "Create a new lesson for a course (Admin only)",
-                "operationId": "cb72058b07ecfa0d8b985ec390714d33",
+                "operationId": "1a09dc3c8902d25faf78af5c1182d4f9",
                 "parameters": [
                     {
                         "name": "course_id",
@@ -791,13 +892,13 @@
                 ]
             }
         },
-        "lessons/{id}": {
+        "/lessons/{id}": {
             "put": {
                 "tags": [
                     "Lessons"
                 ],
                 "summary": "Update an existing lesson (Admin only)",
-                "operationId": "aa67ac7b5855fbde7b6446184970ebc2",
+                "operationId": "174f9b467c880dd9da9ac1039336a78f",
                 "parameters": [
                     {
                         "name": "id",
@@ -856,13 +957,13 @@
                 ]
             }
         },
-        "lessons/{id}/progress": {
+        "/lessons/{id}/progress": {
             "put": {
                 "tags": [
                     "LessonProgress"
                 ],
                 "summary": "Update lesson progress for authenticated user",
-                "operationId": "a495ccddb0647a708f22f117d429c416",
+                "operationId": "607075ab796ccfe809c9f3849f1c905b",
                 "parameters": [
                     {
                         "name": "id",
@@ -934,13 +1035,13 @@
                 ]
             }
         },
-        "quizzes/{id}/attempts": {
+        "/quizzes/{id}/attempts": {
             "post": {
                 "tags": [
                     "QuizAttempts"
                 ],
                 "summary": "Submit a quiz attempt for authenticated user",
-                "operationId": "f02390d8190c03a58329867eacdf2d43",
+                "operationId": "233997414f4415b2cae5a378fa82819d",
                 "parameters": [
                     {
                         "name": "id",
@@ -1040,13 +1141,13 @@
                 ]
             }
         },
-        "quiz-attempts/{id}/grade": {
+        "/quiz-attempts/{id}/grade": {
             "put": {
                 "tags": [
                     "QuizAttempts"
                 ],
                 "summary": "Manually grade a quiz attempt (Admin only)",
-                "operationId": "f97be68a42cbb42568b1b4962e9310f6",
+                "operationId": "17365629e06b1879fef9468bc22475ed",
                 "parameters": [
                     {
                         "name": "id",
@@ -1122,13 +1223,13 @@
                 ]
             }
         },
-        "quizzes/{id}": {
+        "/quizzes/{id}": {
             "get": {
                 "tags": [
                     "Quizzes"
                 ],
                 "summary": "Get quiz details with questions and options",
-                "operationId": "192164b564d846f9495350086a387e65",
+                "operationId": "4b8a50b96b63712d5803a1162a384d01",
                 "parameters": [
                     {
                         "name": "id",
@@ -1209,13 +1310,13 @@
                 ]
             }
         },
-        "reports/sales": {
+        "/reports/sales": {
             "get": {
                 "tags": [
                     "Reports"
                 ],
                 "summary": "Get sales report for all courses (Admin only)",
-                "operationId": "1be93f67f50d0dc9cc187489505e2703",
+                "operationId": "a8c011b480b98a5ac8b2a6d5761f6165",
                 "responses": {
                     "200": {
                         "description": "Sales report retrieved successfully",
@@ -1256,13 +1357,13 @@
                 ]
             }
         },
-        "reports/enrollments": {
+        "/reports/enrollments": {
             "get": {
                 "tags": [
                     "Reports"
                 ],
                 "summary": "Get enrollment count per course (Admin only)",
-                "operationId": "2e2a08489113006c5ac49613b4fdbe92",
+                "operationId": "b64ba134a34722cacefaea3be897615f",
                 "responses": {
                     "200": {
                         "description": "Enrollment report retrieved successfully",
@@ -1299,13 +1400,13 @@
                 ]
             }
         },
-        "users/{id}": {
+        "/users/{id}": {
             "get": {
                 "tags": [
                     "Users"
                 ],
                 "summary": "Get user details by ID",
-                "operationId": "6f9bd13be16c5edfc7fe6516fbfc77bf",
+                "operationId": "910a0c7cf580e1c605648d82a4e57f46",
                 "parameters": [
                     {
                         "name": "id",
@@ -1366,7 +1467,7 @@
                     "Users"
                 ],
                 "summary": "Update user profile",
-                "operationId": "a9a97bbb4c30c7d5803ddc2eae51a9da",
+                "operationId": "ddfe232db1870b82493bf8bd25596d37",
                 "parameters": [
                     {
                         "name": "id",

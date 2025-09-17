@@ -31,10 +31,28 @@ class AuthController extends Controller
      *             @OA\Property(property="role", type="string", example="student")
      *         )
      *     ),
-     *     @OA\Response(response=201, description="User registered successfully"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(
+     *         response=201,
+     *         description="User registered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="name", type="string", example="Student John"),
+     *             @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
+     *             @OA\Property(property="role", type="string", example="student"),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-17T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The email field is required"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
      * )
      */
+
     public function register(Request $request)
     {
         $request->validate([
@@ -77,10 +95,31 @@ class AuthController extends Controller
      *             @OA\Property(property="password", type="string", format="password", example="12345678@We")
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Login successful"),
-     *     @OA\Response(response=401, description="Invalid credentials")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="access_token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer"),
+     *             @OA\Property(property="expires_in", type="integer", example=3600),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Student"),
+     *                 @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
+     *                 @OA\Property(property="role", type="string", example="student")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid credentials")
+     *         )
+     *     )
      * )
      */
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
