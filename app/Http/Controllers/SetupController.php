@@ -29,9 +29,10 @@ class SetupController extends Controller
 
         // OF NOT EXIST THEN CREATE NEW
         foreach ($roles as $role) {
-            Role::firstOrCreate(
-                ['name' => $role, 'guard_name' => 'api']
-            );
+            if (!Role::where('name', $role)->where('guard_name', 'api')->exists())
+                Role::create(
+                    ['name' => $role, 'guard_name' => 'api']
+                );
         }
 
         // Return a response

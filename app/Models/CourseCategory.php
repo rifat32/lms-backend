@@ -7,8 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class CourseCategory extends Model
 {
-    use HasFactory;
-      protected $fillable = [
-        'name',
-    ];
+  use HasFactory;
+
+  // The attributes that are mass assignable.
+  protected $fillable = [
+    'name',
+  ];
+
+
+  // FILTERS
+  public function scopeFilters($query)
+  {
+    return $query->when(request()->filled('searchKey'), function ($q) {
+      $q->where('name', 'like', '%' . request('searchKey') . '%');
+    });
+  }
 }

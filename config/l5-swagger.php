@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'L5 Swagger UI',
+                'title' => 'LMS Api Doc',
             ],
 
             'routes' => [
@@ -16,7 +16,7 @@ return [
             ],
             'paths' => [
                 'docs' => storage_path('api-docs'),
-                'docs_json' => 'api-docs.json', // ✅ ADD THIS LINE
+                'docs_json' => 'api-docs.json',
                 'annotations' => base_path('app'),
                 'excludes' => [
                     base_path('vendor'),

@@ -4,6 +4,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\EnrollmentController;
@@ -48,9 +49,21 @@ Route::middleware('auth:api')->group(function () {
 
     // Admin-only routes
     Route::middleware('role:admin')->group(function () {
+
+        // COURSE CATEGORY
+        Route::post('/course-categories', [CourseCategoryController::class, 'store']);
+        Route::put('/course-categories/{id}', [CourseCategoryController::class, 'update']);
+        Route::get('/course-categories', [CourseCategoryController::class, 'index']);
+        Route::get('/course-categories/{id}', [CourseCategoryController::class, 'show']);
+
+        // COURSE
         Route::post('/courses', [CourseController::class, 'store']);
         Route::put('/courses/{id}', [CourseController::class, 'update']);
+        Route::get('/courses', [CourseController::class, 'index']);
+        Route::get('/courses/{id}', [CourseController::class, 'show']);
         Route::post('/courses/{course_id}/lessons', [LessonController::class, 'store']);
+
+        // Lesson
         Route::put('/lessons/{id}', [LessonController::class, 'update']);
     });
 

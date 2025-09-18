@@ -94,14 +94,38 @@ class CourseController extends Controller
      *             required={"title","description"},
      *             @OA\Property(property="title", type="string", example="Laravel Basics"),
      *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
-     *             @OA\Property(property="price", type="number", example=49.99),
+     *             @OA\Property(property="price", type="number", format="float", example=49.99),
      *             @OA\Property(property="category_id", type="integer", example=1)
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Course created successfully"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(
+     *         response=201,
+     *         description="Course created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=10),
+     *             @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *             @OA\Property(property="price", type="number", format="float", example=49.99),
+     *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The title field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="title", type="array",
+     *                     @OA\Items(type="string", example="The title field is required.")
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
+
     public function store(Request $request)
     {
         $validated = $request->validate([

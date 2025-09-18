@@ -68,8 +68,8 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Assign role via Spatie
-        $user->assignRole($request->role);
+        $user->assignRole($request->role); // works now
+
 
         // Generate Passport token
         $token = $user->createToken('API Token')->accessToken;
