@@ -19,4 +19,5 @@ Route::get('/', function () {
 });
 
 
-Route::get('/roleRefresh', [SetupController::class, 'roleRefresh']);
+Route::get('/roleRefresh', [SetupController::class, 'roleRefresh'])->name('roleRefresh');
+Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"])->name("swaggerRefresh");
