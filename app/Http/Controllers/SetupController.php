@@ -8,6 +8,17 @@ use Spatie\Permission\Models\Role;
 
 class SetupController extends Controller
 {
+    public function setup()
+    {
+        // PASSPORT 
+        Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations']);
+        Artisan::call('passport:install');
+        // SWAGGER
+        Artisan::call('l5-swagger:generate');
+
+        return response()->json(['message' => 'Setup Complete']);
+    }
+
     // SWAGGER REFRESH
     public function swaggerRefresh(Request $request)
     {
