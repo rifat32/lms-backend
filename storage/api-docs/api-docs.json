@@ -360,13 +360,13 @@
                 }
             }
         },
-        "/course-categories": {
+        "/v1.0/course-categories": {
             "get": {
                 "tags": [
-                    "Course.CourseCategory"
+                    "course_category"
                 ],
                 "summary": "Get all course categories",
-                "operationId": "0492418afd924632514fcc7dbb6da7c8",
+                "operationId": "getCourseCategories",
                 "parameters": [
                     {
                         "name": "id",
@@ -493,13 +493,137 @@
                         "bearerAuth": []
                     }
                 ]
-            },
+            }
+        },
+        "/v1.0/course-categories/{id}": {
+            "get": {
+                "tags": [
+                    "course_category"
+                ],
+                "summary": "Get a single course category by ID",
+                "operationId": "getCourseCategoryById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course Category ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course Category retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Web Development"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-18T12:00:00Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-18T12:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to view this course category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course Category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict: Resource conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conflict occurred while retrieving this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/course-categories": {
             "post": {
                 "tags": [
-                    "Course.CourseCategory"
+                    "course_category"
                 ],
                 "summary": "Create a new course category (Admin only)",
-                "operationId": "f8527cf72f4205cfab4accac968c23a0",
+                "operationId": "createCourseCategory",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -651,132 +775,12 @@
             }
         },
         "/course-categories/{id}": {
-            "get": {
-                "tags": [
-                    "Course.CourseCategory"
-                ],
-                "summary": "Get a single course category by ID",
-                "operationId": "457f02bff02cd7b5e94cb9706bfd83ea",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Course Category ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Course Category retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
-                                            "type": "string",
-                                            "example": "Web Development"
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-09-18T12:00:00Z"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-09-18T12:00:00Z"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden: Access denied",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to view this course category"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Course Category not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Course Category not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict: Resource conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Conflict occurred while retrieving this resource"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
             "put": {
                 "tags": [
-                    "Course.CourseCategory"
+                    "course_category"
                 ],
                 "summary": "Update a course category (Admin only)",
-                "operationId": "5d0536dd81c8b6508fbdcab4fca2cc7c",
+                "operationId": "updateCourseCategory",
                 "parameters": [
                     {
                         "name": "id",
@@ -934,13 +938,13 @@
                 ]
             }
         },
-        "/courses": {
+        "/v1.0/courses": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "course"
                 ],
                 "summary": "Get all courses",
-                "operationId": "60329c69b19eb136af8e134db39956cc",
+                "operationId": "getCourses",
                 "parameters": [
                     {
                         "name": "category_id",
@@ -1273,14 +1277,14 @@
                 ]
             }
         },
-        "/courses/{id}": {
+        "/v1.0/courses/{id}": {
             "get": {
                 "tags": [
-                    "Courses"
+                    "course"
                 ],
                 "summary": "Get a single course by ID",
                 "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
-                "operationId": "b2d41b50d6344d71e5303d0f0792454a",
+                "operationId": "getCourseById",
                 "parameters": [
                     {
                         "name": "id",
@@ -1415,10 +1419,10 @@
             },
             "put": {
                 "tags": [
-                    "Courses"
+                    "course"
                 ],
                 "summary": "Update a course (Admin only)",
-                "operationId": "f6485cfae71c752ee7e2f1c3f459ec21",
+                "operationId": "updateCourse",
                 "parameters": [
                     {
                         "name": "id",
@@ -2641,10 +2645,6 @@
             "description": "Endpoints for generating, downloading, and verifying certificates"
         },
         {
-            "name": "Courses",
-            "description": "Endpoints for managing courses"
-        },
-        {
             "name": "CourseReviews",
             "description": "Endpoints for managing course reviews"
         },
@@ -2677,8 +2677,8 @@
             "description": "Endpoints to view and update user profile"
         },
         {
-            "name": "Course.CourseCategory",
-            "description": "Course.CourseCategory"
+            "name": "course_category",
+            "description": "course_category"
         },
         {
             "name": "course",

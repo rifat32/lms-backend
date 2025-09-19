@@ -17,7 +17,7 @@ class CourseController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/v1/courses",
+     *     path="/v1.0/courses",
      *     tags={"course"},
      *     operationId="getCourses",
      *     summary="Get all courses",
@@ -99,7 +99,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/v1/courses/{id}",
+     *     path="/v1.0/courses/{id}",
      *     tags={"course"},
      *     operationId="getCourseById",
      *     summary="Get a single course by ID",
@@ -191,7 +191,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/v1/courses",
+     *     path="/v1.0/courses",
      *     tags={"course"},
      *     operationId="createCourse",
      *     summary="Create a new course (Admin only)",
@@ -281,7 +281,7 @@ class CourseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/v1/courses/{id}",
+     *     path="/v1.0/courses/{id}",
      *     tags={"course"},
      *     operationId="updateCourse",
      *     summary="Update a course (Admin only)",

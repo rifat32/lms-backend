@@ -18,7 +18,7 @@ class CourseCategoryController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/v1/course-categories",
+     *     path="/v1.0/course-categories",
      *     operationId="getCourseCategories",
      *     tags={"course_category"},
      *     summary="Get all course categories",
@@ -96,7 +96,7 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/v1/course-categories/{id}",
+     *     path="/v1.0/course-categories/{id}",
      *     operationId="getCourseCategoryById",
      *     tags={"course_category"},
      *     summary="Get a single course category by ID",
