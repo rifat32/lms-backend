@@ -18,8 +18,9 @@ class CourseCategoryController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/course-categories",
-     *     tags={"Course.CourseCategory"},
+     *     path="/v1/course-categories",
+     *     operationId="getCourseCategories",
+     *     tags={"course_category"},
      *     summary="Get all course categories",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -80,7 +81,7 @@ class CourseCategoryController extends Controller
      * )
      */
 
-    public function index(Request $request)
+    public function getCourseCategory(Request $request)
     {
         // 
         $courses = CourseCategory::filters()->get();
@@ -95,8 +96,9 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/course-categories/{id}",
-     *     tags={"Course.CourseCategory"},
+     *     path="/v1/course-categories/{id}",
+     *     operationId="getCourseCategoryById",
+     *     tags={"course_category"},
      *     summary="Get a single course category by ID",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -148,7 +150,7 @@ class CourseCategoryController extends Controller
      */
 
 
-    public function show($id)
+    public function getCourseCategoryById($id)
     {
         $course = CourseCategory::findOrFail($id);
         return response()->json([
@@ -161,7 +163,8 @@ class CourseCategoryController extends Controller
     /**
      * @OA\Post(
      *     path="/course-categories",
-     *     tags={"Course.CourseCategory"},
+     *     operationId="createCourseCategory",
+     *     tags={"course_category"},
      *     summary="Create a new course category (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -225,7 +228,7 @@ class CourseCategoryController extends Controller
      */
 
 
-    public function store(CreateCourseCategoryRequest $request)
+    public function createCourseCategory(CreateCourseCategoryRequest $request)
     {
         // VALIDATE PAYLOAD
         $request_payload = $request->validated();
@@ -244,7 +247,8 @@ class CourseCategoryController extends Controller
     /**
      * @OA\Put(
      *     path="/course-categories/{id}",
-     *     tags={"Course.CourseCategory"},
+     *     operationId="updateCourseCategory",
+     *     tags={"course_category"},
      *     summary="Update a course category (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -313,7 +317,7 @@ class CourseCategoryController extends Controller
      * )
      */
 
-    public function update(UpdateCourseCategoryRequest $request, $id)
+    public function updateCourseCategory(UpdateCourseCategoryRequest $request, $id)
     {
         // VALIDATE PAYLOAD
         $request_payload = $request->validated();

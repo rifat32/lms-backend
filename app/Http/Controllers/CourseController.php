@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
@@ -16,52 +17,94 @@ class CourseController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/courses",
-     *     tags={"Courses"},
+     *     path="/v1/courses",
+     *     tags={"course"},
+     *     operationId="getCourses",
      *     summary="Get all courses",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
      *         required=false,
      *         description="Filter by category ID",
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Parameter(
-     *         name="keyword",
+     *         name="searchKey",
      *         in="query",
      *         required=false,
      *         description="Search by keyword in title or description",
-     *         @OA\Schema(type="string")
+     *         @OA\Schema(type="string", example="Laravel")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="List of courses"
+     *         description="List of courses",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Courses retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                     @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *                     @OA\Property(property="price", type="number", format="float", example=49.99),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-19T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid query parameters")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource.")
+     *         )
      *     )
      * )
      */
-    public function index(Request $request)
+
+    public function getCourses(Request $request)
     {
-        $query = Course::query();
 
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+        $courses = Course::filters()
+            ->get();
 
-        if ($request->has('keyword')) {
-            $query->where('title', 'like', '%' . $request->keyword . '%')
-                ->orWhere('description', 'like', '%' . $request->keyword . '%');
-        }
-
-        $courses = $query->get();
-
-        return response()->json($courses);
+        return response()->json([
+            'success' => true,
+            'message' => 'Courses retrieved successfully',
+            'data' => $courses
+        ], 200);
     }
 
     /**
      * @OA\Get(
-     *     path="/courses/{id}",
-     *     tags={"Courses"},
+     *     path="/v1/courses/{id}",
+     *     tags={"course"},
+     *     operationId="getCourseById",
      *     summary="Get a single course by ID",
+     *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -71,21 +114,86 @@ class CourseController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Course details including lessons, FAQs, and notices"
+     *         description="Course details retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Introduction to Programming"),
+     *                 @OA\Property(property="description", type="string", example="A beginner course on programming"),
+     *                 @OA\Property(
+     *                     property="lessons",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Lesson 1")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="faqs",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="question", type="string", example="What is a variable?"),
+     *                         @OA\Property(property="answer", type="string", example="A variable is...")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="notices",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Exam Notice"),
+     *                         @OA\Property(property="description", type="string", example="Exam will be held on...")
+     *                     )
+     *                 )
+     *             )
+     *         )
      *     ),
-     *     @OA\Response(response=404, description="Course not found")
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course not found")
+     *         )
+     *     )
      * )
      */
-    public function show($id)
+
+    public function getCourseById($id)
     {
-        $course = Course::with(['lessons', 'faqs', 'notices'])->findOrFail($id);
-        return response()->json($course);
+        // FIND BY ID
+        $course = Course::find($id);
+
+        // SEND RESPONSE
+        if (empty($course)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course retrieved successfully',
+            'data' => $course
+        ], 200);
     }
 
     /**
      * @OA\Post(
-     *     path="/courses",
-     *     tags={"Courses"},
+     *     path="/v1/courses",
+     *     tags={"course"},
+     *     operationId="createCourse",
      *     summary="Create a new course (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -112,6 +220,34 @@ class CourseController extends Controller
      *         )
      *     ),
      *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Category not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+     *         )
+     *     ),
+     *     @OA\Response(
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
@@ -126,24 +262,28 @@ class CourseController extends Controller
      * )
      */
 
-    public function store(Request $request)
+
+    public function createCourse(CourseRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'price' => 'nullable|numeric',
-            'category_id' => 'nullable|integer',
-        ]);
+        // VALIDATE PAYLOAD
+        $request_payload = $request->validate();
 
-        $course = Course::create($validated);
+        // CREATE
+        $course = Course::create($request_payload);
 
-        return response()->json($course, 201);
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Course created successfully',
+            'data' => $course
+        ], 201);
     }
 
     /**
      * @OA\Put(
-     *     path="/courses/{id}",
-     *     tags={"Courses"},
+     *     path="/v1/courses/{id}",
+     *     tags={"course"},
+     *     operationId="updateCourse",
      *     summary="Update a course (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -151,35 +291,89 @@ class CourseController extends Controller
      *         in="path",
      *         required=true,
      *         description="Course ID",
-     *         @OA\Schema(type="integer")
+     *         @OA\Schema(type="integer", example=10)
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="title", type="string", example="Updated Title"),
      *             @OA\Property(property="description", type="string", example="Updated description"),
-     *             @OA\Property(property="price", type="number", example=59.99),
+     *             @OA\Property(property="price", type="number", format="float", example=59.99),
      *             @OA\Property(property="category_id", type="integer", example=2)
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Course updated successfully"),
-     *     @OA\Response(response=404, description="Course not found"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=10),
+     *             @OA\Property(property="title", type="string", example="Updated Title"),
+     *             @OA\Property(property="description", type="string", example="Updated description"),
+     *             @OA\Property(property="price", type="number", format="float", example=59.99),
+     *             @OA\Property(property="category_id", type="integer", example=2),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Course not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The title field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="title", type="array",
+     *                     @OA\Items(type="string", example="The title field is required.")
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
-    public function update(Request $request, $id)
+
+    public function updateCourse(CourseRequest $request)
     {
-        $course = Course::findOrFail($id);
 
-        $validated = $request->validate([
-            'title' => 'sometimes|string',
-            'description' => 'sometimes|string',
-            'price' => 'sometimes|numeric',
-            'category_id' => 'sometimes|integer',
-        ]);
+        // VALIDATE PAYLOAD
+        $request_payload = $request->validate();
 
-        $course->update($validated);
+        // FIND BY ID
+        $course = Course::findOrFail($request_payload['id']);
 
-        return response()->json($course);
+        // UPDATE
+        $course->update($request_payload);
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Course updated successfully',
+            'data' => $course
+        ], 200);
     }
 }

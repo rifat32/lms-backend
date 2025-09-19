@@ -366,7 +366,7 @@
                     "Course.CourseCategory"
                 ],
                 "summary": "Get all course categories",
-                "operationId": "2af4daf9c7e747e361cbd5f3bbd6833f",
+                "operationId": "0492418afd924632514fcc7dbb6da7c8",
                 "parameters": [
                     {
                         "name": "id",
@@ -499,7 +499,7 @@
                     "Course.CourseCategory"
                 ],
                 "summary": "Create a new course category (Admin only)",
-                "operationId": "c2fa260f51ff4f35d113c83c3f6622c3",
+                "operationId": "f8527cf72f4205cfab4accac968c23a0",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -656,7 +656,7 @@
                     "Course.CourseCategory"
                 ],
                 "summary": "Get a single course category by ID",
-                "operationId": "05f7e5d9c8b901739dac499993f402a7",
+                "operationId": "457f02bff02cd7b5e94cb9706bfd83ea",
                 "parameters": [
                     {
                         "name": "id",
@@ -776,7 +776,7 @@
                     "Course.CourseCategory"
                 ],
                 "summary": "Update a course category (Admin only)",
-                "operationId": "22d33ac3cb6a7c9cf043161e8eabd77b",
+                "operationId": "5d0536dd81c8b6508fbdcab4fca2cc7c",
                 "parameters": [
                     {
                         "name": "id",
@@ -800,7 +800,7 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Updated Name"
+                                        "example": "Data Science"
                                     }
                                 },
                                 "type": "object"
@@ -821,7 +821,7 @@
                                         },
                                         "name": {
                                             "type": "string",
-                                            "example": "Updated Name"
+                                            "example": "Data Science"
                                         },
                                         "updated_at": {
                                             "type": "string",
@@ -940,7 +940,7 @@
                     "Courses"
                 ],
                 "summary": "Get all courses",
-                "operationId": "37c5c37794e46a7b0debd611ab297e9e",
+                "operationId": "60329c69b19eb136af8e134db39956cc",
                 "parameters": [
                     {
                         "name": "category_id",
@@ -948,31 +948,154 @@
                         "description": "Filter by category ID",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     },
                     {
-                        "name": "keyword",
+                        "name": "searchKey",
                         "in": "query",
                         "description": "Search by keyword in title or description",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "Laravel"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of courses"
+                        "description": "List of courses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Courses retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Learn Laravel framework"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 49.99
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid query parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
-                    "Courses"
+                    "course"
                 ],
                 "summary": "Create a new course (Admin only)",
-                "operationId": "0faffeb3b3c57da1ca08bfe7386c04c5",
+                "operationId": "createCourse",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1050,6 +1173,70 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Category not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A course with this title already exists."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "description": "Validation error",
                         "content": {
@@ -1092,7 +1279,8 @@
                     "Courses"
                 ],
                 "summary": "Get a single course by ID",
-                "operationId": "620a543eae6a3776276ecc0249aa1322",
+                "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
+                "operationId": "b2d41b50d6344d71e5303d0f0792454a",
                 "parameters": [
                     {
                         "name": "id",
@@ -1106,19 +1294,131 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Course details including lessons, FAQs, and notices"
+                        "description": "Course details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Programming"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A beginner course on programming"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson 1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "faqs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question": {
+                                                                "type": "string",
+                                                                "example": "What is a variable?"
+                                                            },
+                                                            "answer": {
+                                                                "type": "string",
+                                                                "example": "A variable is..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "notices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Exam Notice"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Exam will be held on..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Course not found"
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Update a course (Admin only)",
-                "operationId": "37475a84f2c77f68772009862747119e",
+                "operationId": "f6485cfae71c752ee7e2f1c3f459ec21",
                 "parameters": [
                     {
                         "name": "id",
@@ -1126,7 +1426,8 @@
                         "description": "Course ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 10
                         }
                     }
                 ],
@@ -1146,6 +1447,7 @@
                                     },
                                     "price": {
                                         "type": "number",
+                                        "format": "float",
                                         "example": 59.99
                                     },
                                     "category_id": {
@@ -1160,13 +1462,134 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Course updated successfully"
+                        "description": "Course updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Updated Title"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Updated description"
+                                        },
+                                        "price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 59.99
+                                        },
+                                        "category_id": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-19T12:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Course not found"
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A course with this title already exists."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The title field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The title field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2256,6 +2679,10 @@
         {
             "name": "Course.CourseCategory",
             "description": "Course.CourseCategory"
+        },
+        {
+            "name": "course",
+            "description": "course"
         }
     ]
 }

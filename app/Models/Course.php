@@ -45,4 +45,13 @@ class Course extends Model
     {
         return $this->hasMany(Enrollment::class, 'course_id', 'id');
     }
+
+    public function scopeFilters($query)
+    {
+        return $query->when(request()->filled('searchKey'), function ($q) {
+            $q->where('title', 'like', '%' . request('searchKey') . '%');
+        })->when(request()->filled('category_id'), function ($q) {
+            $q->where('category_id', request('category_id'));
+        });
+    }
 }
