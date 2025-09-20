@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\ValidCourse;
 use App\Rules\ValidCourseCategory;
+use App\Rules\ValidUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CourseRequest extends FormRequest
@@ -27,10 +28,14 @@ class CourseRequest extends FormRequest
     {
 
         $rules = [
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'nullable|numeric',
+            'price' => 'nullable|numeric|min:0',
             'category_id' => ['required', 'numeric', new ValidCourseCategory()],
+            'lecturer_id' => ['nullable', 'numeric', new ValidUser()],
+            'is_free' => 'boolean',
+            'status' => 'in:draft,published,archived',
+            'duration_days' => 'nullable|integer|min:0',
         ];
 
         if ($this->isMethod('put') || $this->isMethod('patch')) {
@@ -43,8 +48,18 @@ class CourseRequest extends FormRequest
     public function messages()
     {
         return [
-            'title.required' => 'The course title is required.',
-            'category_id.required' => 'Please select a valid course category.',
+            'title.required' => 'Course title is required.',
+            'description.required' => 'Course description is required.',
+            'price.numeric' => 'Price must be a number.',
+            'category_id.required' => 'Category is required.',
+            'category_id.numeric' => 'Category must be a valid ID.',
+            'lecturer_id.numeric' => 'Lecturer must be a valid ID.',
+            'is_free.boolean' => 'Is Free must be true or false.',
+            'status.in' => 'Status must be one of: draft, published, archived.',
+            'duration_days.integer' => 'Duration must be a number of days.',
+            'duration_days.min' => 'Duration must be at least 0 days.',
+            'id.required' => 'Course ID is required for updates.',
+            'id.numeric' => 'Course ID must be numeric.',
         ];
     }
 }

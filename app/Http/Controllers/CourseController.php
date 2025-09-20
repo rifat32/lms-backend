@@ -199,11 +199,15 @@ class CourseController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","description"},
+     *             required={"title","description","category_id"},
      *             @OA\Property(property="title", type="string", example="Laravel Basics"),
      *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
      *             @OA\Property(property="price", type="number", format="float", example=49.99),
-     *             @OA\Property(property="category_id", type="integer", example=1)
+     *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="lecturer_id", type="integer", example=2),
+     *             @OA\Property(property="is_free", type="boolean", example=false),
+     *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+     *             @OA\Property(property="duration_days", type="integer", example=30)
      *         )
      *     ),
      *     @OA\Response(
@@ -215,6 +219,10 @@ class CourseController extends Controller
      *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
      *             @OA\Property(property="price", type="number", format="float", example=49.99),
      *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="lecturer_id", type="integer", example=2),
+     *             @OA\Property(property="is_free", type="boolean", example=false),
+     *             @OA\Property(property="status", type="string", example="draft"),
+     *             @OA\Property(property="duration_days", type="integer", example=30),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
      *         )
@@ -255,6 +263,15 @@ class CourseController extends Controller
      *             @OA\Property(property="errors", type="object",
      *                 @OA\Property(property="title", type="array",
      *                     @OA\Items(type="string", example="The title field is required.")
+     *                 ),
+     *                 @OA\Property(property="description", type="array",
+     *                     @OA\Items(type="string", example="The description field is required.")
+     *                 ),
+     *                 @OA\Property(property="category_id", type="array",
+     *                     @OA\Items(type="string", example="The category id field is required.")
+     *                 ),
+     *                 @OA\Property(property="lecturer_id", type="array",
+     *                     @OA\Items(type="string", example="The lecturer id field is required.")
      *                 )
      *             )
      *         )
@@ -263,10 +280,14 @@ class CourseController extends Controller
      */
 
 
+
     public function createCourse(CourseRequest $request)
     {
         // VALIDATE PAYLOAD
-        $request_payload = $request->validate();
+        $request_payload = $request->validated();
+
+        // ADD CREATED BY
+        $request_payload['created_by'] = auth()->user()->id;
 
         // CREATE
         $course = Course::create($request_payload);
@@ -296,10 +317,16 @@ class CourseController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
+     *             required={"title","description","category_id"},
+     *             @OA\Property(property="id", type="integer", example=10),
      *             @OA\Property(property="title", type="string", example="Updated Title"),
      *             @OA\Property(property="description", type="string", example="Updated description"),
      *             @OA\Property(property="price", type="number", format="float", example=59.99),
-     *             @OA\Property(property="category_id", type="integer", example=2)
+     *             @OA\Property(property="category_id", type="integer", example=2),
+     *             @OA\Property(property="lecturer_id", type="integer", example=3),
+     *             @OA\Property(property="is_free", type="boolean", example=false),
+     *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="published"),
+     *             @OA\Property(property="duration_days", type="integer", example=45)
      *         )
      *     ),
      *     @OA\Response(
@@ -311,6 +338,10 @@ class CourseController extends Controller
      *             @OA\Property(property="description", type="string", example="Updated description"),
      *             @OA\Property(property="price", type="number", format="float", example=59.99),
      *             @OA\Property(property="category_id", type="integer", example=2),
+     *             @OA\Property(property="lecturer_id", type="integer", example=3),
+     *             @OA\Property(property="is_free", type="boolean", example=false),
+     *             @OA\Property(property="status", type="string", example="published"),
+     *             @OA\Property(property="duration_days", type="integer", example=45),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
      *         )
      *     ),
@@ -350,6 +381,15 @@ class CourseController extends Controller
      *             @OA\Property(property="errors", type="object",
      *                 @OA\Property(property="title", type="array",
      *                     @OA\Items(type="string", example="The title field is required.")
+     *                 ),
+     *                 @OA\Property(property="description", type="array",
+     *                     @OA\Items(type="string", example="The description field is required.")
+     *                 ),
+     *                 @OA\Property(property="category_id", type="array",
+     *                     @OA\Items(type="string", example="The category id field is required.")
+     *                 ),
+     *                 @OA\Property(property="lecturer_id", type="array",
+     *                     @OA\Items(type="string", example="The lecturer id field is required.")
      *                 )
      *             )
      *         )
@@ -357,11 +397,12 @@ class CourseController extends Controller
      * )
      */
 
+
     public function updateCourse(CourseRequest $request)
     {
 
         // VALIDATE PAYLOAD
-        $request_payload = $request->validate();
+        $request_payload = $request->validated();
 
         // FIND BY ID
         $course = Course::findOrFail($request_payload['id']);
