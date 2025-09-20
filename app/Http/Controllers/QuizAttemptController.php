@@ -19,7 +19,7 @@ class QuizAttemptController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/quizzes/{id}/attempts",
+     *     path="/v1.0/quizzes/{id}/attempts",
      *     tags={"QuizAttempts"},
      *     summary="Submit a quiz attempt for authenticated user",
      *     security={{"bearerAuth":{}}},
@@ -109,16 +109,20 @@ class QuizAttemptController extends Controller
         $quiz_attempt->save();
 
         return response()->json([
-            'attempt_id' => $quiz_attempt->id,
-            'score' => $quiz_attempt->score,
-            'is_passed' => $quiz_attempt->is_passed,
-            'feedback' => $feedback,
+            'success' => true,
+            'message' => 'Quiz attempt submitted',
+            'data' => [
+                'attempt_id' => $quiz_attempt->id,
+                'score' => $quiz_attempt->score,
+                'is_passed' => $quiz_attempt->is_passed,
+                'feedback' => $feedback,
+            ]
         ], 201);
     }
 
     /**
      * @OA\Put(
-     *     path="/quiz-attempts/{id}/grade",
+     *     path="/v1.0/quiz-attempts/{id}/grade",
      *     tags={"QuizAttempts"},
      *     summary="Manually grade a quiz attempt (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -164,9 +168,13 @@ class QuizAttemptController extends Controller
         $quiz_attempt->save();
 
         return response()->json([
-            'attempt_id' => $quiz_attempt->id,
+            'success' => true,
             'message' => 'Grade updated.',
-            'new_score' => $quiz_attempt->score
-        ]);
+            'data' => [
+                'attempt_id' => $quiz_attempt->id,
+                'message' => 'Grade updated.',
+                'new_score' => $quiz_attempt->score
+            ]
+        ], 200);
     }
 }

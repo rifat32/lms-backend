@@ -16,7 +16,7 @@ class LessonController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/courses/{course_id}/lessons",
+     *     path="/v1.0/courses/{course_id}/lessons",
      *     tags={"Lessons"},
      *     summary="Create a new lesson for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -55,12 +55,16 @@ class LessonController extends Controller
 
         $lesson = Lesson::create($validated);
 
-        return response()->json($lesson, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson created successfully',
+            'data' => $lesson
+        ], 201);
     }
 
     /**
      * @OA\Put(
-     *     path="/lessons/{id}",
+     *     path="/v1.0/lessons/{id}",
      *     tags={"Lessons"},
      *     summary="Update an existing lesson (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -98,6 +102,10 @@ class LessonController extends Controller
 
         $lesson->update($validated);
 
-        return response()->json($lesson);
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson updated successfully',
+            'data' => $lesson
+        ], 200);
     }
 }

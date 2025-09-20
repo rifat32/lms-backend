@@ -27,19 +27,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
-
-Route::prefix('auth')->group(function () {
+//  Auth
+Route::prefix('/v1.0/auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+
+// PRIVATE ROUTES
 Route::middleware('auth:api')->group(function () {
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::get('/v1.0/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::get('/v1.0/users/{id}', [UserController::class, 'show']);
+    Route::put('/v1.0/users/{id}', [UserController::class, 'update']);
 
     // Courses
     Route::get('/courses', [CourseController::class, 'index']);
@@ -61,47 +63,47 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/v1.0/courses/{id}', [CourseController::class, 'getCourseById']);
 
         // Lesson
-        Route::post('/courses/{course_id}/lessons', [LessonController::class, 'store']);
-        Route::put('/lessons/{id}', [LessonController::class, 'update']);
+        Route::post('/v1.0/courses/{course_id}/lessons', [LessonController::class, 'store']);
+        Route::put('/v1.0/lessons/{id}', [LessonController::class, 'update']);
     });
 
     // Enrollments
-    Route::post('/enrollments', [EnrollmentController::class, 'store']);
-    Route::get('/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
+    Route::post('/v1.0/enrollments', [EnrollmentController::class, 'store']);
+    Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
 
     // Lesson progress
-    Route::put('/lessons/{id}/progress', [LessonProgressController::class, 'update']);
+    Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'update']);
 
 
     // Get quiz with questions
-    Route::get('/quizzes/{id}', [QuizController::class, 'show']);
+    Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'show']);
 
     // Submit quiz attempt
-    Route::post('/quizzes/{id}/attempts', [QuizAttemptController::class, 'store']);
+    Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'store']);
 
     // Admin manual grading
-    Route::middleware('role:admin')->put('/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'grade']);
+    Route::middleware('role:admin')->put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'grade']);
 
 
     // Generate certificate after completing a course
-    Route::post('/courses/{id}/complete', [CertificateController::class, 'generate']);
+    Route::post('/v1.0/courses/{id}/complete', [CertificateController::class, 'generate']);
 
     // Download user's certificate
-    Route::get('/certificates/download/{id}', [CertificateController::class, 'download']);
+    Route::get('/v1.0/certificates/download/{id}', [CertificateController::class, 'download']);
 
-    Route::get('/courses/{id}/reviews', [CourseReviewController::class, 'store']);
+    Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'store']);
 
     // Sales report
-    Route::get('/reports/sales', [ReportController::class, 'sales']);
+    Route::get('/v1.0/reports/sales', [ReportController::class, 'sales']);
 
     // Enrollments report
-    Route::get('/reports/enrollments', [ReportController::class, 'enrollments']);
+    Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollments']);
 });
 
 // Get all reviews (auth optional)
-Route::get('/courses/{id}/reviews', [CourseReviewController::class, 'index']);
+Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'index']);
 
 
 
 // Public verification route
-Route::get('/certificates/verify/{code}', [CertificateController::class, 'verify']);
+Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verify']);

@@ -162,7 +162,7 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/course-categories",
+     *     path="/v1.0/course-categories",
      *     operationId="createCourseCategory",
      *     tags={"course_category"},
      *     summary="Create a new course category (Admin only)",
@@ -246,7 +246,7 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/course-categories/{id}",
+     *     path="/v1.0/course-categories/{id}",
      *     operationId="updateCourseCategory",
      *     tags={"course_category"},
      *     summary="Update a course category (Admin only)",

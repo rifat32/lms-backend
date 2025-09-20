@@ -19,7 +19,7 @@ class LessonProgressController extends Controller
 {
     /**
      * @OA\Put(
-     *     path="/lessons/{id}/progress",
+     *     path="/v1.0/lessons/{id}/progress",
      *     tags={"LessonProgress"},
      *     summary="Update lesson progress for authenticated user",
      *     security={{"bearerAuth":{}}},
@@ -70,9 +70,13 @@ class LessonProgressController extends Controller
         $enrollment->save();
 
         return response()->json([
-            'user_id' => $user->id,
-            'lesson_id' => $lesson->id,
-            'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+            'success' => true,
+            'message' => 'Lesson progress updated',
+            'data' => [
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+                'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+            ]
         ]);
     }
 }

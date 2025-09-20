@@ -19,7 +19,7 @@ class EnrollmentController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/enrollments",
+     *     path="/v1.0/enrollments",
      *     tags={"Enrollments"},
      *     summary="Enroll authenticated user in a course",
      *     security={{"bearerAuth":{}}},
@@ -57,12 +57,16 @@ class EnrollmentController extends Controller
             ['enrolled_at' => now()]
         );
 
-        return response()->json($enrollment, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Enrollment successful',
+            'data' => $enrollment
+        ], 201);
     }
 
     /**
      * @OA\Get(
-     *     path="/users/{id}/enrollments",
+     *     path="/v1.0/users/{id}/enrollments",
      *     tags={"Enrollments"},
      *     summary="Get all enrollments of a specific user",
      *     security={{"bearerAuth":{}}},
@@ -118,6 +122,10 @@ class EnrollmentController extends Controller
             ];
         });
 
-        return response()->json($data);
+        return response()->json([
+            'success' => true,
+            'message' => 'User enrollments retrieved successfully',
+            'data' => $data
+        ], 200);
     }
 }

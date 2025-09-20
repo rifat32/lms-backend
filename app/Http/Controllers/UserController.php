@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/users/{id}",
+     *     path="/v1.0/users/{id}",
      *     tags={"Users"},
      *     summary="Get user details by ID",
      *     security={{"bearerAuth":{}}},
@@ -47,18 +47,22 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         return response()->json([
-            'id'            => $user->id,
-            'name'          => $user->name,
-            'email'         => $user->email,
-            'profile_image' => $user->profile_image,
-            'role'          => $user->roles->pluck('name')->first(),
+            'success' => true,
+            'message' => 'User details retrieved successfully',
+            'data' => [
+                'id'            => $user->id,
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'profile_image' => $user->profile_image,
+                'role'          => $user->roles->pluck('name')->first(),
+            ]
         ]);
     }
 
 
     /**
      * @OA\Put(
-     *     path="/users/{id}",
+     *     path="/v1.0/users/{id}",
      *     tags={"Users"},
      *     summary="Update user profile",
      *     security={{"bearerAuth":{}}},
@@ -105,11 +109,15 @@ class UserController extends Controller
         $user->update($data);
 
         return response()->json([
-            'id'            => $user->id,
-            'name'          => $user->name,
-            'email'         => $user->email,
-            'profile_image' => $user->profile_image,
-            'role'          => $user->roles->pluck('name')->first(),
+            'success' => true,
+            'message' => 'User profile updated successfully',
+            'data' => [
+                'id'            => $user->id,
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'profile_image' => $user->profile_image,
+                'role'          => $user->roles->pluck('name')->first(),
+            ]
         ]);
     }
 }

@@ -19,7 +19,7 @@ class CourseReviewController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/courses/{id}/reviews",
+     *     path="/v1.0/courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Get all approved reviews for a course",
      *     @OA\Parameter(
@@ -64,12 +64,16 @@ class CourseReviewController extends Controller
                 ];
             });
 
-        return response()->json($reviews);
+        return response()->json([
+            'success' => true,
+            'message' => 'Reviews retrieved successfully',
+            'data' => $reviews
+        ]);
     }
 
     /**
      * @OA\Post(
-     *     path="/courses/{id}/reviews",
+     *     path="/v1.0/courses/{id}/reviews",
      *     tags={"CourseReviews"},
      *     summary="Submit a review for a course",
      *     security={{"bearerAuth":{}}},
@@ -119,8 +123,9 @@ class CourseReviewController extends Controller
         ]);
 
         return response()->json([
-            'review_id' => $review->id,
-            'message' => 'Review submitted for moderation.'
+            'success' => true,
+            'message' => 'Review submitted for moderation.',
+            'data' =>  ['review_id' => $review->id,]
         ], 201);
     }
 }

@@ -17,7 +17,7 @@ class QuizController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/quizzes/{id}",
+     *     path="/v1.0/quizzes/{id}",
      *     tags={"Quizzes"},
      *     summary="Get quiz details with questions and options",
      *     security={{"bearerAuth":{}}},
@@ -60,7 +60,7 @@ class QuizController extends Controller
     {
         $quiz = Quiz::with(['questions.options'])->findOrFail($id);
 
-        return response()->json([
+        $result = [
             'id' => $quiz->id,
             'title' => $quiz->title,
             'questions' => $quiz->questions->map(function ($question) {
@@ -76,6 +76,12 @@ class QuizController extends Controller
                     }),
                 ];
             }),
-        ]);
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz retrieved successfully',
+            'data' => $result
+        ], 200);
     }
 }

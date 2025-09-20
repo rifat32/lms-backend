@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Course;
-use App\Models\Payment;
-use App\Models\Enrollment;
 
 /**
  * @OA\Tag(
@@ -18,7 +15,7 @@ class ReportController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/reports/sales",
+     *     path="/v1.0/reports/sales",
      *     tags={"Reports"},
      *     summary="Get sales report for all courses (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -58,7 +55,7 @@ class ReportController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/reports/enrollments",
+     *     path="/v1.0/reports/enrollments",
      *     tags={"Reports"},
      *     summary="Get enrollment count per course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -90,6 +87,10 @@ class ReportController extends Controller
             ];
         });
 
-        return response()->json($report);
+        return response()->json([
+            'success' => true,
+            'message' => 'Enrollment report retrieved successfully',
+            'data' => $report
+        ]);
     }
 }
