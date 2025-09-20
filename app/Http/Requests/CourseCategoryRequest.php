@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Rules\ValidCourseCategory;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCourseCategoryRequest extends FormRequest
+class CourseCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,13 +24,26 @@ class UpdateCourseCategoryRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            // 'id' => [
-            //     'required',
-            //     'integer',
-            //     new ValidCourseCategory(),
-            // ],
+        $rules = [
             'name' => 'required|string|max:255',
+        ];
+
+        if ($this->method() == 'PUT') {
+            $rules['id'] = [
+                'required',
+                'integer',
+                new ValidCourseCategory(),
+            ];
+        }
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'id.required' => 'The course category ID is required.',
+            'id.integer' => 'The course category ID must be an integer.',
         ];
     }
 }

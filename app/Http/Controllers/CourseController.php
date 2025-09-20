@@ -302,22 +302,15 @@ class CourseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/v1.0/courses/{id}",
+     *     path="/v1.0/courses",
      *     tags={"course"},
      *     operationId="updateCourse",
      *     summary="Update a course (Admin only)",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Course ID",
-     *         @OA\Schema(type="integer", example=10)
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","description","category_id"},
+     *             required={"title","description","category_id", "id"},
      *             @OA\Property(property="id", type="integer", example=10),
      *             @OA\Property(property="title", type="string", example="Updated Title"),
      *             @OA\Property(property="description", type="string", example="Updated description"),
@@ -405,7 +398,15 @@ class CourseController extends Controller
         $request_payload = $request->validated();
 
         // FIND BY ID
-        $course = Course::findOrFail($request_payload['id']);
+        $course = Course::find($request_payload['id']);
+
+        // SEND RESPONSE
+        if (empty($course)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found'
+            ], 404);
+        }
 
         // UPDATE
         $course->update($request_payload);

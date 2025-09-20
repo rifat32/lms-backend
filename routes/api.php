@@ -52,19 +52,19 @@ Route::middleware('auth:api')->group(function () {
 
         // COURSE CATEGORY
         Route::post('/v1.0/course-categories', [CourseCategoryController::class, 'createCourseCategory']);
-        Route::put('/v1.0/course-categories/{id}', [CourseCategoryController::class, 'updateCourseCategory']);
+        Route::put('/v1.0/course-categories', [CourseCategoryController::class, 'updateCourseCategory']);
         Route::get('/v1.0/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
         Route::get('/v1.0/course-categories/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
 
         // COURSE
         Route::post('/v1.0/courses', [CourseController::class, 'createCourse']);
-        Route::put('/v1.0/courses/{id}', [CourseController::class, 'updateCourse']);
+        Route::put('/v1.0/courses', [CourseController::class, 'updateCourse']);
         Route::get('/v1.0/courses', [CourseController::class, 'getCourses']);
         Route::get('/v1.0/courses/{id}', [CourseController::class, 'getCourseById']);
 
         // Lesson
-        Route::post('/v1.0/courses/{course_id}/lessons', [LessonController::class, 'store']);
-        Route::put('/v1.0/lessons/{id}', [LessonController::class, 'update']);
+        Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
+        Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
     });
 
     // Enrollments
