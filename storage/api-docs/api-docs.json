@@ -2822,7 +2822,7 @@
                     "QuizAttempts"
                 ],
                 "summary": "Submit a quiz attempt for authenticated user",
-                "operationId": "e92c833745a01627ebfe6b1a989c3a5b",
+                "operationId": "submitQuizAttempt",
                 "parameters": [
                     {
                         "name": "id",
@@ -2868,42 +2868,119 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Quiz attempt submitted",
+                        "description": "Quiz attempt submitted successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "attempt_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "score": {
-                                            "type": "number",
-                                            "example": 80
-                                        },
-                                        "is_passed": {
+                                        "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "feedback": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "question_id": {
-                                                        "type": "integer",
-                                                        "example": 5
-                                                    },
-                                                    "user_answer": {
-                                                        "type": "string",
-                                                        "example": "My essay answer"
-                                                    },
-                                                    "message": {
-                                                        "type": "string",
-                                                        "example": "Requires manual grading"
-                                                    }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz attempt submitted"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "attempt_id": {
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
-                                                "type": "object"
-                                            }
+                                                "score": {
+                                                    "type": "number",
+                                                    "example": 80
+                                                },
+                                                "is_passed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "feedback": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "user_answer": {
+                                                                "type": "string",
+                                                                "example": "My essay answer"
+                                                            },
+                                                            "message": {
+                                                                "type": "string",
+                                                                "example": "Requires manual grading"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to submit this quiz."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz or question not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question not found."
                                         }
                                     },
                                     "type": "object"
@@ -2912,7 +2989,48 @@
                         }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The answers field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "answers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The answers field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -2928,7 +3046,7 @@
                     "QuizAttempts"
                 ],
                 "summary": "Manually grade a quiz attempt (Admin only)",
-                "operationId": "cc5fd9a4f6cefefb39485162af7cc7b8",
+                "operationId": "gradeQuizAttempt",
                 "parameters": [
                     {
                         "name": "id",
@@ -2972,17 +3090,78 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "attempt_id": {
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
                                             "example": "Grade updated."
                                         },
-                                        "new_score": {
-                                            "type": "number",
-                                            "example": 90
+                                        "data": {
+                                            "properties": {
+                                                "attempt_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Grade updated."
+                                                },
+                                                "new_score": {
+                                                    "type": "number",
+                                                    "example": 90
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
                                         }
                                     },
                                     "type": "object"
@@ -2991,10 +3170,64 @@
                         }
                     },
                     "404": {
-                        "description": "Quiz attempt or question not found"
+                        "description": "Quiz attempt or question not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz attempt not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The score field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "score": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The score field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -3010,7 +3243,7 @@
                     "Quizzes"
                 ],
                 "summary": "Get quiz details with questions and options",
-                "operationId": "e6fd0f4952a601715c69e29b7641e59e",
+                "operationId": "getQuizWithQuestionsById",
                 "parameters": [
                     {
                         "name": "id",
@@ -3030,49 +3263,110 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "title": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "Laravel Basics Quiz"
+                                            "example": "Quiz retrieved successfully"
                                         },
-                                        "questions": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "question_id": {
-                                                        "type": "integer",
-                                                        "example": 10
-                                                    },
-                                                    "text": {
-                                                        "type": "string",
-                                                        "example": "What is Laravel?"
-                                                    },
-                                                    "type": {
-                                                        "type": "string",
-                                                        "example": "multiple_choice"
-                                                    },
-                                                    "options": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "option_id": {
-                                                                    "type": "integer",
-                                                                    "example": 101
-                                                                },
-                                                                "text": {
-                                                                    "type": "string",
-                                                                    "example": "A PHP framework"
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    }
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
                                                 },
-                                                "type": "object"
-                                            }
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Laravel Basics Quiz"
+                                                },
+                                                "questions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "What is Laravel?"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "multiple_choice"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "option_id": {
+                                                                            "type": "integer",
+                                                                            "example": 101
+                                                                        },
+                                                                        "text": {
+                                                                            "type": "string",
+                                                                            "example": "A PHP framework"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
                                         }
                                     },
                                     "type": "object"
@@ -3081,7 +3375,36 @@
                         }
                     },
                     "404": {
-                        "description": "Quiz not found"
+                        "description": "Quiz not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [

@@ -65,6 +65,9 @@ Route::middleware('auth:api')->group(function () {
         // Lesson
         Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
         Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
+
+        // quiz attempt
+        Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
     });
 
     // Enrollments
@@ -76,13 +79,11 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Get quiz with questions
-    Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'show']);
+    Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
 
     // Submit quiz attempt
-    Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'store']);
+    Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'submitQuizAttempt']);
 
-    // Admin manual grading
-    Route::middleware('role:admin')->put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'grade']);
 
 
     // Generate certificate after completing a course
