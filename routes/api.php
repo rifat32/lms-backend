@@ -40,8 +40,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/user', function (Request $request) {
         return $request->user();
     });
-    Route::get('/v1.0/users/{id}', [UserController::class, 'show']);
-    Route::put('/v1.0/users/{id}', [UserController::class, 'update']);
+    Route::get('/v1.0/users/{id}', [UserController::class, 'getUserById']);
+    Route::put('/v1.0/users', [UserController::class, 'updateUser']);
 
     // Courses
     Route::get('/courses', [CourseController::class, 'index']);
