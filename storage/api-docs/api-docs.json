@@ -3097,38 +3097,66 @@
                     "Reports"
                 ],
                 "summary": "Get sales report for all courses (Admin only)",
-                "operationId": "36bdd81e0b12817c00ecd48e7b7a753a",
+                "operationId": "sales",
                 "responses": {
                     "200": {
                         "description": "Sales report retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "course_id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "title": {
-                                                "type": "string",
-                                                "example": "Laravel Basics"
-                                            },
-                                            "total_revenue": {
-                                                "type": "number",
-                                                "example": 5000
-                                            },
-                                            "total_sales_count": {
-                                                "type": "integer",
-                                                "example": 20
-                                            }
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "type": "object"
-                                    }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sales report retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "total_revenue": {
+                                                        "type": "number",
+                                                        "example": 5000
+                                                    },
+                                                    "total_sales_count": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required"
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admin users can access this report"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 },
                 "security": [
@@ -3144,31 +3172,124 @@
                     "Reports"
                 ],
                 "summary": "Get enrollment count per course (Admin only)",
-                "operationId": "f979edc8de5bcd0f1373a567305dd81a",
+                "operationId": "enrollmentReport",
                 "responses": {
                     "200": {
                         "description": "Enrollment report retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "course_id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "title": {
-                                                "type": "string",
-                                                "example": "Laravel Basics"
-                                            },
-                                            "enrolled_students_count": {
-                                                "type": "integer",
-                                                "example": 25
-                                            }
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "type": "object"
-                                    }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Enrollment report retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "enrolled_students_count": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Only admin users can access this report",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this report."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Resource not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while retrieving the report."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
