@@ -17,18 +17,22 @@ class CreateCoursesTable extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->unsignedBigInteger('category_id');
-            $table->unsignedBigInteger('lecturer_id');
             $table->decimal('price', 10, 2)->default(0);
             $table->boolean('is_free')->default(false);
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->integer('duration_days')->nullable();
-            $table->unsignedBigInteger('created_by'); // FK to Users
+            $table->foreignId('category_id')
+                ->constrained('course_categories')
+                ->cascadeOnDelete();
+            $table->foreignId('lecturer_id')
+                ->nullable()
+                ->constrained('lecturers')
+                ->cascadeOnDelete();
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
             $table->timestamps();
-
-            $table->foreign('category_id')->references('id')->on('course_categories');
-            $table->foreign('lecturer_id')->references('id')->on('lecturers');
-            $table->foreign('created_by')->references('id')->on('users');
         });
     }
 

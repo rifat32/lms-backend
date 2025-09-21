@@ -13,7 +13,13 @@ class Course extends Model
         'description',
         'price',
         'category_id',
+        'lecturer_id',
+        'is_free',
+        'status',
+        'duration_days',
+        'created_by',
     ];
+
 
     // Relationships
     public function lessons()

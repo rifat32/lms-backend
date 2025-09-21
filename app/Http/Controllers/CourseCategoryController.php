@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseCategoryRequest;
 use App\Http\Requests\CreateCourseCategoryRequest;
 use App\Http\Requests\UpdateCourseCategoryRequest;
 use App\Models\CourseCategory;
@@ -162,7 +163,7 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/course-categories",
+     *     path="/v1.0/course-categories",
      *     operationId="createCourseCategory",
      *     tags={"course_category"},
      *     summary="Create a new course category (Admin only)",
@@ -228,7 +229,7 @@ class CourseCategoryController extends Controller
      */
 
 
-    public function createCourseCategory(CreateCourseCategoryRequest $request)
+    public function createCourseCategory(CourseCategoryRequest $request)
     {
         // VALIDATE PAYLOAD
         $request_payload = $request->validated();
@@ -246,22 +247,16 @@ class CourseCategoryController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/course-categories/{id}",
+     *     path="/v1.0/course-categories",
      *     operationId="updateCourseCategory",
      *     tags={"course_category"},
      *     summary="Update a course category (Admin only)",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Course Category ID",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name"},
+     *             required={"id", "name"},
+     *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="name", type="string", example="Data Science")
      *         )
      *     ),
@@ -317,15 +312,15 @@ class CourseCategoryController extends Controller
      * )
      */
 
-    public function updateCourseCategory(UpdateCourseCategoryRequest $request, $id)
+    public function updateCourseCategory(CourseCategoryRequest $request)
     {
         // VALIDATE PAYLOAD
         $request_payload = $request->validated();
 
         // FIND THE COURSE CATEGORY
-        $course = CourseCategory::find($id);
+        $course = CourseCategory::find($request_payload['id']);
 
-        if (!$course) {
+        if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course category not found',

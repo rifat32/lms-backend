@@ -19,7 +19,8 @@ class LessonProgressController extends Controller
 {
     /**
      * @OA\Put(
-     *     path="/lessons/{id}/progress",
+     *     path="/v1.0/lessons/{id}/progress",
+     *     operationId="updateLessonProgress",
      *     tags={"LessonProgress"},
      *     summary="Update lesson progress for authenticated user",
      *     security={{"bearerAuth":{}}},
@@ -34,7 +35,12 @@ class LessonProgressController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"is_completed"},
-     *             @OA\Property(property="is_completed", type="boolean", example=true, description="Mark lesson as completed or not")
+     *             @OA\Property(
+     *                 property="is_completed",
+     *                 type="boolean",
+     *                 example=true,
+     *                 description="Mark lesson as completed or not"
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -46,11 +52,59 @@ class LessonProgressController extends Controller
      *             @OA\Property(property="progress_status", type="string", example="completed")
      *         )
      *     ),
-     *     @OA\Response(response=404, description="Lesson or enrollment not found"),
-     *     @OA\Response(response=422, description="Validation error")
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request payload")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to update this lesson progress")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Lesson or enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Lesson not found or user not enrolled")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Lesson progress already marked as completed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The is_completed field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(
+     *                     property="is_completed",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The is_completed field must be true or false.")
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
-    public function update(Request $request, $id)
+
+    public function updateLessonProgress(Request $request, $id)
     {
         $request->validate([
             'is_completed' => 'required|boolean',
@@ -58,7 +112,15 @@ class LessonProgressController extends Controller
 
         $user = Auth::user();
 
-        $lesson = Lesson::findOrFail($id);
+        // Ensure the lesson exists
+        $lesson = Lesson::find($id);
+
+        if (empty($lesson)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lesson not found',
+            ], 404);
+        }
 
         // Ensure the user is enrolled in the course
         $enrollment = Enrollment::where('user_id', $user->id)
@@ -70,9 +132,13 @@ class LessonProgressController extends Controller
         $enrollment->save();
 
         return response()->json([
-            'user_id' => $user->id,
-            'lesson_id' => $lesson->id,
-            'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+            'success' => true,
+            'message' => 'Lesson progress updated',
+            'data' => [
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+                'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+            ]
         ]);
     }
 }

@@ -18,7 +18,7 @@ class AuthController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/auth/register",
+     *     path="/v1.0/auth/register",
      *     tags={"Auth"},
      *     summary="Register a new user",
      *     @OA\RequestBody(
@@ -58,7 +58,7 @@ class AuthController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
             'role'     => 'required|string|in:student,lecturer,admin',
         ]);
 
@@ -74,17 +74,24 @@ class AuthController extends Controller
         // Generate Passport token
         $token = $user->createToken('API Token')->accessToken;
 
-        return response()->json([
-            'user_id' => $user->id,
-            'name'    => $user->name,
-            'email'   => $user->email,
-            'token'   => $token,
-        ], 201);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'User registered successfully',
+                'data' => [
+                    'user_id' => $user->id,
+                    'name'    => $user->name,
+                    'email'   => $user->email,
+                    'token'   => $token,
+                ]
+            ],
+            201
+        );
     }
 
     /**
      * @OA\Post(
-     *     path="/auth/login",
+     *     path="/v1.0/auth/login",
      *     tags={"Auth"},
      *     summary="Login user",
      *     @OA\RequestBody(
@@ -132,9 +139,13 @@ class AuthController extends Controller
         $token = $user->createToken('API Token')->accessToken;
 
         return response()->json([
-            'user_id' => $user->id,
-            'role'    => $user->roles->pluck('name')->first(),
-            'token'   => $token,
-        ]);
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'user_id' => $user->id,
+                'role'    => $user->roles->pluck('name')->first(),
+                'token'   => $token,
+            ]
+        ], 200);
     }
 }

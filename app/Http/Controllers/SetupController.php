@@ -4,20 +4,37 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Laravel\Passport\Passport;
 use Spatie\Permission\Models\Role;
 
 class SetupController extends Controller
 {
+
+    // initial setup
     public function setup()
     {
-        // PASSPORT 
-        Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations']);
+        // Clear caches
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+
+        // Run migrations normally
+        Artisan::call('migrate');
+
+        // Register Passport routes (safe call)
+        Passport::routes();
+
+        // Install passport only if not already installed (first time only)
         Artisan::call('passport:install');
-        // SWAGGER
+        Artisan::call('passport:keys');
+
+        // Generate swagger docs
         Artisan::call('l5-swagger:generate');
 
         return response()->json(['message' => 'Setup Complete']);
     }
+
 
     // SWAGGER REFRESH
     public function swaggerRefresh(Request $request)
