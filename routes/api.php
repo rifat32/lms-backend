@@ -72,7 +72,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
 
     // Lesson progress
-    Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'update']);
+    Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'updateLessonProgress']);
 
 
     // Get quiz with questions
