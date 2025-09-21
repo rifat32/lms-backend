@@ -181,7 +181,7 @@ class CertificateController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Certificate PDF download",
-     *         @OA\Content(
+     *         @OA\MediaType(
      *             mediaType="application/pdf"
      *         )
      *     ),
@@ -227,6 +227,7 @@ class CertificateController extends Controller
      *     )
      * )
      */
+
 
     public function downloadCertificate($id)
     {
