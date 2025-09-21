@@ -43,9 +43,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/users/{id}', [UserController::class, 'getUserById']);
     Route::put('/v1.0/users', [UserController::class, 'updateUser']);
 
-    // Courses
-    Route::get('/courses', [CourseController::class, 'index']);
-    Route::get('/courses/{id}', [CourseController::class, 'show']);
 
     // Admin-only routes
     Route::middleware('role:admin')->group(function () {
@@ -87,12 +84,12 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Generate certificate after completing a course
-    Route::post('/v1.0/courses/{id}/complete', [CertificateController::class, 'generate']);
+    Route::post('/v1.0/courses/{id}/complete', [CertificateController::class, 'generateCertificate']);
 
     // Download user's certificate
-    Route::get('/v1.0/certificates/download/{id}', [CertificateController::class, 'download']);
+    Route::get('/v1.0/certificates/download/{id}', [CertificateController::class, 'downloadCertificate']);
 
-    Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'store']);
+    Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'submitCourseReview']);
 
     // Sales report
     Route::get('/v1.0/reports/sales', [ReportController::class, 'sales']);
@@ -102,9 +99,9 @@ Route::middleware('auth:api')->group(function () {
 });
 
 // Get all reviews (auth optional)
-Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'index']);
+Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCourseReviews']);
 
 
 
 // Public verification route
-Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verify']);
+Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verifyCertificate']);
