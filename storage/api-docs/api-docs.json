@@ -1850,7 +1850,7 @@
                     "Enrollments"
                 ],
                 "summary": "Enroll authenticated user in a course",
-                "operationId": "985c6489f81be3e0e587048bd370b7c3",
+                "operationId": "createEnrollment",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1899,8 +1899,129 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request payload."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to enroll in this course."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Already enrolled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User is already enrolled in this course."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "422": {
-                        "description": "Validation error"
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The course_id field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while processing the enrollment."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1935,55 +2056,80 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "enrollment_id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "course": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User enrollments retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
                                                 "properties": {
-                                                    "id": {
+                                                    "enrollment_id": {
                                                         "type": "integer",
-                                                        "example": 101
+                                                        "example": 1
                                                     },
-                                                    "title": {
+                                                    "course": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Laravel Basics"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Learn Laravel framework"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 49.99
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "progress": {
+                                                        "type": "integer",
+                                                        "example": 100
+                                                    },
+                                                    "status": {
                                                         "type": "string",
-                                                        "example": "Laravel Basics"
+                                                        "example": "completed"
                                                     },
-                                                    "description": {
+                                                    "enrolled_at": {
                                                         "type": "string",
-                                                        "example": "Learn Laravel framework"
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "example": 49.99
+                                                        "example": "2025-09-16 12:00:00"
                                                     }
                                                 },
                                                 "type": "object"
-                                            },
-                                            "progress": {
-                                                "type": "integer",
-                                                "example": 100
-                                            },
-                                            "status": {
-                                                "type": "string",
-                                                "example": "completed"
-                                            },
-                                            "enrolled_at": {
-                                                "type": "string",
-                                                "example": "2025-09-16 12:00:00"
                                             }
-                                        },
-                                        "type": "object"
-                                    }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
+                    "400": {
+                        "description": "Bad Request - Invalid input"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required"
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not have access"
+                    },
                     "404": {
                         "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 },
                 "security": [

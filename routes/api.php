@@ -68,7 +68,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // Enrollments
-    Route::post('/v1.0/enrollments', [EnrollmentController::class, 'store']);
+    Route::post('/v1.0/enrollments', [EnrollmentController::class, 'createEnrollment']);
     Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
 
     // Lesson progress
