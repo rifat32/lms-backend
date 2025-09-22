@@ -20,7 +20,7 @@ class SetupController extends Controller
         Artisan::call('view:clear');
 
         // Run migrations normally
-        Artisan::call('migrate');
+        Artisan::call('migrate:refresh');
 
         // Register Passport routes (safe call)
         Passport::routes();
@@ -31,6 +31,17 @@ class SetupController extends Controller
 
         // Generate swagger docs
         Artisan::call('l5-swagger:generate');
+
+        // GET ALL ROLES
+        $roles = config('setup-config.roles');
+
+        // OF NOT EXIST THEN CREATE NEW
+        foreach ($roles as $role) {
+            if (!Role::where('name', $role)->where('guard_name', 'api')->exists())
+                Role::create(
+                    ['name' => $role, 'guard_name' => 'api']
+                );
+        }
 
         return response()->json(['message' => 'Setup Complete']);
     }

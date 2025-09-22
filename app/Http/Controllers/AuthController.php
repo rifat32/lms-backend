@@ -24,8 +24,10 @@ class AuthController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","email","password","role"},
-     *             @OA\Property(property="name", type="string", example="Student John"),
+     *             required={"title", "first_name", "last_name", "email","password","role"},
+     *             @OA\Property(property="title", type="string", example="Mr."),
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john.student@yopmail.com"),
      *             @OA\Property(property="password", type="string", format="password", example="12345678@We"),
      *             @OA\Property(property="role", type="string", example="student")
@@ -36,7 +38,9 @@ class AuthController extends Controller
      *         description="User registered successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="Student John"),
+     *             @OA\Property(property="title", type="string", example="Mr."),
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
      *             @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
      *             @OA\Property(property="role", type="string", example="student"),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-17T12:00:00Z")
@@ -56,14 +60,18 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
+            'title'     => 'required|string|max:255',
+            'first_name'     => 'required|string|max:255',
+            'last_name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'role'     => 'required|string|in:student,lecturer,admin',
         ]);
 
         $user = User::create([
-            'name'     => $request->name,
+            'title'     => $request->title,
+            'first_name'     => $request->first_name,
+            'last_name'     => $request->last_name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -80,8 +88,11 @@ class AuthController extends Controller
                 'message' => 'User registered successfully',
                 'data' => [
                     'user_id' => $user->id,
-                    'name'    => $user->name,
+                    'title'    => $user->title,
+                    'first_name'    => $user->first_name,
+                    'last_name'    => $user->last_name,
                     'email'   => $user->email,
+                    'role'    => $user->roles->pluck('name')->first(),
                     'token'   => $token,
                 ]
             ],
@@ -111,7 +122,9 @@ class AuthController extends Controller
      *             @OA\Property(property="expires_in", type="integer", example=3600),
      *             @OA\Property(property="user", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="John Student"),
+     *                 @OA\Property(property="title", type="string", example="Mr."),
+     *                 @OA\Property(property="first_name", type="string", example="John"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe"),
      *                 @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
      *                 @OA\Property(property="role", type="string", example="student")
      *             )

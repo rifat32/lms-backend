@@ -35,9 +35,10 @@ class UserController extends Controller
      *         description="User details retrieved successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="title", type="string", example="Mr."),
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
      *             @OA\Property(property="email", type="string", example="john@example.com"),
-     *             @OA\Property(property="profile_image", type="string", example="profile.jpg"),
      *             @OA\Property(property="role", type="string", example="student")
      *         )
      *     ),
@@ -91,9 +92,10 @@ class UserController extends Controller
 
         $user = [
             'id'            => $query->id,
-            'name'          => $query->name,
+            'title'          => $query->title,
+            'first_name'          => $query->first_name,
+            'last_name'          => $query->last_name,
             'email'         => $query->email,
-            'profile_image' => $query->profile_image,
             'role'          => $query->roles->pluck('name')->first(),
         ];
 
@@ -112,13 +114,14 @@ class UserController extends Controller
      *     summary="Update user profile",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
-     *         required=false,
+     *         required=true,
      *         @OA\JsonContent(
-     *             required={"id", "name", "email"},
+     *             required={"id", "title", "first_name", "last_name", "email"},
      *             @OA\Property(property="id", type="integer", example="1"),
-     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="title", type="string", example="Mr."),
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
      *             @OA\Property(property="email", type="string", example="john@example.com"),
-     *             @OA\Property(property="profile_image", type="string", example="profile.jpg"),
      *             @OA\Property(property="password", type="string", format="password", example="newpassword")
      *         )
      *     ),
@@ -127,9 +130,10 @@ class UserController extends Controller
      *         description="User profile updated successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="title", type="string", example="Mr."),
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
      *             @OA\Property(property="email", type="string", example="john@example.com"),
-     *             @OA\Property(property="profile_image", type="string", example="profile.jpg"),
      *             @OA\Property(property="role", type="string", example="student")
      *         )
      *     ),
@@ -209,9 +213,10 @@ class UserController extends Controller
             'message' => 'User profile updated successfully',
             'data' => [
                 'id'            => $user->id,
-                'name'          => $user->name,
+                'title'          => $user->title,
+                'first_name'          => $user->first_name,
+                'last_name'          => $user->last_name,
                 'email'         => $user->email,
-                'profile_image' => $user->profile_image,
                 'role'          => $user->roles->pluck('name')->first(),
             ]
         ]);

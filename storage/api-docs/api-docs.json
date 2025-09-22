@@ -32,15 +32,25 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name",
+                                    "title",
+                                    "first_name",
+                                    "last_name",
                                     "email",
                                     "password",
                                     "role"
                                 ],
                                 "properties": {
-                                    "name": {
+                                    "title": {
                                         "type": "string",
-                                        "example": "Student John"
+                                        "example": "Mr."
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
                                     },
                                     "email": {
                                         "type": "string",
@@ -73,9 +83,17 @@
                                             "type": "integer",
                                             "example": 1
                                         },
-                                        "name": {
+                                        "title": {
                                             "type": "string",
-                                            "example": "Student John"
+                                            "example": "Mr."
+                                        },
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "John"
+                                        },
+                                        "last_name": {
+                                            "type": "string",
+                                            "example": "Doe"
                                         },
                                         "email": {
                                             "type": "string",
@@ -176,9 +194,17 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "name": {
+                                                "title": {
                                                     "type": "string",
-                                                    "example": "John Student"
+                                                    "example": "Mr."
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "John"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Doe"
                                                 },
                                                 "email": {
                                                     "type": "string",
@@ -222,7 +248,7 @@
                     "Certificates"
                 ],
                 "summary": "Generate a certificate for a completed course",
-                "operationId": "837809bd1969d287152f0c11a3cfa569",
+                "operationId": "generateCertificate",
                 "parameters": [
                     {
                         "name": "id",
@@ -230,7 +256,8 @@
                         "description": "Course ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 101
                         }
                     }
                 ],
@@ -260,12 +287,179 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Certificate generated successfully"
+                        "description": "Certificate generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate generated."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "certificate_id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "400": {
-                        "description": "Course not completed yet"
+                        "description": "Course not completed yet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not completed yet."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User, course, or enrollment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The user_id field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The user_id field is required."
+                                                    }
+                                                },
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/v1.0/certificates/download/{id}": {
@@ -274,7 +468,7 @@
                     "Certificates"
                 ],
                 "summary": "Download a certificate PDF",
-                "operationId": "0a9d180d8923f3ab041e8ec7d81926d0",
+                "operationId": "downloadCertificate",
                 "parameters": [
                     {
                         "name": "id",
@@ -282,18 +476,124 @@
                         "description": "Certificate ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 10
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Certificate PDF download"
+                        "description": "Certificate PDF download",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid certificate ID"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "File not found"
+                        "description": "File not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "File not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/v1.0/certificates/verify/{code}": {
@@ -302,7 +602,7 @@
                     "Certificates"
                 ],
                 "summary": "Verify a certificate by code",
-                "operationId": "2ff8e1e6e87bdf4137e0776a7f053fed",
+                "operationId": "verifyCertificate",
                 "parameters": [
                     {
                         "name": "code",
@@ -322,31 +622,104 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "is_valid": {
+                                        "success": {
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "user": {
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "course": {
-                                            "properties": {
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Laravel Basics"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "issued_at": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "2025-09-16 12:00:00"
+                                            "example": "Certificate is valid"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "course": {
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Laravel Basics"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "issued_at": {
+                                                    "type": "string",
+                                                    "example": "2025-09-16 12:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid certificate code"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
                                         }
                                     },
                                     "type": "object"
@@ -355,7 +728,53 @@
                         }
                     },
                     "404": {
-                        "description": "Certificate not found"
+                        "description": "Certificate not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate not found"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -3914,17 +4333,21 @@
                                             "type": "integer",
                                             "example": 1
                                         },
-                                        "name": {
+                                        "title": {
                                             "type": "string",
-                                            "example": "John Doe"
+                                            "example": "Mr."
+                                        },
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "John"
+                                        },
+                                        "last_name": {
+                                            "type": "string",
+                                            "example": "Doe"
                                         },
                                         "email": {
                                             "type": "string",
                                             "example": "john@example.com"
-                                        },
-                                        "profile_image": {
-                                            "type": "string",
-                                            "example": "profile.jpg"
                                         },
                                         "role": {
                                             "type": "string",
@@ -4032,13 +4455,15 @@
                 "summary": "Update user profile",
                 "operationId": "2bf19028a4d9733efd84ee5eae8deafe",
                 "requestBody": {
-                    "required": false,
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
                                     "id",
-                                    "name",
+                                    "title",
+                                    "first_name",
+                                    "last_name",
                                     "email"
                                 ],
                                 "properties": {
@@ -4046,17 +4471,21 @@
                                         "type": "integer",
                                         "example": "1"
                                     },
-                                    "name": {
+                                    "title": {
                                         "type": "string",
-                                        "example": "John Doe"
+                                        "example": "Mr."
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
                                     },
                                     "email": {
                                         "type": "string",
                                         "example": "john@example.com"
-                                    },
-                                    "profile_image": {
-                                        "type": "string",
-                                        "example": "profile.jpg"
                                     },
                                     "password": {
                                         "type": "string",
@@ -4080,17 +4509,21 @@
                                             "type": "integer",
                                             "example": 1
                                         },
-                                        "name": {
+                                        "title": {
                                             "type": "string",
-                                            "example": "John Doe"
+                                            "example": "Mr."
+                                        },
+                                        "first_name": {
+                                            "type": "string",
+                                            "example": "John"
+                                        },
+                                        "last_name": {
+                                            "type": "string",
+                                            "example": "Doe"
                                         },
                                         "email": {
                                             "type": "string",
                                             "example": "john@example.com"
-                                        },
-                                        "profile_image": {
-                                            "type": "string",
-                                            "example": "profile.jpg"
                                         },
                                         "role": {
                                             "type": "string",
