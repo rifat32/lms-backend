@@ -15,14 +15,14 @@ class CreateCourseReviewsTable extends Migration
     {
         Schema::create('course_reviews', function (Blueprint $table) {
             $table->id();
-          $table->unsignedBigInteger('course_id');
-    $table->unsignedBigInteger('user_id');
-    $table->tinyInteger('rating')->check('rating >= 1 and rating <= 5');
-    $table->text('comment')->nullable();
-    $table->timestamp('created_at')->useCurrent();
+            $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('user_id');
+            $table->tinyInteger('rating')->check('rating >= 1 and rating <= 5');
+            $table->text('comment')->nullable();
+            $table->timestamp('created_at')->useCurrent();
 
-    $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
-    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Course extends Model
 {
@@ -13,18 +14,40 @@ class Course extends Model
         'description',
         'price',
         'category_id',
-        'lecturer_id',
         'is_free',
         'status',
-        'duration_days',
+        'url',
+        'level',
+        'cover',
+        'preview_video',
+        'duration',
+        'video_duration',
+        'course_preview_description',
+        'course_status',
+        'status_start_date',
+        'status_end_date',
+        'number_of_students',
+        'course_view',
+        'is_featured',
+        'is_lock_lessons_in_order',
+        'access_duration',
+        'access_device_type',
+        'certificate_info',
+        'pricing',
         'created_by',
     ];
 
 
     // Relationships
-    public function lessons()
+
+    public function category()
     {
-        return $this->hasMany(Lesson::class);
+        return $this->belongsTo(CourseCategory::class, 'category_id');
+    }
+
+    public function sections(): HasMany
+    {
+        return $this->hasMany(Section::class, 'course_id'); // foreign key in sections table
     }
 
     // public function faqs()

@@ -12,6 +12,7 @@ use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -65,6 +66,14 @@ Route::middleware('auth:api')->group(function () {
 
         // quiz attempt
         Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
+
+        // sections
+        Route::group(['prefix' => 'v1.0/sections'], function () {
+            Route::post('/', [SectionController::class, 'createSection']);       // Create
+            Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
+            Route::get('/', [SectionController::class, 'getSections']);          // Get all
+            Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
+        });
     });
 
     // Enrollments

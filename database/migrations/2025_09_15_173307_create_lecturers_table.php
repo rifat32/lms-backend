@@ -15,11 +15,11 @@ class CreateLecturersTable extends Migration
     {
         Schema::create('lecturers', function (Blueprint $table) {
             $table->id();
-              $table->string('name');
-    $table->string('designation')->nullable();
-    $table->text('bio')->nullable();
-    $table->string('photo_url')->nullable();
-    $table->string('email')->unique();
+            $table->string('name');
+            $table->string('designation')->nullable();
+            $table->text('bio')->nullable();
+            $table->string('photo_url')->nullable();
+            $table->string('email')->unique();
             $table->timestamps();
         });
     }
