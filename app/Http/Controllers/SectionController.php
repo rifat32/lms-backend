@@ -13,7 +13,7 @@ class SectionController extends Controller
      * @OA\Post(
      *     path="/v1.0/sections",
      *     operationId="createSection",
-     *     tags={"Section"},
+     *     tags={"section"},
      *     summary="Create a new section for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -108,7 +108,7 @@ class SectionController extends Controller
      * @OA\PUT(
      *     path="/v1.0/sections",
      *     operationId="updateSection",
-     *     tags={"Section"},
+     *     tags={"section"},
      *     summary="Update section for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -121,11 +121,11 @@ class SectionController extends Controller
      *         )
      *     ),
      *     @OA\Response(
-     *         response=201,
-     *         description="Section created successfully",
+     *         response=200,
+     *         description="Section updated successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Section created successfully"),
+     *             @OA\Property(property="message", type="string", example="Section updated successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="course_id", type="integer", example=1),
@@ -158,9 +158,9 @@ class SectionController extends Controller
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Course not found",
+     *         description="Section not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Course not found.")
+     *             @OA\Property(property="message", type="string", example="Section not found.")
      *         )
      *     ),
      *     @OA\Response(
@@ -188,6 +188,7 @@ class SectionController extends Controller
      * )
      */
 
+
     public function updateSection(SectionRequest $request)
     {
         $request_payload = $request->validated();
@@ -207,7 +208,7 @@ class SectionController extends Controller
      * @OA\Get(
      *     path="/v1.0/sections",
      *     operationId="getSections",
-     *     tags={"Section"},
+     *     tags={"section"},
      *     summary="Fetch all sections",
      *     description="Retrieve a list of all sections",
      *     security={{"bearerAuth":{}}},
@@ -260,7 +261,7 @@ class SectionController extends Controller
      * @OA\Get(
      *     path="/v1.0/sections/{id}",
      *     operationId="getSectionById",
-     *     tags={"Section"},
+     *     tags={"section"},
      *     summary="Fetch a single section by ID",
      *     description="Retrieve details of a specific section using its ID",
      *     security={{"bearerAuth":{}}},

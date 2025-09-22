@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
@@ -46,34 +47,41 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Admin-only routes
-    Route::middleware('role:admin')->group(function () {
+    // COURSE CATEGORY
+    Route::post('/v1.0/course-categories', [CourseCategoryController::class, 'createCourseCategory']);
+    Route::put('/v1.0/course-categories', [CourseCategoryController::class, 'updateCourseCategory']);
+    Route::get('/v1.0/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
+    Route::get('/v1.0/course-categories/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
 
-        // COURSE CATEGORY
-        Route::post('/v1.0/course-categories', [CourseCategoryController::class, 'createCourseCategory']);
-        Route::put('/v1.0/course-categories', [CourseCategoryController::class, 'updateCourseCategory']);
-        Route::get('/v1.0/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
-        Route::get('/v1.0/course-categories/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
+    // COURSE
+    Route::post('/v1.0/courses', [CourseController::class, 'createCourse']);
+    Route::put('/v1.0/courses', [CourseController::class, 'updateCourse']);
+    Route::get('/v1.0/courses', [CourseController::class, 'getCourses']);
+    Route::get('/v1.0/courses/{id}', [CourseController::class, 'getCourseById']);
 
-        // COURSE
-        Route::post('/v1.0/courses', [CourseController::class, 'createCourse']);
-        Route::put('/v1.0/courses', [CourseController::class, 'updateCourse']);
-        Route::get('/v1.0/courses', [CourseController::class, 'getCourses']);
-        Route::get('/v1.0/courses/{id}', [CourseController::class, 'getCourseById']);
+    // Lesson
+    Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
+    Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
 
-        // Lesson
-        Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
-        Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
+    // quiz attempt
+    Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
 
-        // quiz attempt
-        Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
+    // sections
+    Route::group(['prefix' => '/v1.0/sections'], function () {
+        Route::post('/', [SectionController::class, 'createSection']);       // Create
+        Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
+        Route::get('/', [SectionController::class, 'getSections']);          // Get all
+        Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
+    });
 
-        // sections
-        Route::group(['prefix' => 'v1.0/sections'], function () {
-            Route::post('/', [SectionController::class, 'createSection']);       // Create
-            Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
-            Route::get('/', [SectionController::class, 'getSections']);          // Get all
-            Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
-        });
+    // Business
+    Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
+    Route::group(['prefix' => '/v1.0/businesses'], function () {
+        Route::post('/', [BusinessController::class, 'createBusiness']);
+        Route::put('/', [BusinessController::class, 'updateBusiness']);
+        Route::put('/', [BusinessController::class, 'updateBusiness']);
+        Route::get('/', [BusinessController::class, 'getAllBusinesses']);
+        Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
     });
 
     // Enrollments

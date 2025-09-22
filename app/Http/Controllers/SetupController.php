@@ -19,29 +19,20 @@ class SetupController extends Controller
         Artisan::call('route:clear');
         Artisan::call('view:clear');
 
-        // Run migrations normally
-        Artisan::call('migrate:refresh');
+        // Run fresh migrations
+        Artisan::call('migrate:fresh');
 
-        // Register Passport routes (safe call)
-        Passport::routes();
-
-        // Install passport only if not already installed (first time only)
-        Artisan::call('passport:install');
-        Artisan::call('passport:keys');
+        // Install Passport only if not installed
+        if (!file_exists(storage_path('oauth-private.key'))) {
+            Artisan::call('passport:install');
+        }
 
         // Generate swagger docs
+        Artisan::call('optimize:clear');
         Artisan::call('l5-swagger:generate');
 
-        // GET ALL ROLES
-        $roles = config('setup-config.roles');
-
-        // OF NOT EXIST THEN CREATE NEW
-        foreach ($roles as $role) {
-            if (!Role::where('name', $role)->where('guard_name', 'api')->exists())
-                Role::create(
-                    ['name' => $role, 'guard_name' => 'api']
-                );
-        }
+        // Seed database
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder']);
 
         return response()->json(['message' => 'Setup Complete']);
     }
