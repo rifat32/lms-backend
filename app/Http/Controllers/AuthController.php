@@ -156,6 +156,10 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'data' => [
                 'user_id' => $user->id,
+                'title'    => $user->title,
+                'first_name'    => $user->first_name,
+                'last_name'    => $user->last_name,
+                'email'   => $user->email,
                 'role'    => $user->roles->pluck('name')->first(),
                 'token'   => $token,
             ]
