@@ -42,22 +42,31 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/user', function (Request $request) {
         return $request->user();
     });
-    Route::get('/v1.0/users/{id}', [UserController::class, 'getUserById']);
-    Route::put('/v1.0/users', [UserController::class, 'updateUser']);
+
+    // USER APIS
+    Route::prefix('/v1.0/users')->group(function () {
+        Route::put('/', [UserController::class, 'updateUser']);
+        Route::get('/', [UserController::class, 'getAllUsers']);
+        Route::get('/{id}', [UserController::class, 'getUserById']);
+    });
 
 
     // Admin-only routes
     // COURSE CATEGORY
-    Route::post('/v1.0/course-categories', [CourseCategoryController::class, 'createCourseCategory']);
-    Route::put('/v1.0/course-categories', [CourseCategoryController::class, 'updateCourseCategory']);
-    Route::get('/v1.0/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
-    Route::get('/v1.0/course-categories/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
+    Route::group(['prefix' => '/v1.0/course-categories'], function () {
+        Route::post('/', [CourseCategoryController::class, 'createCourseCategory']);
+        Route::put('/', [CourseCategoryController::class, 'updateCourseCategory']);
+        Route::get('/', [CourseCategoryController::class, 'getCourseCategory']);
+        Route::get('/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
+    });
 
     // COURSE
-    Route::post('/v1.0/courses', [CourseController::class, 'createCourse']);
-    Route::put('/v1.0/courses', [CourseController::class, 'updateCourse']);
-    Route::get('/v1.0/courses', [CourseController::class, 'getCourses']);
-    Route::get('/v1.0/courses/{id}', [CourseController::class, 'getCourseById']);
+    Route::group(['prefix' => '/v1.0/courses'], function () {
+        Route::post('/', [CourseController::class, 'createCourse']);
+        Route::put('/', [CourseController::class, 'updateCourse']);
+        Route::get('/', [CourseController::class, 'getCourses']);
+        Route::get('/{id}', [CourseController::class, 'getCourseById']);
+    });
 
     // Lesson
     Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);

@@ -20,7 +20,7 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/v1.0/users/{id}",
      *     operationId="getUserById",
-     *     tags={"Users"},
+     *     tags={"user_management"},
      *     summary="Get user details by ID",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -110,7 +110,8 @@ class UserController extends Controller
     /**
      * @OA\Put(
      *     path="/v1.0/users",
-     *     tags={"Users"},
+     *     operationId="updateUser",
+     *     tags={"user_management"},
      *     summary="Update user profile",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -219,6 +220,81 @@ class UserController extends Controller
                 'email'         => $user->email,
                 'role'          => $user->roles->pluck('name')->first(),
             ]
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/v1.0/users",
+     *     operationId="getAllUsers",
+     *     tags={"user_management"},
+     *     summary="Get all users",
+     *     description="Retrieve a list of all users in the system",
+     *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Users retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Users retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/UserSchema")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid request parameters")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Resource not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred")
+     *         )
+     *     )
+     * )
+     */
+    public function getAllUsers()
+    {
+        $users = User::all();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Users retrieved successfully',
+            'data' => $users
         ]);
     }
 }
