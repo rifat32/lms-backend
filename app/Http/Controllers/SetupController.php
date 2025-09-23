@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\SetupUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Passport\Passport;
@@ -9,7 +10,7 @@ use Spatie\Permission\Models\Role;
 
 class SetupController extends Controller
 {
-
+    use SetupUtils;
     // initial setup
     public function setup()
     {
@@ -53,17 +54,7 @@ class SetupController extends Controller
     public function roleRefresh(Request $request)
     {
 
-        // GET ALL ROLES
-        $roles = config('setup-config.roles');
-
-        // OF NOT EXIST THEN CREATE NEW
-        foreach ($roles as $role) {
-            if (!Role::where('name', $role)->where('guard_name', 'api')->exists())
-                Role::create(
-                    ['name' => $role, 'guard_name' => 'api']
-                );
-        }
-
+        $this->rolesPermissionsRefresh();
         // Return a response
         return response()->json(['message' => 'Role Refreshed']);
     }

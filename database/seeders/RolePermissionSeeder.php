@@ -29,6 +29,11 @@ class RolePermissionSeeder extends Seeder
         // ROLES
         // ###############################
         $roles = config('setup-config.roles', []);
+
+        $businessRoles = array_filter($roles, function ($role) {
+            return $role !== "super_admin";
+        });
+
         foreach ($roles as $roleName) {
             Role::firstOrCreate(
                 [
@@ -39,12 +44,7 @@ class RolePermissionSeeder extends Seeder
                     'is_default' => 1,
                 ],
                 [
-                    'is_default_for_business' => in_array($roleName, [
-                        'owner',
-                        'admin',
-                        'lecturer',
-                        'student',
-                    ]) ? 1 : 0
+                    'is_default_for_business' => in_array($roleName, $businessRoles) ? 1 : 0
                 ]
             );
         }
