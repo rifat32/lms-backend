@@ -18,7 +18,7 @@ class BusinessController extends Controller
      * @OA\Post(
      *     path="/v1.0/register-user-with-business",
      *     operationId="registerUserWithBusiness",
-     *     tags={"auth","business_management"},
+     *     tags={"Auth","business_management"},
      *     summary="Register a user and create a business",
      *     description="Create a new user and their business. Typically used by admin or self-registration depending on implementation.",
      *     security={{"bearerAuth":{}}},
@@ -133,6 +133,9 @@ class BusinessController extends Controller
             $user->email_verified_at = now();
             $user->save();
 
+
+            // PREPARE PREPARE RESPONSE 
+            $user->business_id = $business->id;
             DB::commit();
 
             // SEND RESPONSE
@@ -247,16 +250,16 @@ class BusinessController extends Controller
     }
 
     /**
-     * @OA\PUT(
+     * @OA\Put(
      *     path="/v1.0/businesses",
      *     operationId="updateBusiness",
      *     tags={"business_management"},
-     *     summary="Update business (Admin or Owner only)",
+     *     summary="Update an existing business (Admin or Owner only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id","name", "registration_date", "address_line_1", "country", "city", "postcode"},
+     *             required={"id", "name", "registration_date", "address_line_1", "country", "city", "postcode"},
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="name", type="string", example="Acme Corporation"),
      *             @OA\Property(property="email", type="string", example="contact@acme.com"),
@@ -288,7 +291,6 @@ class BusinessController extends Controller
      *                 @OA\Property(property="trail_end_date", type="string", format="date", example="2025-10-22"),
      *                 @OA\Property(property="country", type="string", example="Bangladesh"),
      *                 @OA\Property(property="city", type="string", example="Dhaka"),
-     *                 @OA\Property(property="postcode", type="string", example="1207"),
      *                 @OA\Property(property="status", type="string", example="pending"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-22T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-22T12:00:00Z")
@@ -314,13 +316,6 @@ class BusinessController extends Controller
      *         description="Forbidden",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Business not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Business not found.")
      *         )
      *     ),
      *     @OA\Response(

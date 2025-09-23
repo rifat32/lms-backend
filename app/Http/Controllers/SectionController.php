@@ -104,12 +104,13 @@ class SectionController extends Controller
         ], 201);
     }
 
+
     /**
-     * @OA\PUT(
+     * @OA\Put(
      *     path="/v1.0/sections",
      *     operationId="updateSection",
      *     tags={"section"},
-     *     summary="Update section for a course (Admin only)",
+     *     summary="Create a new section for a course (Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -158,9 +159,9 @@ class SectionController extends Controller
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Section not found",
+     *         description="Course not found",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Section not found.")
+     *             @OA\Property(property="message", type="string", example="Course not found.")
      *         )
      *     ),
      *     @OA\Response(
@@ -187,7 +188,6 @@ class SectionController extends Controller
      *     )
      * )
      */
-
 
     public function updateSection(SectionRequest $request)
     {

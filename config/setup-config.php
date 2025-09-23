@@ -52,6 +52,12 @@ return [
     ],
 
     "permissions" => [
+        'super_admin',
+        'reseller',
+        'owner',
+        'admin',
+        'lecturer',
+        'student',
 
         "user_create",
         "user_update",

@@ -20,19 +20,18 @@ class SetupController extends Controller
         Artisan::call('view:clear');
 
         // Run fresh migrations
-        Artisan::call('migrate:fresh');
+        Artisan::call('migrate:fresh', ['--force' => true]);
 
-        // Install Passport only if not installed
-        if (!file_exists(storage_path('oauth-private.key'))) {
-            Artisan::call('passport:install');
-        }
+        // Re-install Passport (always, because migrate:fresh drops its tables)
+        Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations']);
+        Artisan::call('passport:install', ['--force' => true]);
 
-        // Generate swagger docs
+        // Generate Swagger docs
         Artisan::call('optimize:clear');
         Artisan::call('l5-swagger:generate');
 
         // Seed database
-        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder']);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
 
         return response()->json(['message' => 'Setup Complete']);
     }

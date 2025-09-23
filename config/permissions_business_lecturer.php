@@ -1,5 +1,7 @@
 <?php
 
 return [
-    "permissions" => []
+    "permissions" => [
+        'lecturer'
+    ]
 ];

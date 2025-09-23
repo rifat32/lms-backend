@@ -2,6 +2,8 @@
 
 return [
     "permissions" => [
+        'super_admin',
+
         "user_create",
         "user_update",
         "user_view",
