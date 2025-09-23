@@ -28,8 +28,8 @@ class RegisterUserWithBusinessRequest extends FormRequest
         return [
             // USER INFORMATION
             'user.title' => 'required|string|max:255',
-            'user.first_Name' => 'required|string|max:255',
-            'user.last_Name' => 'required|string|max:255',
+            'user.first_name' => 'required|string|max:255',
+            'user.last_name' => 'required|string|max:255',
             'user.email' => ['required', 'string', 'email', 'max:255', new UniqueUserEmail()],
             'user.password' => 'nullable|string|min:8',
 
@@ -59,13 +59,13 @@ class RegisterUserWithBusinessRequest extends FormRequest
             'user.title.string' => 'User title must be a string.',
             'user.title.max' => 'User title may not exceed 255 characters.',
 
-            'user.first_Name.required' => 'First name is required.',
-            'user.first_Name.string' => 'First name must be a string.',
-            'user.first_Name.max' => 'First name may not exceed 255 characters.',
+            'user.first_name.required' => 'First name is required.',
+            'user.first_name.string' => 'First name must be a string.',
+            'user.first_name.max' => 'First name may not exceed 255 characters.',
 
-            'user.last_Name.required' => 'Last name is required.',
-            'user.last_Name.string' => 'Last name must be a string.',
-            'user.last_Name.max' => 'Last name may not exceed 255 characters.',
+            'user.last_name.required' => 'Last name is required.',
+            'user.last_name.string' => 'Last name must be a string.',
+            'user.last_name.max' => 'Last name may not exceed 255 characters.',
 
             'user.email.required' => 'User email is required.',
             'user.email.string' => 'User email must be a string.',

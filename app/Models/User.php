@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -20,7 +21,8 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
-        'email_verified_at'
+        'email_verified_at',
+        'business_id',
     ];
 
     protected $hidden = [
@@ -32,8 +34,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function business()
+
+    public function business(): BelongsTo
     {
-        return $this->hasOne(Business::class, 'owner_id');
+        return $this->belongsTo(Business::class, 'business_id');
     }
 }

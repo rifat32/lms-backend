@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\ValidBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -65,6 +66,7 @@ class AuthController extends Controller
             'last_name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
+            // 'business_id' => ['required', 'integer', new ValidBusiness()],
             'role'     => 'required|string|in:student,lecturer,admin',
         ]);
 
@@ -74,9 +76,11 @@ class AuthController extends Controller
             'last_name'     => $request->last_name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            // 'business_id' => $request->business_id
         ]);
 
-        $user->assignRole($request->role); // works now
+        // $user->assignRole("$request->role" . "#" . $request->business_id);
+        $user->assignRole($request->role);
 
 
         // Generate Passport token

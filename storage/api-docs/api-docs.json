@@ -263,23 +263,23 @@
                                                 "type": "string",
                                                 "example": "Mr"
                                             },
-                                            "first_Name": {
+                                            "first_name": {
                                                 "type": "string",
                                                 "example": "John"
                                             },
-                                            "last_Name": {
+                                            "last_name": {
                                                 "type": "string",
                                                 "example": "Doe"
                                             },
                                             "email": {
                                                 "type": "string",
                                                 "format": "email",
-                                                "example": "john@example.com"
+                                                "example": "mdronymia040@gmail.com"
                                             },
                                             "password": {
                                                 "type": "string",
                                                 "format": "password",
-                                                "example": "secret123"
+                                                "example": "12345678@We"
                                             }
                                         },
                                         "type": "object"
@@ -288,12 +288,12 @@
                                         "properties": {
                                             "name": {
                                                 "type": "string",
-                                                "example": "Acme Ltd"
+                                                "example": "Learning Hub"
                                             },
                                             "email": {
                                                 "type": "string",
                                                 "format": "email",
-                                                "example": "contact@acme.test"
+                                                "example": "mdronymia040@gmail.com"
                                             },
                                             "phone": {
                                                 "type": "string",
@@ -302,12 +302,12 @@
                                             "registration_date": {
                                                 "type": "string",
                                                 "format": "date",
-                                                "example": "2025-01-01"
+                                                "example": "01-01-2010"
                                             },
                                             "trail_end_date": {
                                                 "type": "string",
                                                 "format": "date",
-                                                "example": "2025-02-01"
+                                                "example": "01-02-2027"
                                             },
                                             "about": {
                                                 "type": "string",
