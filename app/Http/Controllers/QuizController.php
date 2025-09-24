@@ -29,6 +29,20 @@ class QuizController extends Controller
      *         description="Quiz ID",
      *         @OA\Schema(type="integer", example=1)
      *     ),
+     *     @OA\Parameter(
+     *         name="is_randomized",
+     *         in="query",
+     *         required=false,
+     *         description="Whether to randomize the quiz questions",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="question_limit",
+     *         in="query",
+     *         required=false,
+     *         description="The maximum number of questions to include in the quiz",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Quiz retrieved successfully",
@@ -110,10 +124,24 @@ class QuizController extends Controller
             ], 404);
         }
 
+        $questions = $quiz->questions;
+
+        // Handle randomization and limit
+        if ($quiz->is_randomized && $quiz->question_limit > 0) {
+            // Case 3: Randomize + Limit
+            $questions = $questions->shuffle()->take($quiz->question_limit);
+        } elseif ($quiz->is_randomized) {
+            // Case 1: Randomize only
+            $questions = $questions->shuffle();
+        } elseif ($quiz->question_limit > 0) {
+            // Case 2: Limit only
+            $questions = $questions->take($quiz->question_limit);
+        }
+
         $result = [
             'id' => $quiz->id,
             'title' => $quiz->title,
-            'questions' => $quiz->questions->map(function ($question) {
+            'questions' => $questions->map(function ($question) {
                 return [
                     'question_id' => $question->id,
                     'text' => $question->question_text,
@@ -121,13 +149,14 @@ class QuizController extends Controller
                     'options' => $question->options->map(function ($option) {
                         return [
                             'option_id' => $option->id,
-                            'text' => $option->option_text
+                            'text' => $option->option_text,
                         ];
                     }),
                 ];
-            }),
+            })->values(), // reset keys
         ];
 
+        // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',

@@ -8,16 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Quiz extends Model
 {
     use HasFactory;
-    
-       protected $fillable = [
+
+    protected $fillable = [
         'course_id',
         'title',
         'description',
         'time_limit',
+        'is_randomized',
+        'question_limit',
     ];
 
-        public function questions()
-{
-    return $this->hasMany(Question::class,"id","quiz_id");
-}
+    public function questions()
+    {
+        return $this->hasMany(Question::class, "id", "quiz_id");
+    }
 }

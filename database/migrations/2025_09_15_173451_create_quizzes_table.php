@@ -15,13 +15,13 @@ class CreateQuizzesTable extends Migration
     {
         Schema::create('quizzes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('course_id');
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('time_limit')->nullable();
+            $table->boolean('is_randomized')->default(false);
+            $table->integer('question_limit')->nullable()->default(0);
             $table->timestamps();
-
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
         });
     }
 
