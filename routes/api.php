@@ -10,6 +10,7 @@ use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReportController;
@@ -92,6 +93,15 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
     });
+    Route::group(['prefix' => '/v1.0/questions'], function () {
+        Route::post('/', [QuestionController::class, 'createQuestion']);
+        Route::put('/', [QuestionController::class, 'updateQuestion']);
+        Route::put('/', [QuestionController::class, 'updateQuestion']);
+        Route::get('/', [QuestionController::class, 'getAllQuestions']);
+        Route::get('/{id}', [QuestionController::class, 'getQuestionById']);
+    });
+
+
 
     // Enrollments
     Route::post('/v1.0/enrollments', [EnrollmentController::class, 'createEnrollment']);
