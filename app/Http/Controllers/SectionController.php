@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SectionRequest;
 use App\Models\Section;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
 {
@@ -93,15 +94,28 @@ class SectionController extends Controller
      */
     public function createSection(SectionRequest $request)
     {
-        $request_payload = $request->validated();
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-        $section = Section::create($request_payload);
+            // Validate the request
+            $request_payload = $request->validated();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Section created successfully',
-            'data' => $section
-        ], 201);
+            $section = Section::create($request_payload);
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Section created successfully',
+                'data' => $section
+            ], 201);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
+        }
     }
 
 
@@ -191,17 +205,30 @@ class SectionController extends Controller
 
     public function updateSection(SectionRequest $request)
     {
-        $request_payload = $request->validated();
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-        $section = Section::findOrFail($request_payload['id']);
+            // Validate the request
+            $request_payload = $request->validated();
 
-        $section->update($request_payload);
+            $section = Section::findOrFail($request_payload['id']);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Section updated successfully',
-            'data' => $section
-        ], 200);
+            $section->update($request_payload);
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Section updated successfully',
+                'data' => $section
+            ], 200);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**

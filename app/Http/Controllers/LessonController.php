@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonRequest;
 use App\Models\Lesson;
-use App\Rules\ValidLesson;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -109,16 +109,29 @@ class LessonController extends Controller
     public function createLesson(LessonRequest $request)
     {
 
-        $request_payload = $request->validated();
+        try {
+            // Start a database transaction
+            DB::beginTransaction();
+
+            // 
+            $request_payload = $request->validated();
 
 
-        $lesson = Lesson::create($request_payload);
+            $lesson = Lesson::create($request_payload);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson created successfully',
-            'data' => $lesson
-        ], 201);
+            // Commit the transaction
+            DB::commit();
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Lesson created successfully',
+                'data' => $lesson
+            ], 201);
+        } catch (\Throwable $th) {
+            // Rollback the transaction
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**
@@ -222,24 +235,37 @@ class LessonController extends Controller
 
     public function updateLesson(LessonRequest $request)
     {
-        $request_payload = $request->validated();
+        try {
+            // Start a database transaction
+            DB::beginTransaction();
 
-        $lesson = Lesson::find($request_payload['id']);
+            // Validate the request payload
+            $request_payload = $request->validated();
 
-        if (empty($lesson)) {
+            $lesson = Lesson::find($request_payload['id']);
+
+            if (empty($lesson)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lesson not found',
+                ], 404);
+            }
+
+
+            $lesson->update($request_payload);
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
             return response()->json([
-                'success' => false,
-                'message' => 'Lesson not found',
-            ], 404);
+                'success' => true,
+                'message' => 'Lesson updated successfully',
+                'data' => $lesson
+            ], 200);
+        } catch (\Throwable $th) {
+            // Rollback the transaction
+            DB::rollBack();
+            throw $th;
         }
-
-
-        $lesson->update($request_payload);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson updated successfully',
-            'data' => $lesson
-        ], 200);
     }
 }

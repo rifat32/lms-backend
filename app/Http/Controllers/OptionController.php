@@ -30,8 +30,8 @@ class OptionController extends Controller
      */
     public function create(OptionRequest $request)
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             // Validate the request
             $request_payload = $request->validated();
 
@@ -74,8 +74,9 @@ class OptionController extends Controller
 
     public function update(OptionRequest $request,)
     {
-        DB::beginTransaction();
         try {
+            // Begin transaction
+            DB::beginTransaction();
 
             // Validate the request
             $request_payload = $request->validated();
@@ -192,8 +193,8 @@ class OptionController extends Controller
 
     public function deleteOptions(Request $request, $ids)
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             // Find the option by ID
             $idsArray = array_map('intval', explode(',', $ids));
 

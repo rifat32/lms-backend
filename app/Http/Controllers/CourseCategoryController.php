@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseCategoryRequest;
-use App\Http\Requests\CreateCourseCategoryRequest;
-use App\Http\Requests\UpdateCourseCategoryRequest;
 use App\Models\CourseCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -24,20 +23,6 @@ class CourseCategoryController extends Controller
      *     tags={"course_category"},
      *     summary="Get all course categories",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Parameter(
-     *         name="keyword",
-     *         in="query",
-     *         required=false,
-     *         description="Search by keyword in name",
-     *         @OA\Schema(type="string", example="Data")
-     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="List of course categories",
@@ -231,18 +216,27 @@ class CourseCategoryController extends Controller
 
     public function createCourseCategory(CourseCategoryRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        DB::beginTransaction();
+        try {
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // CREATE
-        $course = CourseCategory::create($request_payload);
+            // CREATE
+            $course = CourseCategory::create($request_payload);
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Course category created successfully',
-            'data' => $course
-        ], 201);
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Course category created successfully',
+                'data' => $course
+            ], 201);
+        } catch (\Throwable $th) {
+            // ROLLBACK TRANSACTION
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**
@@ -314,27 +308,36 @@ class CourseCategoryController extends Controller
 
     public function updateCourseCategory(CourseCategoryRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        DB::beginTransaction();
+        try {
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // FIND THE COURSE CATEGORY
-        $course = CourseCategory::find($request_payload['id']);
+            // FIND THE COURSE CATEGORY
+            $course = CourseCategory::find($request_payload['id']);
 
-        if (empty($course)) {
+            if (empty($course)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Course category not found',
+                ], 404);
+            }
+
+            // UPDATE
+            $course->update($request_payload);
+
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
             return response()->json([
-                'success' => false,
-                'message' => 'Course category not found',
-            ], 404);
+                'success' => true,
+                'message' => 'Course category updated successfully',
+                'data' => $course
+            ], 200);
+        } catch (\Throwable $th) {
+            // ROLLBACK TRANSACTION
+            DB::rollBack();
+            throw $th;
         }
-
-        // UPDATE
-        $course->update($request_payload);
-
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Course category updated successfully',
-            'data' => $course
-        ], 200);
     }
 }

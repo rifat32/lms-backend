@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Rules\ValidBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -60,48 +60,57 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'title'     => 'required|string|max:255',
-            'first_name'     => 'required|string|max:255',
-            'last_name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            // 'business_id' => ['required', 'integer', new ValidBusiness()],
-            'role'     => 'required|string|in:student,lecturer,admin',
-        ]);
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'title'     => 'required|string|max:255',
+                'first_name'     => 'required|string|max:255',
+                'last_name'     => 'required|string|max:255',
+                'email'    => 'required|email|unique:users,email',
+                'password' => 'required|string|min:8',
+                // 'business_id' => ['required', 'integer', new ValidBusiness()],
+                'role'     => 'required|string|in:student,lecturer,admin',
+            ]);
 
-        $user = User::create([
-            'title'     => $request->title,
-            'first_name'     => $request->first_name,
-            'last_name'     => $request->last_name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            // 'business_id' => $request->business_id
-        ]);
+            $user = User::create([
+                'title'     => $request->title,
+                'first_name'     => $request->first_name,
+                'last_name'     => $request->last_name,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password),
+                // 'business_id' => $request->business_id
+            ]);
 
-        // $user->assignRole("$request->role" . "#" . $request->business_id);
-        $user->assignRole($request->role);
+            // $user->assignRole("$request->role" . "#" . $request->business_id);
+            $user->assignRole($request->role);
 
 
-        // Generate Passport token
-        $token = $user->createToken('API Token')->accessToken;
+            // Generate Passport token
+            $token = $user->createToken('API Token')->accessToken;
 
-        return response()->json(
-            [
-                'success' => true,
-                'message' => 'User registered successfully',
-                'data' => [
-                    'user_id' => $user->id,
-                    'title'    => $user->title,
-                    'first_name'    => $user->first_name,
-                    'last_name'    => $user->last_name,
-                    'email'   => $user->email,
-                    'role'    => $user->roles->pluck('name')->first(),
-                    'token'   => $token,
-                ]
-            ],
-            201
-        );
+            // Commit the transaction
+            DB::commit();
+            // Return success response
+            return response()->json(
+                [
+                    'success' => true,
+                    'message' => 'User registered successfully',
+                    'data' => [
+                        'user_id' => $user->id,
+                        'title'    => $user->title,
+                        'first_name'    => $user->first_name,
+                        'last_name'    => $user->last_name,
+                        'email'   => $user->email,
+                        'role'    => $user->roles->pluck('name')->first(),
+                        'token'   => $token,
+                    ]
+                ],
+                201
+            );
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**
@@ -146,27 +155,36 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        try {
+            DB::beginTransaction();
+            $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            if (!Auth::attempt($credentials)) {
+                return response()->json(['error' => 'Invalid credentials'], 401);
+            }
+
+            $user = Auth::user();
+            $token = $user->createToken('API Token')->accessToken;
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful',
+                'data' => [
+                    'user_id' => $user->id,
+                    'title'    => $user->title,
+                    'first_name'    => $user->first_name,
+                    'last_name'    => $user->last_name,
+                    'email'   => $user->email,
+                    'role'    => $user->roles->pluck('name')->first(),
+                    'token'   => $token,
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        $user = Auth::user();
-        $token = $user->createToken('API Token')->accessToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
-                'user_id' => $user->id,
-                'title'    => $user->title,
-                'first_name'    => $user->first_name,
-                'last_name'    => $user->last_name,
-                'email'   => $user->email,
-                'role'    => $user->roles->pluck('name')->first(),
-                'token'   => $token,
-            ]
-        ], 200);
     }
 }

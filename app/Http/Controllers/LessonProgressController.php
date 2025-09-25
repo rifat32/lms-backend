@@ -7,7 +7,7 @@ use App\Models\Lesson;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -106,39 +106,45 @@ class LessonProgressController extends Controller
 
     public function updateLessonProgress(Request $request, $id)
     {
-        $request->validate([
-            'is_completed' => 'required|boolean',
-        ]);
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-        $user = Auth::user();
+            // Validate the request
+            $request->validate([
+                'is_completed' => 'required|boolean',
+            ]);
 
-        // Ensure the lesson exists
-        $lesson = Lesson::find($id);
+            $user = Auth::user();
 
-        if (empty($lesson)) {
+            // Ensure the lesson exists
+            $lesson = Lesson::findOrFail($id);
+
+            // Ensure the user is enrolled in the course
+            $enrollment = Enrollment::where('user_id', $user->id)
+                ->where('course_id', $lesson->course_id)
+                ->firstOrFail();
+
+            // Update progress (for simplicity, mark completed = 100%)
+            $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
+            $enrollment->save();
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
             return response()->json([
-                'success' => false,
-                'message' => 'Lesson not found',
-            ], 404);
+                'success' => true,
+                'message' => 'Lesson progress updated',
+                'data' => [
+                    'user_id' => $user->id,
+                    'lesson_id' => $lesson->id,
+                    'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+                ]
+            ]);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
         }
-
-        // Ensure the user is enrolled in the course
-        $enrollment = Enrollment::where('user_id', $user->id)
-            ->where('course_id', $lesson->course_id)
-            ->firstOrFail();
-
-        // Update progress (for simplicity, mark completed = 100%)
-        $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
-        $enrollment->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson progress updated',
-            'data' => [
-                'user_id' => $user->id,
-                'lesson_id' => $lesson->id,
-                'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
-            ]
-        ]);
     }
 }

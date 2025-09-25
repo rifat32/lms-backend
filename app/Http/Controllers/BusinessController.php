@@ -104,8 +104,8 @@ class BusinessController extends Controller
 
     public function registerUserWithBusiness(RegisterUserWithBusinessRequest $request)
     {
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             // if (!$request->user()->hasPermissionTo('business_create')) {
             //     return response()->json([
             //         "message" => "You can not perform this action"
@@ -240,13 +240,21 @@ class BusinessController extends Controller
      */
     public function createBusiness(BusinessRequest $request)
     {
-        $business = Business::create($request->validated());
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Business created successfully',
-            'data' => $business
-        ], 201);
+            $business = Business::create($request->validated());
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Business created successfully',
+                'data' => $business
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**
@@ -338,20 +346,29 @@ class BusinessController extends Controller
 
     public function updateBusiness(BusinessRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        try {
+            DB::beginTransaction();
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // FIND BY ID
-        $business = Business::findOrFail($request_payload['id']);
-        // UPDATE
-        $business->update($request_payload);
+            // FIND BY ID
+            $business = Business::findOrFail($request_payload['id']);
+            // UPDATE
+            $business->update($request_payload);
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Business updated successfully',
-            'data' => $business
-        ], 200);
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Business updated successfully',
+                'data' => $business
+            ], 200);
+        } catch (\Throwable $th) {
+            // ROLLBACK TRANSACTION
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**

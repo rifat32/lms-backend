@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Rules\ValidCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -102,36 +102,47 @@ class EnrollmentController extends Controller
 
     public function createEnrollment(Request $request)
     {
-        // VALIDATE PAYLOAD
-        $request->validate([
-            'course_id' => ['required', 'integer', new ValidCourse()],
-        ]);
+        try {
+            // BEGIN TRANSACTION
+            DB::beginTransaction(); // Uncomment if you want to use transactions
+            // VALIDATE PAYLOAD
+            $request->validate([
+                'course_id' => ['required', 'integer', new ValidCourse()],
+            ]);
 
-        // GET AUTHENTICATED USER
-        $user = Auth::user();
+            // GET AUTHENTICATED USER
+            $user = Auth::user();
 
-        $exists = Enrollment::where('user_id', $user->id)
-            ->where('course_id', $request->course_id)
-            ->exists();
+            $exists = Enrollment::where('user_id', $user->id)
+                ->where('course_id', $request->course_id)
+                ->exists();
 
-        if ($exists) {
+            if ($exists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is already enrolled in this course.',
+                ], 409); // Conflict
+            }
+
+            $enrollment = Enrollment::create([
+                'user_id' => $user->id,
+                'course_id' => $request->course_id,
+                'enrolled_at' => now(),
+            ]);
+
+            // COMMIT TRANSACTION
+            DB::commit(); // Uncomment if you want to use transactions
+            // RETURN SUCCESS RESPONSE
             return response()->json([
-                'success' => false,
-                'message' => 'User is already enrolled in this course.',
-            ], 409); // Conflict
+                'success' => true,
+                'message' => 'Enrollment created successfully',
+                'data' => $enrollment,
+            ], 201);
+        } catch (\Throwable $th) {
+            // ROLLBACK TRANSACTION
+            DB::rollBack(); // Uncomment if you want to use transactions
+            throw $th;
         }
-
-        $enrollment = Enrollment::create([
-            'user_id' => $user->id,
-            'course_id' => $request->course_id,
-            'enrolled_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Enrollment created successfully',
-            'data' => $enrollment,
-        ], 201);
     }
 
     /**

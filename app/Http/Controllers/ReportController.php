@@ -152,7 +152,7 @@ class ReportController extends Controller
     {
         $courses = Course::with('enrollments')->get();
 
-        $report = $courses->map(function ($course) {
+        $enrollment_courses = $courses->map(function ($course) {
             $enrolled_students_count = $course->enrollments()->count();
 
             return [
@@ -164,8 +164,8 @@ class ReportController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Enrollment report retrieved successfully',
-            'data' => $report
+            'message' => 'Enrollment courses retrieved successfully',
+            'data' => $enrollment_courses
         ]);
     }
 }

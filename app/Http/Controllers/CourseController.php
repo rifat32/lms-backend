@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -283,21 +284,29 @@ class CourseController extends Controller
 
     public function createCourse(CourseRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        try {
+            DB::beginTransaction();
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // ADD CREATED BY
-        $request_payload['created_by'] = auth()->user()->id;
+            // ADD CREATED BY
+            $request_payload['created_by'] = auth()->user()->id;
 
-        // CREATE
-        $course = Course::create($request_payload);
+            // CREATE
+            $course = Course::create($request_payload);
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Course created successfully',
-            'data' => $course
-        ], 201);
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Course created successfully',
+                'data' => $course
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**
@@ -394,28 +403,36 @@ class CourseController extends Controller
     public function updateCourse(CourseRequest $request)
     {
 
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        try {
+            DB::beginTransaction();
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // FIND BY ID
-        $course = Course::find($request_payload['id']);
+            // FIND BY ID
+            $course = Course::find($request_payload['id']);
 
-        // SEND RESPONSE
-        if (empty($course)) {
+            // SEND RESPONSE
+            if (empty($course)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Course not found'
+                ], 404);
+            }
+
+            // UPDATE
+            $course->update($request_payload);
+
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
             return response()->json([
-                'success' => false,
-                'message' => 'Course not found'
-            ], 404);
+                'success' => true,
+                'message' => 'Course updated successfully',
+                'data' => $course
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        // UPDATE
-        $course->update($request_payload);
-
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Course updated successfully',
-            'data' => $course
-        ], 200);
     }
 }

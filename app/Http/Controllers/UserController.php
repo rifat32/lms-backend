@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -192,35 +193,48 @@ class UserController extends Controller
 
     public function updateUser(UserUpdateRequest $request)
     {
-        $request_payload = $request->validated();
+        try {
+            // Start a database transaction 
+            DB::beginTransaction();
 
-        $user = User::find($request_payload['id']);
+            // Validate the request payload
+            $request_payload = $request->validated();
 
-        if (empty($user)) {
+            $user = User::find($request_payload['id']);
+
+            if (empty($user)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found',
+                ], 404);
+            }
+
+            if ($request->filled('password')) {
+                $request_payload['password'] = Hash::make($request->password);
+            }
+
+            $user->update($request_payload);
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
             return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
+                'success' => true,
+                'message' => 'User profile updated successfully',
+                'data' => [
+                    'id'            => $user->id,
+                    'title'          => $user->title,
+                    'first_name'          => $user->first_name,
+                    'last_name'          => $user->last_name,
+                    'email'         => $user->email,
+                    'role'          => $user->roles->pluck('name')->first(),
+                ]
+            ]);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
         }
-
-        if ($request->filled('password')) {
-            $request_payload['password'] = Hash::make($request->password);
-        }
-
-        $user->update($request_payload);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User profile updated successfully',
-            'data' => [
-                'id'            => $user->id,
-                'title'          => $user->title,
-                'first_name'          => $user->first_name,
-                'last_name'          => $user->last_name,
-                'email'         => $user->email,
-                'role'          => $user->roles->pluck('name')->first(),
-            ]
-        ]);
     }
 
     /**

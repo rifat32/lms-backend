@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\QuestionRequest;
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
@@ -124,18 +125,29 @@ class QuestionController extends Controller
 
     public function createQuestion(QuestionRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-        // CREATE QUESTION
-        $question = Question::create($request_payload);
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Question created successfully',
-            'question' => $question
-        ], 201);
+            // CREATE QUESTION
+            $question = Question::create($request_payload);
+
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Question created successfully',
+                'question' => $question
+            ], 201);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
+        }
     }
 
 
@@ -266,19 +278,29 @@ class QuestionController extends Controller
 
     public function updateQuestion(QuestionRequest $request)
     {
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
+        try {
+            // 
+            DB::beginTransaction();
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
 
-        // UPDATE QUESTION
-        $question = Question::findOrFail($request_payload['id']);
-        $question->update($request_payload);
+            // UPDATE QUESTION
+            $question = Question::findOrFail($request_payload['id']);
+            $question->update($request_payload);
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Question updated successfully',
-            'question' => $question
-        ], 201);
+            // COMMIT TRANSACTION
+            DB::commit();
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Question updated successfully',
+                'question' => $question
+            ], 200);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**

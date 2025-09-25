@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\QuizAttempt;
 use App\Models\Question;
+use App\Rules\ValidQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -272,32 +273,45 @@ class QuizAttemptController extends Controller
 
     public function gradeQuizAttempt(Request $request, $id)
     {
-        $request->validate([
-            'question_id' => 'required|exists:questions,question_id',
-            'score' => 'required|numeric|min:0'
-        ]);
+        try {
+            // Begin transaction
+            DB::beginTransaction();
 
-        $quiz_attempt = QuizAttempt::find($id);
+            // Validate the request
+            $request->validate([
+                'question_id' => ['required', 'integer', new ValidQuestion()],
+                'score' => 'required|numeric|min:0'
+            ]);
 
-        if (empty($quiz_attempt)) {
+            $quiz_attempt = QuizAttempt::find($id);
+
+            if (empty($quiz_attempt)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Quiz attempt not found',
+                ], 404);
+            }
+
+            // Add manual score to existing score
+            $quiz_attempt->score += $request->score;
+            $quiz_attempt->save();
+
+            // Commit the transaction
+            DB::commit();
+            // Return success response
             return response()->json([
-                'success' => false,
-                'message' => 'Quiz attempt not found',
-            ], 404);
-        }
-
-        // Add manual score to existing score
-        $quiz_attempt->score += $request->score;
-        $quiz_attempt->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Grade updated.',
-            'data' => [
-                'attempt_id' => $quiz_attempt->id,
+                'success' => true,
                 'message' => 'Grade updated.',
-                'new_score' => $quiz_attempt->score
-            ]
-        ], 200);
+                'data' => [
+                    'attempt_id' => $quiz_attempt->id,
+                    'message' => 'Grade updated.',
+                    'new_score' => $quiz_attempt->score
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            throw $th;
+        }
     }
 }
