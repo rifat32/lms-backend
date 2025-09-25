@@ -4603,10 +4603,185 @@
                 ]
             }
         },
+        "/v1.0/options": {
+            "get": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Get all options",
+                "operationId": "getAllOptions",
+                "responses": {
+                    "200": {
+                        "description": "List of options",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Option"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Update an existing option",
+                "operationId": "updateOption",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OptionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Option updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Option"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Create a new option",
+                "operationId": "createOption",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OptionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Option created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Option"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1.0/options/{id}": {
+            "get": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Get option by ID",
+                "operationId": "getOptionById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Option retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Option"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1.0/options/{ids}": {
+            "delete": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Delete one or more options by ID",
+                "operationId": "deleteOptions",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "Comma-separated list of option IDs",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Options deleted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid or missing IDs"
+                    }
+                }
+            }
+        },
+        "/v1.0/options/question/{question_id}": {
+            "get": {
+                "tags": [
+                    "question_management.options"
+                ],
+                "summary": "Get options by question ID",
+                "operationId": "getOptionByQuestionId",
+                "parameters": [
+                    {
+                        "name": "question_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Options retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Option"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1.0/questions": {
             "get": {
                 "tags": [
-                    "Questions"
+                    "question_management.question"
                 ],
                 "summary": "Get all questions",
                 "operationId": "getAllQuestions",
@@ -4755,7 +4930,7 @@
             },
             "put": {
                 "tags": [
-                    "Questions"
+                    "question_management.question"
                 ],
                 "summary": "Update an existing question",
                 "operationId": "updateQuestion",
@@ -4978,7 +5153,7 @@
             },
             "post": {
                 "tags": [
-                    "Questions"
+                    "question_management.question"
                 ],
                 "summary": "Create a new question",
                 "operationId": "createQuestion",
@@ -5040,20 +5215,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Question created successfully"
-                                        },
-                                        "question": {
-                                            "$ref": "#/components/schemas/Question"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/QuestionResponse"
                                 }
                             }
                         }
@@ -5191,7 +5353,7 @@
         "/v1.0/questions/{id}": {
             "get": {
                 "tags": [
-                    "Questions"
+                    "question_management.question"
                 ],
                 "summary": "Get question by ID",
                 "operationId": "getQuestionById",
@@ -5364,7 +5526,7 @@
         "/v1.0/questions/{ids}": {
             "delete": {
                 "tags": [
-                    "Questions"
+                    "question_management.question"
                 ],
                 "summary": "Delete one or more questions by ID",
                 "operationId": "deleteQuestions",
@@ -7496,6 +7658,63 @@
     },
     "components": {
         "schemas": {
+            "Option": {
+                "title": "Option Model",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "question_id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "text": {
+                        "type": "string",
+                        "example": "Option A"
+                    },
+                    "is_correct": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "OptionRequest": {
+                "required": [
+                    "question_id",
+                    "text",
+                    "is_correct"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Required for update",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "question_id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "text": {
+                        "type": "string",
+                        "example": "Option A"
+                    },
+                    "is_correct": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
             "Question": {
                 "title": "Question",
                 "description": "Schema for a quiz question",
@@ -7600,6 +7819,63 @@
                     }
                 },
                 "type": "object"
+            },
+            "QuestionResponse": {
+                "title": "Question API Response",
+                "description": "Standard response for question-related endpoints",
+                "required": [
+                    "success",
+                    "message",
+                    "question"
+                ],
+                "properties": {
+                    "success": {
+                        "description": "Indicates if the operation was successful",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "description": "Descriptive message about the result",
+                        "type": "string",
+                        "example": "Question created successfully"
+                    },
+                    "question": {
+                        "description": "The question data",
+                        "required": [
+                            "id",
+                            "title",
+                            "body",
+                            "created_at",
+                            "updated_at"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "title": {
+                                "type": "string",
+                                "example": "What is Laravel?"
+                            },
+                            "body": {
+                                "type": "string",
+                                "example": "Laravel is a PHP framework..."
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-09-25T14:30:00Z"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2025-09-25T15:00:00Z"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -7662,8 +7938,12 @@
             "description": "course"
         },
         {
-            "name": "Questions",
-            "description": "Questions"
+            "name": "question_management.options",
+            "description": "question_management.options"
+        },
+        {
+            "name": "question_management.question",
+            "description": "question_management.question"
         },
         {
             "name": "section",

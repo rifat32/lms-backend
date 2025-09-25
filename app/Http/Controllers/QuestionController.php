@@ -13,7 +13,7 @@ class QuestionController extends Controller
      * @OA\Post(
      *     path="/v1.0/questions",
      *     operationId="createQuestion",
-     *     tags={"Questions"},
+     *     tags={"question_management.question"},
      *     summary="Create a new question",
      *     security={{"bearerAuth":{}}},
      *
@@ -63,12 +63,7 @@ class QuestionController extends Controller
      *     @OA\Response(
      *         response=201,
      *         description="Question created successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Question created successfully"),
-     *             @OA\Property(property="question", ref="#/components/schemas/Question")
-     *         )
+     *         @OA\JsonContent(ref="#/components/schemas/QuestionResponse")
      *     ),
      *     @OA\Response(
      *         response=400,
@@ -148,7 +143,7 @@ class QuestionController extends Controller
      * @OA\Put(
      *     path="/v1.0/questions",
      *     operationId="updateQuestion",
-     *     tags={"Questions"},
+     *     tags={"question_management.question"},
      *     summary="Update an existing question",
      *     security={{"bearerAuth":{}}},
      *
@@ -290,7 +285,7 @@ class QuestionController extends Controller
      * @OA\Get(
      *     path="/v1.0/questions",
      *     operationId="getAllQuestions",
-     *     tags={"Questions"},
+     *     tags={"question_management.question"},
      *     summary="Get all questions",
      *     security={{"bearerAuth":{}}},
      *
@@ -378,7 +373,7 @@ class QuestionController extends Controller
      * @OA\Get(
      *     path="/v1.0/questions/{id}",
      *     operationId="getQuestionById",
-     *     tags={"Questions"},
+     *     tags={"question_management.question"},
      *     summary="Get question by ID",
      *     security={{"bearerAuth":{}}},
      *
@@ -474,7 +469,7 @@ class QuestionController extends Controller
      * @OA\Delete(
      *     path="/v1.0/questions/{ids}",
      *     operationId="deleteQuestions",
-     *     tags={"Questions"},
+     *     tags={"question_management.question"},
      *     summary="Delete one or more questions by ID",
      *     security={{"bearerAuth":{}}},
      *

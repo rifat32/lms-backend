@@ -10,6 +10,7 @@ use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
+use App\Http\Controllers\OptionController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
@@ -93,12 +94,24 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
     });
+
+    // QUESTION
     Route::group(['prefix' => '/v1.0/questions'], function () {
         Route::post('/', [QuestionController::class, 'createQuestion']);
         Route::put('/', [QuestionController::class, 'updateQuestion']);
         Route::put('/', [QuestionController::class, 'updateQuestion']);
         Route::get('/', [QuestionController::class, 'getAllQuestions']);
         Route::get('/{id}', [QuestionController::class, 'getQuestionById']);
+    });
+
+    // QUESTION OPTIONS
+    Route::group(['prefix' => '/v1.0/options'], function () {
+        Route::post('/', [OptionController::class, 'createOption']);
+        Route::put('/', [OptionController::class, 'updateOption']);
+        Route::put('/', [OptionController::class, 'updateOption']);
+        Route::get('/', [OptionController::class, 'getAllOptions']);
+        Route::get('/{id}', [OptionController::class, 'getOptionById']);
+        Route::get('/question/{question_id}', [OptionController::class, 'getOptionByQuestionId']);
     });
 
 
