@@ -17,17 +17,84 @@ class OptionController extends Controller
      *     operationId="createOption",
      *     tags={"question_management.options"},
      *     summary="Create a new option",
+     *     description="Creates a new option for a specific question.",
+     *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/OptionRequest")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"text", "is_correct", "question_id"},
+     *             @OA\Property(
+     *                 property="text",
+     *                 type="string",
+     *                 example="Option A",
+     *                 description="The text value of the option"
+     *             ),
+     *             @OA\Property(
+     *                 property="is_correct",
+     *                 type="boolean",
+     *                 example=true,
+     *                 description="Whether this option is correct"
+     *             ),
+     *             @OA\Property(
+     *                 property="question_id",
+     *                 type="integer",
+     *                 example=5,
+     *                 description="The question ID this option belongs to"
+     *             )
+     *         )
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Option created successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Option")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="text", type="string", example="Option A"),
+     *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *             @OA\Property(property="question_id", type="integer", example=5),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid request.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="text", type="array",
+     *                     @OA\Items(type="string", example="The text field is required.")
+     *                 ),
+     *                 @OA\Property(property="question_id", type="array",
+     *                     @OA\Items(type="string", example="The question_id must be a valid integer.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *         )
      *     )
      * )
      */
+
     public function create(OptionRequest $request)
     {
         try {
@@ -53,24 +120,85 @@ class OptionController extends Controller
         }
     }
 
-
     /**
      * @OA\Put(
      *     path="/v1.0/options",
      *     operationId="updateOption",
      *     tags={"question_management.options"},
      *     summary="Update an existing option",
+     *     description="Updates an option's details such as text, correctness, or associated question.",
+     *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/OptionRequest")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"id", "text", "is_correct", "question_id"},
+     *             @OA\Property(property="id", type="integer", example=1, description="ID of the option to update"),
+     *             @OA\Property(property="text", type="string", example="Option A", description="Option text"),
+     *             @OA\Property(property="is_correct", type="boolean", example=true, description="Whether this option is correct"),
+     *             @OA\Property(property="question_id", type="integer", example=5, description="Associated question ID")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Option updated successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Option")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="text", type="string", example="Option A"),
+     *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *             @OA\Property(property="question_id", type="integer", example=5),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid request.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Option not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Option with given ID not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="text", type="array",
+     *                     @OA\Items(type="string", example="The text field is required.")
+     *                 ),
+     *                 @OA\Property(property="question_id", type="array",
+     *                     @OA\Items(type="string", example="The question_id must be a valid integer.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *         )
      *     )
      * )
      */
+
 
     public function update(OptionRequest $request,)
     {
@@ -100,25 +228,34 @@ class OptionController extends Controller
         }
     }
 
-
     /**
      * @OA\Get(
      *     path="/v1.0/options",
      *     operationId="getAllOptions",
      *     tags={"question_management.options"},
      *     summary="Get all options",
+     *     description="Returns a list of all available options.",
      *     @OA\Response(
      *         response=200,
      *         description="List of options",
      *         @OA\JsonContent(
      *             type="array",
-     *             @OA\Items(ref="#/components/schemas/Option")
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="text", type="string", example="Option A"),
+     *                 @OA\Property(property="is_correct", type="boolean", example=true),
+     *                 @OA\Property(property="question_id", type="integer", example=10),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
+     *             )
      *         )
      *     )
      * )
      */
 
-    public function getALlOptions(Request $request)
+
+    public function getAllOptions(Request $request)
     {
         // Retrieve all options for the specified question
         $query = Option::query();
@@ -140,19 +277,49 @@ class OptionController extends Controller
      *     operationId="getOptionById",
      *     tags={"question_management.options"},
      *     summary="Get option by ID",
+     *     description="Retrieve a specific option by its unique ID.",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         description="The ID of the option to retrieve",
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Option retrieved successfully",
-     *         @OA\JsonContent(ref="#/components/schemas/Option")
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="text", type="string", example="Option A"),
+     *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *             @OA\Property(property="question_id", type="integer", example=5),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Option not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Option not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *         )
      *     )
      * )
      */
+
 
     public function getOptionById(Request $request, $id)
     {
@@ -239,22 +406,52 @@ class OptionController extends Controller
      *     operationId="getOptionByQuestionId",
      *     tags={"question_management.options"},
      *     summary="Get options by question ID",
+     *     description="Retrieve all options associated with a specific question ID.",
+     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="question_id",
      *         in="path",
      *         required=true,
-     *         @OA\Schema(type="integer")
+     *         description="The ID of the question to retrieve options for",
+     *         @OA\Schema(type="integer", example=5)
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Options retrieved successfully",
      *         @OA\JsonContent(
      *             type="array",
-     *             @OA\Items(ref="#/components/schemas/Option")
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="text", type="string", example="Option A"),
+     *                 @OA\Property(property="is_correct", type="boolean", example=true),
+     *                 @OA\Property(property="question_id", type="integer", example=5),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No options found for the given question ID",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No options found for this question ID.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
      *         )
      *     )
      * )
      */
+
 
     public function getOptionByQuestionId(Request $request, $question_id)
     {
