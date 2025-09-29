@@ -173,7 +173,13 @@ class CourseController extends Controller
     public function getCourseById($id)
     {
         // FIND BY ID
-        $course = Course::find($id);
+        $course = Course::with(
+            [
+                "sections.lessons"
+            
+            ]
+            
+            )->find($id);
 
         // SEND RESPONSE
         if (empty($course)) {
