@@ -2,27 +2,27 @@
 
 
 if (!function_exists('retrieve_data')) {
-    function retrieve_data($query, $orderBy, $tableName)
+    function retrieve_data($query, $orderBy = 'created_at', $tableName)
     {
-        // Apply ordering
-        if (request()->filled("order_by")) {
-            $orderByColumn = request()->input("order_by");
-        } else {
-            $orderByColumn = $orderBy;
+        // Get order column and sort order
+        $orderByColumn = request()->input('order_by', $orderBy);
+        $sortOrder = strtoupper(request()->input('sort_order', 'DESC'));
+
+        // Ensure sort_order is valid
+        if (!in_array($sortOrder, ['ASC', 'DESC'])) {
+            $sortOrder = 'DESC';
         }
 
+        // Add table prefix if not included
         if (strpos($orderByColumn, '.') === false) {
-            $orderByColumn = $tableName . "." . $orderByColumn;
+            $orderByColumn = $tableName . '.' . $orderByColumn;
         }
 
-        $query = $query->orderBy(
-            $orderByColumn,
-            !empty(request()->order_by) && in_array(strtoupper(request()->order_by), ['ASC', 'DESC'])
-                ? request()->order_by
-                : 'DESC'
-        );
+        // Apply ordering
+        $query = $query->orderBy($orderByColumn, $sortOrder);
 
-        $perPage = request()->input('per_page', null);
+        // Pagination setup
+        $perPage = request()->input('per_page');
         $currentPage = request()->input('page', 1);
         $skip = 0;
         $total = 0;
@@ -42,17 +42,19 @@ if (!function_exists('retrieve_data')) {
             $total = $data->count();
         }
 
+        // Meta info
         $meta = [
             'total' => $total,
             'per_page' => $perPage,
             'current_page' => $currentPage,
             'skip' => $skip,
-            'total_pages' => $totalPages
+            'total_pages' => $totalPages,
         ];
 
+        // Return data with meta
         return [
             'data' => $data,
-            'meta' => $meta
+            'meta' => $meta,
         ];
     }
 }
