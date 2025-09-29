@@ -19,20 +19,45 @@ class CourseCategoryController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/course-categories",
-     *     operationId="getCourseCategories",
+     *     operationId="getCourseCategory",
      *     tags={"course_category"},
      *     summary="Get all course categories",
+     *     description="Retrieve a paginated list of course categories.",
      *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", default=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=10, example=10)
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of course categories",
      *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Web Development"),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
+     *             type="object",
+     *             @OA\Property(property="current_page", type="integer", example=1),
+     *             @OA\Property(property="per_page", type="integer", example=10),
+     *             @OA\Property(property="total", type="integer", example=50),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Web Development"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
+     *                 )
      *             )
      *         )
      *     ),
@@ -40,6 +65,7 @@ class CourseCategoryController extends Controller
      *         response=401,
      *         description="Unauthorized",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="message", type="string", example="Unauthorized access")
      *         )
      *     ),
@@ -47,6 +73,7 @@ class CourseCategoryController extends Controller
      *         response=403,
      *         description="Forbidden",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource")
      *         )
      *     ),
@@ -54,6 +81,7 @@ class CourseCategoryController extends Controller
      *         response=404,
      *         description="No categories found",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="message", type="string", example="No course categories found")
      *         )
      *     ),
@@ -61,16 +89,21 @@ class CourseCategoryController extends Controller
      *         response=422,
      *         description="Validation error",
      *         @OA\JsonContent(
+     *             type="object",
      *             @OA\Property(property="message", type="string", example="Invalid query parameters")
      *         )
      *     )
      * )
      */
 
+
     public function getCourseCategory(Request $request)
     {
         // 
-        $courses = CourseCategory::filters()->get();
+        $query = CourseCategory::filters();
+
+        // 
+        $courses = retrieve_data($query, $request->order_by, 'course_categories');
 
         // SEND RESPONSE
         return response()->json([
