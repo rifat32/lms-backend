@@ -100,16 +100,17 @@ class CourseCategoryController extends Controller
     public function getCourseCategory(Request $request)
     {
         // 
-        $query = CourseCategory::filters()->get();
+        $query = CourseCategory::filters();
 
         // 
-        // $courses = retrieve_data($query, 'created_at', 'course_categories');
+        $courses = retrieve_data($query, 'created_at', 'course_categories');
 
         // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Course categories retrieved successfully',
-            'data' => $query,
+            'meta' => $courses['meta'],
+            'data' => $courses['data'],
         ], 200);
     }
 

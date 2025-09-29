@@ -2,10 +2,13 @@
 
 
 if (!function_exists('retrieve_data')) {
-    function retrieve_data($query, $orderBy = 'created_at', $tableName)
+    function retrieve_data($query, $orderBy = 'created_at', $tableName = '')
     {
         // Get order column and sort order
-        $orderByColumn = request()->input('order_by', $orderBy);
+        if (request()->filled('order_by')) {
+            $orderBy = request()->input('order_by');
+        };
+        $orderBy = request()->input('order_by', $orderBy);
         $sortOrder = strtoupper(request()->input('sort_order', 'DESC'));
 
         // Ensure sort_order is valid
@@ -14,12 +17,12 @@ if (!function_exists('retrieve_data')) {
         }
 
         // Add table prefix if not included
-        if (strpos($orderByColumn, '.') === false) {
-            $orderByColumn = $tableName . '.' . $orderByColumn;
-        }
+        // if (strpos($orderBy, '.') === false) {
+        //     $orderBy = $tableName . '.' . $orderBy;
+        // }
 
         // Apply ordering
-        $query = $query->orderBy($orderByColumn, $sortOrder);
+        $query = $query->orderBy($orderBy, $sortOrder);
 
         // Pagination setup
         $perPage = request()->input('per_page');
