@@ -6,10 +6,87 @@ use App\Http\Requests\SectionRequest;
 use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SectionController extends Controller
 {
 
+      /**
+     * @OA\Delete(
+     *     path="/v1.0/sections/{id}",
+     *     operationId="deleteSection",
+     *     tags={"section"},
+     *     summary="Delete a section and its lessons (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the section to delete",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Section deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Section deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Section not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Section not found")
+     *         )
+     *     )
+     * )
+     */
+    public function deleteSection($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $section = Section::find($id);
+
+            if (empty($section)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Section not found',
+                ], 404);
+            }
+
+            // 🔥 Get all lessons for this section
+            $lessons = Lesson::where('section_id', $section->id)->get();
+
+            foreach ($lessons as $lesson) {
+                if (!empty($lesson->files)) {
+                    $files = json_decode($lesson->files, true);
+                    if (is_array($files)) {
+                        foreach ($files as $file) {
+                            Storage::disk('public')->delete($file);
+                        }
+                    }
+                }
+            }
+
+            // Delete section (will cascade delete lessons in DB)
+            $section->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Section deleted successfully'
+            ], 200);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    
     /**
      * @OA\Post(
      *     path="/v1.0/sections",

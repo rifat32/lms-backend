@@ -73,6 +73,8 @@ Route::middleware('auth:api')->group(function () {
     // Lesson
     Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
     Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
+    Route::delete('/v1.0/lessons/{id}', [LessonController::class, 'deleteLesson']);
+
 
     // quiz attempt
     Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
@@ -83,6 +85,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
+          Route::delete('/{id}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
 
     // Business
