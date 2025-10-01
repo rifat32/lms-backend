@@ -9,12 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * @OA\Tag(
- *     name="Users",
- *     description="Endpoints to view and update user profile"
- * )
- */
 class UserController extends Controller
 {
     /**
@@ -255,7 +249,19 @@ class UserController extends Controller
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
-     *                 @OA\Items(ref="#/components/schemas/UserSchema")
+     *                 @OA\Items(
+     *                     type="object",
+     *                     title="User",
+     *                     required={"id", "first_name", "last_name", "email"},
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Mr."),
+     *                     @OA\Property(property="first_name", type="string", example="John"),
+     *                     @OA\Property(property="last_name", type="string", example="Doe"),
+     *                     @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                     @OA\Property(property="business_id", type="integer", nullable=true, example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-23T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-23T12:00:00Z")
+     *                 )
      *             )
      *         )
      *     ),
@@ -301,6 +307,7 @@ class UserController extends Controller
      *     )
      * )
      */
+
     public function getAllUsers()
     {
         $users = User::all();
@@ -310,5 +317,79 @@ class UserController extends Controller
             'message' => 'Users retrieved successfully',
             'data' => $users
         ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/users/{ids}",
+     *     operationId="deleteUsers",
+     *     tags={"user_management"},
+     *     summary="Delete users",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         required=true,
+     *         description="User ID (comma-separated for multiple)",
+     *         @OA\Schema(type="string", example="1,2,3")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Lesson not found")
+     *         )
+     *     )
+     * )
+     */
+    public function deleteUsers($ids)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Validate and convert comma-separated IDs to an array
+            $idsArray = array_map('intval', explode(',', $ids));
+
+            // Get existing users
+            $users = User::whereIn('id', $idsArray)->get();
+
+            $existingIds = $users->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsArray)) {
+                $missingIds = array_diff($idsArray, $existingIds);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'users not found',
+                    'data' => [
+                        'missing_ids' => array_values($missingIds)
+                    ]
+                ], 400);
+            }
+
+
+            // Delete users
+            User::whereIn('id', $existingIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted successfully',
+                'data' => $existingIds
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 }

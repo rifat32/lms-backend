@@ -9,23 +9,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-/**
- * @OA\Schema(
- *     schema="UserSchema",
- *     type="object",
- *     title="User",
- *     required={"id", "first_name", "last_name", "email"},
- *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="title", type="string", example="Mr."),
- *     @OA\Property(property="first_name", type="string", example="John"),
- *     @OA\Property(property="last_name", type="string", example="Doe"),
- *     @OA\Property(property="email", type="string", example="john.doe@example.com"),
- *     @OA\Property(property="business_id", type="integer", nullable=true, example=1),
- *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-23T12:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-23T12:00:00Z")
- * )
- */
-
 
 class User extends Authenticatable
 {

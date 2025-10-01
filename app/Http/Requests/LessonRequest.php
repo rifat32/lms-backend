@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\ValidCourse;
 use App\Rules\ValidLesson;
+use App\Rules\ValidSection;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonRequest extends FormRequest
@@ -21,7 +22,7 @@ class LessonRequest extends FormRequest
             'content_type' => 'required|in:video,text,file,quiz',
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
-            'section_id' => ['required', 'integer', new ValidLesson()],
+            'section_id' => ['required', 'integer', new ValidSection()],
 
             // new fields
             'duration' => 'nullable|integer|min:1',

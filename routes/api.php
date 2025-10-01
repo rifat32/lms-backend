@@ -50,6 +50,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [UserController::class, 'updateUser']);
         Route::get('/', [UserController::class, 'getAllUsers']);
         Route::get('/{id}', [UserController::class, 'getUserById']);
+        Route::delete('/{ids}', [UserController::class, 'deleteUsers']);
     });
 
 
