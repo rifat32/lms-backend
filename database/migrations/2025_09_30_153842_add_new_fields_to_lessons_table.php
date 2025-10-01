@@ -12,7 +12,6 @@ class AddNewFieldsToLessonsTable extends Migration
     public function up(): void
     {
         Schema::table('lessons', function (Blueprint $table) {
-            $table->string('title')->nullable()->after('course_id');
             $table->integer('duration')->nullable()->after('title'); // duration in minutes
             $table->boolean('is_preview')->default(false)->after('duration');
             $table->boolean('is_time_locked')->default(false)->after('is_preview');

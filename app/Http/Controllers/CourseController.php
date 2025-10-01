@@ -37,6 +37,21 @@ class CourseController extends Controller
      *         description="Search by keyword in title or description",
      *         @OA\Schema(type="string", example="Laravel")
      *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", default=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=10, example=10)
+     *     ),
+     * 
      *     @OA\Response(
      *         response=200,
      *         description="List of courses",
@@ -88,8 +103,9 @@ class CourseController extends Controller
     public function getCourses(Request $request)
     {
 
-        $courses = Course::filters()
-            ->get();
+        $query = Course::filters();
+
+        $courses = retrieve_data($query, 'created_at', 'courses');
 
         return response()->json([
             'success' => true,
