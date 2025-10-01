@@ -21,6 +21,7 @@ class LessonRequest extends FormRequest
             'content_type' => 'required|in:video,text,file,quiz',
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
+            'section_id' => ['required', 'integer', new ValidLesson()],
 
             // new fields
             'duration' => 'nullable|integer|min:1',

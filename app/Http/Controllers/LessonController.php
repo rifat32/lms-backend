@@ -25,12 +25,13 @@ class LessonController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","content_type", "course_id"},
+     *             required={"title","content_type", "course_id","section_id"},
      *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *             @OA\Property(property="sort_order", type="integer", example=1),
+     *             @OA\Property(property="section_id", type="integer", example=1),
      *             @OA\Property(property="duration", type="integer", example=45, description="Duration in minutes"),
      *             @OA\Property(property="is_preview", type="boolean", example=true),
      *             @OA\Property(property="is_time_locked", type="boolean", example=false),
@@ -55,6 +56,7 @@ class LessonController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="course_id", type="integer", example=101),
+     *                 @OA\Property(property="section_id", type="integer", example=1),
      *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *                 @OA\Property(property="duration", type="integer", example=45),
      *                 @OA\Property(property="is_preview", type="boolean", example=true),
@@ -250,44 +252,41 @@ class LessonController extends Controller
      *     )
      * )
      */
-public function deleteLesson($id)
-{
-    try {
-        DB::beginTransaction();
+    public function deleteLesson($id)
+    {
+        try {
+            DB::beginTransaction();
 
-        $lesson = Lesson::find($id);
+            $lesson = Lesson::find($id);
 
-        if (empty($lesson)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lesson not found',
-            ], 404);
-        }
+            if (empty($lesson)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lesson not found',
+                ], 404);
+            }
 
-        // If lesson has uploaded files, delete them from storage
-        if (!empty($lesson->files)) {
-            $files = json_decode($lesson->files, true);
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    Storage::disk('public')->delete($file);
+            // If lesson has uploaded files, delete them from storage
+            if (!empty($lesson->files)) {
+                $files = json_decode($lesson->files, true);
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        Storage::disk('public')->delete($file);
+                    }
                 }
             }
+
+            $lesson->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lesson deleted successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        $lesson->delete();
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson deleted successfully'
-        ], 200);
-
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        throw $th;
     }
-}
-
-
 }

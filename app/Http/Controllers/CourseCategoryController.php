@@ -100,7 +100,7 @@ class CourseCategoryController extends Controller
     public function getCourseCategory(Request $request)
     {
         // 
-        $query = CourseCategory::filters();
+        $query = CourseCategory::withCount(['courses as total_courses'])->filters();
 
         // 
         $courses = retrieve_data($query, 'created_at', 'course_categories');
