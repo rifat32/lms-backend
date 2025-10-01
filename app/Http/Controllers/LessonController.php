@@ -79,37 +79,44 @@ class LessonController extends Controller
      */
 
 
-    public function createLesson(LessonRequest $request)
-    {
-        try {
-            DB::beginTransaction();
+public function createLesson(LessonRequest $request)
+{
+    try {
+        DB::beginTransaction();
 
-            $request_payload = $request->validated();
+        $request_payload = $request->validated();
 
-            // Handle file uploads
-            if ($request->hasFile('files')) {
-                $uploaded_files = [];
-                foreach ($request->file('files') as $file) {
-                    $path = $file->store('lessons/files', 'public');
-                    $uploaded_files[] = $path;
-                }
-                $request_payload['files'] = json_encode($uploaded_files);
+        $lesson = Lesson::create($request_payload); // create first to get ID
+
+        // Handle file uploads
+        if ($request->hasFile('files')) {
+            $uploaded_files = [];
+            foreach ($request->file('files') as $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = uniqid() . '.' . $extension; // unique file name
+                $folder_path = "business_1/section_{$lesson->section_id}/lesson_{$lesson->id}";
+                $file->storeAs($folder_path, $filename, 'public');
+                $uploaded_files[] = $filename; // save only filename in DB
             }
-
-            $lesson = Lesson::create($request_payload);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Lesson created successfully',
-                'data' => $lesson
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+            $lesson->files = json_encode($uploaded_files);
+            $lesson->save();
         }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson created successfully',
+            'data' => $lesson
+        ], 201);
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        throw $th;
     }
+}
+
+
     /**
      * @OA\Put(
      *     path="/v1.0/lessons/{id}",
@@ -252,56 +259,72 @@ class LessonController extends Controller
      *     )
      * )
      */
-    public function deleteLesson($ids)
-    {
-        try {
-            DB::beginTransaction();
+   public function deleteLesson($ids)
+{
+    try {
+        DB::beginTransaction();
 
-            // Validate and convert comma-separated IDs to an array
-            $idsArray = array_map('intval', explode(',', $ids));
+        // Validate and convert comma-separated IDs to an array
+        $idsArray = array_map('intval', explode(',', $ids));
 
-            // Get existing lessons
-            $lessons = Lesson::whereIn('id', $idsArray)->get();
+        // Get existing lessons
+        $lessons = Lesson::whereIn('id', $idsArray)->get();
 
-            $existingIds = $lessons->pluck('id')->toArray();
+        $existingIds = $lessons->pluck('id')->toArray();
 
-            if (count($existingIds) !== count($idsArray)) {
-                $missingIds = array_diff($idsArray, $existingIds);
+        if (count($existingIds) !== count($idsArray)) {
+            $missingIds = array_diff($idsArray, $existingIds);
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Lesson(s) not found',
-                    'data' => [
-                        'missing_ids' => array_values($missingIds)
-                    ]
-                ], 404);
-            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Lesson(s) not found',
+                'data' => [
+                    'missing_ids' => array_values($missingIds)
+                ]
+            ], 404);
+        }
 
-            // Delete lesson files
-            foreach ($lessons as $lesson) {
-                if (!empty($lesson->files)) {
-                    $files = json_decode($lesson->files, true);
-                    if (is_array($files)) {
-                        foreach ($files as $file) {
-                            Storage::disk('public')->delete($file);
+        // Delete lesson files
+        foreach ($lessons as $lesson) {
+            if (!empty($lesson->files)) {
+                $files = json_decode($lesson->files, true);
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        // Build full path based on stored structure
+                        $path = "business_1/section_{$lesson->section_id}/lesson_{$lesson->id}/$file";
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
                         }
                     }
                 }
             }
-
-            // Delete lessons
-            Lesson::whereIn('id', $existingIds)->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Lesson deleted successfully',
-                'data' => $existingIds
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
         }
+
+        // Delete lessons
+        Lesson::whereIn('id', $existingIds)->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson deleted successfully',
+            'data' => $existingIds
+        ], 200);
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        throw $th;
     }
+}
+
+
+
+
+
+
+
+
+
+
+
 }

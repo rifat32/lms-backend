@@ -31,6 +31,17 @@ class Lesson extends Model
     protected $casts = [
         'files' => 'array',
     ];
+ public function getFilesAttribute($value)
+    {
+        $files = json_decode($value, true) ?? [];
+
+        $full_paths = array_map(function ($filename) {
+            // return full path for each file
+            return asset("storage/business_1/section_{$this->section_id}/lesson_{$this->id}/$filename");
+        }, $files);
+
+        return $full_paths;
+    }
 
     public function course()
     {

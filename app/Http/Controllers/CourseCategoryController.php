@@ -128,6 +128,7 @@ class CourseCategoryController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="name", type="string", example="Web Development"),
+     *             @OA\Property(property="description", type="string", example="description"),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
      *         )
@@ -185,7 +186,8 @@ class CourseCategoryController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"name"},
-     *             @OA\Property(property="name", type="string", example="Data Science")
+     *             @OA\Property(property="name", type="string", example="Data Science"),
+     *             @OA\Property(property="description", type="string", example="description")
      *         )
      *     ),
      *     @OA\Response(
@@ -194,6 +196,7 @@ class CourseCategoryController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=10),
      *             @OA\Property(property="name", type="string", example="Data Science"),
+     *             @OA\Property(property="description", type="string", example="description"),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
      *         )
@@ -279,7 +282,8 @@ class CourseCategoryController extends Controller
      *         @OA\JsonContent(
      *             required={"id", "name"},
      *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="Data Science")
+     *             @OA\Property(property="name", type="string", example="Data Science"),
+     *             @OA\Property(property="description", type="string", example="description")
      *         )
      *     ),
      *     @OA\Response(
@@ -288,6 +292,7 @@ class CourseCategoryController extends Controller
      *         @OA\JsonContent(
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="name", type="string", example="Data Science"),
+     *        @OA\Property(property="description", type="string", example="description"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
      *         )
      *     ),

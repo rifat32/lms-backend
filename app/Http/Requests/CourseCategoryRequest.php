@@ -26,6 +26,7 @@ class CourseCategoryRequest extends FormRequest
     {
         $rules = [
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ];
 
         if ($this->method() == 'PUT') {
