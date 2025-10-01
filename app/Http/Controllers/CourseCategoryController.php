@@ -8,19 +8,13 @@ use App\Models\CourseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * @OA\Tag(
- *     name="Courses",
- *     description="Endpoints for managing courses"
- * )
- */
 class CourseCategoryController extends Controller
 {
     /**
      * @OA\Get(
      *     path="/v1.0/course-categories",
      *     operationId="getCourseCategory",
-     *     tags={"course_category"},
+     *     tags={"course_management.course_category"},
      *     summary="Get all course categories",
      *     description="Retrieve a paginated list of course categories.",
      *     security={{"bearerAuth":{}}},
@@ -118,7 +112,7 @@ class CourseCategoryController extends Controller
      * @OA\Get(
      *     path="/v1.0/course-categories/{id}",
      *     operationId="getCourseCategoryById",
-     *     tags={"course_category"},
+     *     tags={"course_management.course_category"},
      *     summary="Get a single course category by ID",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -184,8 +178,8 @@ class CourseCategoryController extends Controller
      * @OA\Post(
      *     path="/v1.0/course-categories",
      *     operationId="createCourseCategory",
-     *     tags={"course_category"},
-     *     summary="Create a new course category (Admin only)",
+     *     tags={"course_management.course_category"},
+     *     summary="Create a new course category",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -277,8 +271,8 @@ class CourseCategoryController extends Controller
      * @OA\Put(
      *     path="/v1.0/course-categories",
      *     operationId="updateCourseCategory",
-     *     tags={"course_category"},
-     *     summary="Update a course category (Admin only)",
+     *     tags={"course_management.course_category"},
+     *     summary="Update a course category",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -370,6 +364,81 @@ class CourseCategoryController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             // ROLLBACK TRANSACTION
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/course-categories/{ids}",
+     *     operationId="deleteCourseCategory",
+     *     tags={"course_management.course_category"},
+     *     summary="Delete a course category",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course Category ID (comma-separated for multiple)",
+     *         @OA\Schema(type="string", example="1,2,3")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course category deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course category deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Some data not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Some data not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course category not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course category not found")
+     *         )
+     *     )
+     * )
+     */
+
+    public function deleteCourseCategory($ids)
+    {
+        try {
+            DB::beginTransaction();
+
+            $idsOfArray = array_map('intval', explode(',', $ids));
+
+            // VALIDATE PAYLOAD
+            $existingIds = CourseCategory::whereIn('id', $idsOfArray)->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsOfArray)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some data not found',
+                    'data' => $existingIds
+                ], 400);
+            }
+
+            // DELETE THE RECORDS
+            CourseCategory::whereIn('id', $existingIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course category deleted successfully',
+                'data' => $existingIds
+            ], 200);
+        } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
         }

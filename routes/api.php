@@ -60,6 +60,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [CourseCategoryController::class, 'updateCourseCategory']);
         Route::get('/', [CourseCategoryController::class, 'getCourseCategory']);
         Route::get('/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
+        Route::get('/{ids}', [CourseCategoryController::class, 'deleteCourseCategory']);
     });
 
     // COURSE
@@ -85,7 +86,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
-          Route::delete('/{id}', [SectionController::class, 'deleteSection']); // 🔥 Delete
+        Route::delete('/{id}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
 
     // Business
