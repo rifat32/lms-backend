@@ -101,6 +101,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [BusinessController::class, 'updateBusiness']);
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
+        Route::delete('/{ids}', [BusinessController::class, 'deleteBusiness']);
     });
 
     // QUESTION

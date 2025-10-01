@@ -1351,6 +1351,74 @@
                 ]
             }
         },
+        "/v1.0/businesses/{ids}": {
+            "delete": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "Delete Businesses",
+                "operationId": "deleteBusiness",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "Business ID (comma-separated for multiple)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "1,2,3"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Business deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Business not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/courses/{id}/complete": {
             "post": {
                 "tags": [
