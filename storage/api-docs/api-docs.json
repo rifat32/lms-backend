@@ -2484,7 +2484,7 @@
                 "operationId": "deleteCourseCategory",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "ids",
                         "in": "path",
                         "description": "Course Category ID (comma-separated for multiple)",
                         "required": true,
@@ -2566,7 +2566,7 @@
         "/v1.0/courses": {
             "get": {
                 "tags": [
-                    "course"
+                    "course_management.course"
                 ],
                 "summary": "Get all courses",
                 "operationId": "getCourses",
@@ -2721,7 +2721,7 @@
             },
             "put": {
                 "tags": [
-                    "course"
+                    "course_management.course"
                 ],
                 "summary": "Update a course (Admin only)",
                 "operationId": "updateCourse",
@@ -2962,7 +2962,7 @@
             },
             "post": {
                 "tags": [
-                    "course"
+                    "course_management.course"
                 ],
                 "summary": "Create a new course (Admin only)",
                 "operationId": "createCourse",
@@ -3205,7 +3205,7 @@
         "/v1.0/courses/{id}": {
             "get": {
                 "tags": [
-                    "course"
+                    "course_management.course"
                 ],
                 "summary": "Get a single course by ID",
                 "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
@@ -3308,6 +3308,94 @@
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/courses/{ids}": {
+            "delete": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Delete course",
+                "operationId": "deleteCourse",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "Course ID (comma-separated for multiple)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "1,2,3"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Some data not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Some data not found"
                                         }
                                     },
                                     "type": "object"
@@ -4455,22 +4543,24 @@
                         "bearerAuth": []
                     }
                 ]
-            },
+            }
+        },
+        "/v1.0/lessons/{ids}": {
             "delete": {
                 "tags": [
                     "Lessons"
                 ],
-                "summary": "Delete a lesson (Admin only)",
-                "operationId": "cd0bfb3a9bb138c956a6646be021a72f",
+                "summary": "Delete a lesson",
+                "operationId": "6ee17e99bafc6430d2cffa52ecbf3365",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "ids",
                         "in": "path",
-                        "description": "Lesson ID",
+                        "description": "Lesson ID (comma-separated for multiple)",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 10
+                            "type": "string",
+                            "example": "1,2,3"
                         }
                     }
                 ],
@@ -7190,148 +7280,22 @@
                 ]
             }
         },
-        "/v1.0/sections/{id}": {
-            "get": {
-                "tags": [
-                    "section"
-                ],
-                "summary": "Fetch a single section by ID",
-                "description": "Retrieve details of a specific section using its ID",
-                "operationId": "getSectionById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the section",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Section fetched successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Section fetched successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "course_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Introduction to Laravel"
-                                                },
-                                                "created_by": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-20T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-20T12:00:00Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to perform this action."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Section not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Section not found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
+        "/v1.0/sections/{ids}": {
             "delete": {
                 "tags": [
                     "section"
                 ],
-                "summary": "Delete a section and its lessons (Admin only)",
+                "summary": "Delete a section and its lessons",
                 "operationId": "deleteSection",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "ids",
                         "in": "path",
-                        "description": "ID of the section to delete",
+                        "description": "ID of the section to delete (comma-separated for multiple)",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "string",
+                            "example": "1,2,3"
                         }
                     }
                 ],
@@ -7877,6 +7841,134 @@
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/sections/{id}": {
+            "get": {
+                "tags": [
+                    "section"
+                ],
+                "summary": "Fetch a single section by ID",
+                "description": "Retrieve details of a specific section using its ID",
+                "operationId": "getSectionById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the section",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Section fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Section fetched successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Laravel"
+                                                },
+                                                "created_by": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Section not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Section not found."
                                         }
                                     },
                                     "type": "object"
@@ -8492,8 +8584,8 @@
             "description": "course_management.course_category"
         },
         {
-            "name": "course",
-            "description": "course"
+            "name": "course_management.course",
+            "description": "course_management.course"
         },
         {
             "name": "question_management.options",

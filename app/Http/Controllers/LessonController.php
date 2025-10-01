@@ -223,16 +223,16 @@ class LessonController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/v1.0/lessons/{id}",
+     *     path="/v1.0/lessons/{ids}",
      *     tags={"Lessons"},
-     *     summary="Delete a lesson (Admin only)",
+     *     summary="Delete a lesson",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
      *         required=true,
-     *         description="Lesson ID",
-     *         @OA\Schema(type="integer", example=10)
+     *         description="Lesson ID (comma-separated for multiple)",
+     *         @OA\Schema(type="string", example="1,2,3")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -252,37 +252,52 @@ class LessonController extends Controller
      *     )
      * )
      */
-    public function deleteLesson($id)
+    public function deleteLesson($ids)
     {
         try {
             DB::beginTransaction();
 
-            $lesson = Lesson::find($id);
+            // Validate and convert comma-separated IDs to an array
+            $idsArray = array_map('intval', explode(',', $ids));
 
-            if (empty($lesson)) {
+            // Get existing lessons
+            $lessons = Lesson::whereIn('id', $idsArray)->get();
+
+            $existingIds = $lessons->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsArray)) {
+                $missingIds = array_diff($idsArray, $existingIds);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Lesson not found',
+                    'message' => 'Lesson(s) not found',
+                    'data' => [
+                        'missing_ids' => array_values($missingIds)
+                    ]
                 ], 404);
             }
 
-            // If lesson has uploaded files, delete them from storage
-            if (!empty($lesson->files)) {
-                $files = json_decode($lesson->files, true);
-                if (is_array($files)) {
-                    foreach ($files as $file) {
-                        Storage::disk('public')->delete($file);
+            // Delete lesson files
+            foreach ($lessons as $lesson) {
+                if (!empty($lesson->files)) {
+                    $files = json_decode($lesson->files, true);
+                    if (is_array($files)) {
+                        foreach ($files as $file) {
+                            Storage::disk('public')->delete($file);
+                        }
                     }
                 }
             }
 
-            $lesson->delete();
+            // Delete lessons
+            Lesson::whereIn('id', $existingIds)->delete();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Lesson deleted successfully'
+                'message' => 'Lesson deleted successfully',
+                'data' => $existingIds
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();

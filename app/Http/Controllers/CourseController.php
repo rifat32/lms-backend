@@ -19,7 +19,7 @@ class CourseController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/courses",
-     *     tags={"course"},
+     *     tags={"course_management.course"},
      *     operationId="getCourses",
      *     summary="Get all courses",
      *     security={{"bearerAuth":{}}},
@@ -101,7 +101,7 @@ class CourseController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/courses/{id}",
-     *     tags={"course"},
+     *     tags={"course_management.course"},
      *     operationId="getCourseById",
      *     summary="Get a single course by ID",
      *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
@@ -176,10 +176,10 @@ class CourseController extends Controller
         $course = Course::with(
             [
                 "sections.lessons"
-            
+
             ]
-            
-            )->find($id);
+
+        )->find($id);
 
         // SEND RESPONSE
         if (empty($course)) {
@@ -199,7 +199,7 @@ class CourseController extends Controller
     /**
      * @OA\Post(
      *     path="/v1.0/courses",
-     *     tags={"course"},
+     *     tags={"course_management.course"},
      *     operationId="createCourse",
      *     summary="Create a new course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -318,7 +318,7 @@ class CourseController extends Controller
     /**
      * @OA\Put(
      *     path="/v1.0/courses",
-     *     tags={"course"},
+     *     tags={"course_management.course"},
      *     operationId="updateCourse",
      *     summary="Update a course (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -435,6 +435,84 @@ class CourseController extends Controller
                 'success' => true,
                 'message' => 'Course updated successfully',
                 'data' => $course
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/courses/{ids}",
+     *     operationId="deleteCourse",
+     *     tags={"course_management.course"},
+     *     summary="Delete course",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID (comma-separated for multiple)",
+     *         @OA\Schema(type="string", example="1,2,3")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Some data not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Some data not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course not found")
+     *         )
+     *     )
+     * )
+     */
+
+    public function deleteCourse($ids)
+    {
+        try {
+            DB::beginTransaction();
+
+            $idsOfArray = array_map('intval', explode(',', $ids));
+
+            // VALIDATE PAYLOAD
+            $existingIds = Course::whereIn('id', $idsOfArray)->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsOfArray)) {
+                $missingIds = array_diff($idsOfArray, $existingIds);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some data not found',
+                    'data' => [
+                        'missing_ids' => $missingIds
+                    ]
+                ], 400);
+            }
+
+            // DELETE THE RECORDS
+            Course::whereIn('id', $existingIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course deleted successfully',
+                'data' => $existingIds
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();

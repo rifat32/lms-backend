@@ -69,13 +69,14 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [CourseController::class, 'updateCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);
+        Route::delete('/{ids}', [CourseController::class, 'deleteCourse']);
     });
 
     // Lesson
     Route::group(['prefix' => '/v1.0/lessons'], function () {
         Route::post('/', [LessonController::class, 'createLesson']);
         Route::put('/', [LessonController::class, 'updateLesson']);
-        Route::delete('/{id}', [LessonController::class, 'deleteLesson']);
+        Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
 
