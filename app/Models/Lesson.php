@@ -10,27 +10,27 @@ class Lesson extends Model
     use HasFactory;
 
 
-   protected $fillable = [
-    'course_id',
-    'title',
-    'content_type',
-    'content_url',
-    'sort_order',
-    'section_id',
-    'duration',
-    'is_preview',
-    'is_time_locked',
-    'start_date',
-    'start_time',
-    'unlock_day_after_purchase',
-    'description',
-    'content',
-    'files'
-];
+    protected $fillable = [
+        'course_id',
+        'title',
+        'content_type',
+        'content_url',
+        'sort_order',
+        'section_id',
+        'duration',
+        'is_preview',
+        'is_time_locked',
+        'start_date',
+        'start_time',
+        'unlock_day_after_purchase',
+        'description',
+        'content',
+        'files'
+    ];
 
-protected $casts = [
-    'files' => 'array',
-];
+    protected $casts = [
+        'files' => 'array',
+    ];
 
     public function course()
     {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SectionRequest;
+use App\Models\Lesson;
 use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,19 +12,19 @@ use Illuminate\Support\Facades\Storage;
 class SectionController extends Controller
 {
 
-      /**
+    /**
      * @OA\Delete(
-     *     path="/v1.0/sections/{id}",
+     *     path="/v1.0/sections/{ids}",
      *     operationId="deleteSection",
      *     tags={"section"},
-     *     summary="Delete a section and its lessons (Admin only)",
+     *     summary="Delete a section and its lessons",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
-     *         description="ID of the section to delete",
+     *         description="ID of the section to delete (comma-separated for multiple)",
      *         required=true,
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="string", example="1,2,3")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -43,23 +44,29 @@ class SectionController extends Controller
      *     )
      * )
      */
-    public function deleteSection($id)
+    public function deleteSection($ids)
     {
         try {
             DB::beginTransaction();
 
-            $section = Section::find($id);
+            $idsArray = array_map('intval', explode(',', $ids));
 
-            if (empty($section)) {
+            // Find existing section IDs
+            $existingIds = Section::whereIn('id', $idsArray)->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsArray)) {
+                $missingIds = array_diff($idsArray, $existingIds);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Section not found',
-                ], 404);
+                    'message' => 'Some of the data not found',
+                    'data' => [
+                        'missing_ids' => $missingIds
+                    ]
+                ], 400);
             }
 
-            // 🔥 Get all lessons for this section
-            $lessons = Lesson::where('section_id', $section->id)->get();
-
+            // Delete all lesson files
+            $lessons = Lesson::whereIn('section_id', $existingIds)->get();
             foreach ($lessons as $lesson) {
                 if (!empty($lesson->files)) {
                     $files = json_decode($lesson->files, true);
@@ -71,22 +78,23 @@ class SectionController extends Controller
                 }
             }
 
-            // Delete section (will cascade delete lessons in DB)
-            $section->delete();
+            // Delete sections (cascade deletes lessons if DB is set up)
+            Section::whereIn('id', $existingIds)->delete();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Section deleted successfully'
+                'message' => 'Sections deleted successfully',
+                'data' => $existingIds
             ], 200);
-
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
         }
     }
-    
+
+
     /**
      * @OA\Post(
      *     path="/v1.0/sections",

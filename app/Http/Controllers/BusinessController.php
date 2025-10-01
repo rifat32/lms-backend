@@ -538,4 +538,78 @@ class BusinessController extends Controller
             'data' => $businesses['data'],
         ], 200);
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/businesses/{ids}",
+     *     operationId="deleteBusiness",
+     *     tags={"business_management"},
+     *     summary="Delete Businesses",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="ids",
+     *         in="path",
+     *         required=true,
+     *         description="Business ID (comma-separated for multiple)",
+     *         @OA\Schema(type="string", example="1,2,3")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Business deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Business deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Business not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Lesson not found")
+     *         )
+     *     )
+     * )
+     */
+    public function deleteBusiness($ids)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Validate and convert comma-separated IDs to an array
+            $idsArray = array_map('intval', explode(',', $ids));
+
+            // Get existing users
+            $businesses = Business::whereIn('id', $idsArray)->get();
+
+            $existingIds = $businesses->pluck('id')->toArray();
+
+            if (count($existingIds) !== count($idsArray)) {
+                $missingIds = array_diff($idsArray, $existingIds);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Business not found',
+                    'data' => [
+                        'missing_ids' => array_values($missingIds)
+                    ]
+                ], 400);
+            }
+
+
+            // Delete users
+            User::whereIn('id', $existingIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Business deleted successfully',
+                'data' => $existingIds
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
 }

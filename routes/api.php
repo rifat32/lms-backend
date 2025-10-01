@@ -50,6 +50,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [UserController::class, 'updateUser']);
         Route::get('/', [UserController::class, 'getAllUsers']);
         Route::get('/{id}', [UserController::class, 'getUserById']);
+        Route::delete('/{ids}', [UserController::class, 'deleteUsers']);
     });
 
 
@@ -60,6 +61,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [CourseCategoryController::class, 'updateCourseCategory']);
         Route::get('/', [CourseCategoryController::class, 'getCourseCategory']);
         Route::get('/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
+        Route::get('/{ids}', [CourseCategoryController::class, 'deleteCourseCategory']);
     });
 
     // COURSE
@@ -68,12 +70,15 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [CourseController::class, 'updateCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);
+        Route::delete('/{ids}', [CourseController::class, 'deleteCourse']);
     });
 
     // Lesson
-    Route::post('/v1.0/lessons', [LessonController::class, 'createLesson']);
-    Route::put('/v1.0/lessons', [LessonController::class, 'updateLesson']);
-    Route::delete('/v1.0/lessons/{id}', [LessonController::class, 'deleteLesson']);
+    Route::group(['prefix' => '/v1.0/lessons'], function () {
+        Route::post('/', [LessonController::class, 'createLesson']);
+        Route::put('/', [LessonController::class, 'updateLesson']);
+        Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
+    });
 
 
     // quiz attempt
@@ -85,7 +90,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
-          Route::delete('/{id}', [SectionController::class, 'deleteSection']); // 🔥 Delete
+        Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
 
     // Business
@@ -96,6 +101,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [BusinessController::class, 'updateBusiness']);
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
+        Route::delete('/{ids}', [BusinessController::class, 'deleteBusiness']);
     });
 
     // QUESTION

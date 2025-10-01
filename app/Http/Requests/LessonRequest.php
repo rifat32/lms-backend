@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\ValidCourse;
 use App\Rules\ValidLesson;
+use App\Rules\ValidSection;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonRequest extends FormRequest
@@ -16,11 +17,12 @@ class LessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'course_id' => ['required', 'numeric', new ValidCourse()],
+            // 'course_id' => ['required', 'integer', new ValidCourse()],
             'title' => 'required|string|max:255',
             'content_type' => 'required|in:video,text,file,quiz',
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
+            'section_id' => ['required', 'integer', new ValidSection()],
 
             // new fields
             'duration' => 'nullable|integer|min:1',
@@ -45,8 +47,8 @@ class LessonRequest extends FormRequest
     public function messages()
     {
         return [
-            'course_id.required' => 'Course ID is required.',
-            'course_id.numeric' => 'Course ID must be a valid number.',
+            // 'course_id.required' => 'Course ID is required.',
+            // 'course_id.numeric' => 'Course ID must be a valid number.',
             'title.required' => 'Lesson title is required.',
             'title.string' => 'Lesson title must be a string.',
             'content_type.required' => 'Content type is required.',

@@ -15,6 +15,13 @@ class CourseCategory extends Model
   ];
 
 
+  // RELATIONSHIPS
+  public function courses()
+  {
+    return $this->hasMany(Course::class, 'category_id');
+  }
+
+
   // FILTERS
   public function scopeFilters($query)
   {
