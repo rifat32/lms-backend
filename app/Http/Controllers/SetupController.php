@@ -37,6 +37,21 @@ class SetupController extends Controller
         return response()->json(['message' => 'Setup Complete']);
     }
 
+    public function setupPassport()
+    {
+        // Clear caches
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+
+        // Re-install Passport
+        Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations']);
+        Artisan::call('passport:install', ['--force' => true]);
+
+        return response()->json(['message' => 'Passport Setup Complete']);
+    }
+
 
     // SWAGGER REFRESH
     public function swaggerRefresh(Request $request)
@@ -47,6 +62,13 @@ class SetupController extends Controller
 
         // Return a response
         return response()->json(['message' => 'Swagger Refreshed']);
+    }
+
+        public function migrate(Request $request)
+    {
+
+        Artisan::call('migrate');
+        return "migrated";
     }
 
 

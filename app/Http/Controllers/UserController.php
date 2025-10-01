@@ -303,12 +303,18 @@ class UserController extends Controller
      */
     public function getAllUsers()
     {
-        $users = User::all();
+        $query = User::query();
 
+        $users = retrieve_data($query, 'created_at', 'users');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Users retrieved successfully',
-            'data' => $users
-        ]);
+            'meta' => $users['meta'],
+            'data' => $users['data'],
+        ], 200);
+
+      
     }
 }

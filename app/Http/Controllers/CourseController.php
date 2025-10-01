@@ -88,14 +88,20 @@ class CourseController extends Controller
     public function getCourses(Request $request)
     {
 
-        $courses = Course::filters()
-            ->get();
 
+          $query = Course::filters();
+
+        $courses = retrieve_data($query, 'created_at', 'courses');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Courses retrieved successfully',
-            'data' => $courses
+            'meta' => $courses['meta'],
+            'data' => $courses['data'],
         ], 200);
+
+
     }
 
     /**

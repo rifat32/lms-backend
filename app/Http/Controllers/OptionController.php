@@ -257,17 +257,21 @@ class OptionController extends Controller
 
     public function getAllOptions(Request $request)
     {
-        // Retrieve all options for the specified question
-        $query = Option::query();
 
-        $options = $query->get();
+        // GET ALL options
+          $query = Option::query();
 
-        // Return a success response with the options
+        $options = retrieve_data($query, 'created_at', 'options');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Options retrieved successfully',
-            'options' => $options
+            'meta' => $options['meta'],
+            'data' => $options['data'],
         ], 200);
+
+
     }
 
 

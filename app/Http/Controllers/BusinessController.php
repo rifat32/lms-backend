@@ -525,12 +525,17 @@ class BusinessController extends Controller
 
     public function getAllBusinesses(Request $request)
     {
-        $businesses = Business::all();
+      
+         $query = Business::query();
 
+        $businesses = retrieve_data($query, 'created_at', 'businesses');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
-            'message' => 'Businesses fetched successfully',
-            'data' => $businesses
+            'message' => 'Businesses retrieved successfully',
+            'meta' => $businesses['meta'],
+            'data' => $businesses['data'],
         ], 200);
     }
 }

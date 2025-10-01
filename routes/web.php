@@ -20,5 +20,7 @@ Route::get('/', function () {
 
 
 Route::get('/setup', [SetupController::class, 'setup'])->name('setup');
+Route::get('/setup-passport', [SetupController::class, 'setupPassport'])->name('passport');
 Route::get('/roleRefresh', [SetupController::class, 'roleRefresh'])->name('roleRefresh');
 Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"])->name("swaggerRefresh");
+Route::get('/migrate', [SetupController::class, 'setup'])->name('migrate');

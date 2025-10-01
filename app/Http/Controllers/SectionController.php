@@ -353,12 +353,20 @@ class SectionController extends Controller
      */
     public function getSections(Request $request)
     {
-        $sections = Section::all();
+
+         $query = Section::query();
+
+        $sections = retrieve_data($query, 'created_at', 'sections');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
-            'message' => 'Sections fetched successfully',
-            'data' => $sections
+            'message' => 'Sections retrieved successfully',
+            'meta' => $sections['meta'],
+            'data' => $sections['data'],
         ], 200);
+
+
     }
 
     /**

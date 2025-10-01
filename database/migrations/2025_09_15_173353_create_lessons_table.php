@@ -19,9 +19,19 @@ class CreateLessonsTable extends Migration
             $table->enum('content_type', ['video', 'text', 'file', 'quiz']);
             $table->string('content_url')->nullable();
             $table->integer('sort_order')->default(0);
+            $table->integer('duration')->nullable(); // duration in minutes
+            $table->boolean('is_preview')->default(false);
+            $table->boolean('is_time_locked')->default(false);
+            $table->date('start_date')->nullable();
+            $table->time('start_time')->nullable();
+            $table->integer('unlock_day_after_purchase')->nullable();
+            $table->text('description')->nullable();
+            $table->longText('content')->nullable();
+            $table->json('files')->nullable();
             $table->foreignId('section_id')->constrained('sections')->cascadeOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+
         });
     }
 

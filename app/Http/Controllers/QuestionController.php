@@ -424,19 +424,21 @@ class QuestionController extends Controller
 
     public function getAllQuestions(Request $request)
     {
+ // GET ALL QUESTIONS
+          $query = Question::query();
 
-        // GET ALL QUESTIONS
-        $query = Question::query();
-        $questions = $query->all();
-
-
+        $questions = retrieve_data($query, 'created_at', 'questions');
 
         // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Questions retrieved successfully',
-            'questions' => $questions
+            'meta' => $questions['meta'],
+            'data' => $questions['data'],
         ], 200);
+
+       
+       
     }
 
     /**
