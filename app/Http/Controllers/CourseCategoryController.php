@@ -377,7 +377,7 @@ class CourseCategoryController extends Controller
      *     summary="Delete a course category",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
      *         required=true,
      *         description="Course Category ID (comma-separated for multiple)",
