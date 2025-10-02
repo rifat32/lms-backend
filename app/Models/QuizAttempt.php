@@ -15,6 +15,8 @@ class QuizAttempt extends Model
         'score',
         'started_at',
         'completed_at',
+        "time_spent",
+        'is_expired',
     ];
 
     public function quiz()

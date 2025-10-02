@@ -18,171 +18,7 @@ use Illuminate\Support\Facades\DB;
  */
 class QuizAttemptController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/v1.0/quizzes/{id}/attempts",
-     *     operationId="submitQuizAttempt",
-     *     tags={"QuizAttempts"},
-     *     summary="Submit a quiz attempt for authenticated user",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Quiz ID",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"answers"},
-     *             @OA\Property(
-     *                 property="answers",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="question_id", type="integer", example=10),
-     *                     @OA\Property(property="user_answer", type="string", example="A")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Quiz attempt submitted successfully",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Quiz attempt submitted"),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="attempt_id", type="integer", example=1),
-     *                 @OA\Property(property="score", type="number", example=80),
-     *                 @OA\Property(property="is_passed", type="boolean", example=true),
-     *                 @OA\Property(
-     *                     property="feedback",
-     *                     type="array",
-     *                     @OA\Items(
-     *                         @OA\Property(property="question_id", type="integer", example=5),
-     *                         @OA\Property(property="user_answer", type="string", example="My essay answer"),
-     *                         @OA\Property(property="message", type="string", example="Requires manual grading")
-     *                     )
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request - Invalid parameters",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized - Authentication required",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - Access denied",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have permission to submit this quiz.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Quiz or question not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Question not found.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The answers field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="answers", type="array",
-     *                     @OA\Items(type="string", example="The answers field is required.")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal Server Error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
-     *         )
-     *     )
-     * )
-     */
-
-    public function submitQuizAttempt(Request $request, $id)
-    {
-        $request->validate([
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,question_id',
-            'answers.*.user_answer' => 'required'
-        ]);
-
-        $user = Auth::user();
-
-        $quiz_attempt = QuizAttempt::create([
-            'quiz_id' => $id,
-            'user_id' => $user->id,
-            'score' => 0,
-            'started_at' => now(),
-            'completed_at' => now(),
-        ]);
-
-        $score = 0;
-        $feedback = [];
-
-        foreach ($request->answers as $answer) {
-            $question = Question::find($answer['question_id']);
-
-            if (empty($question)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Question not found',
-                ], 404);
-            }
-
-            $is_correct = false;
-            if ($question->question_type !== 'essay') {
-                // For non-essay, check if answer matches correct option
-                $correct_option = $question->options()->where('is_correct', true)->first();
-                $is_correct = $correct_option && $correct_option->id == $answer['user_answer'];
-                $score += $is_correct ? $question->points : 0;
-            } else {
-                $feedback[] = [
-                    'question_id' => $question->question_id,
-                    'user_answer' => $answer['user_answer'],
-                    'message' => 'Requires manual grading'
-                ];
-            }
-        }
-
-        $quiz_attempt->score = $score;
-        $quiz_attempt->is_passed = $score >= 50; // example passing score
-        $quiz_attempt->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Quiz attempt submitted',
-            'data' => [
-                'attempt_id' => $quiz_attempt->id,
-                'score' => $quiz_attempt->score,
-                'is_passed' => $quiz_attempt->is_passed,
-                'feedback' => $feedback,
-            ]
-        ], 201);
-    }
-
+    
     /**
      * @OA\Put(
      *     path="/v1.0/quiz-attempts/{id}/grade",
@@ -271,6 +107,7 @@ class QuizAttemptController extends Controller
      * )
      */
 
+
     public function gradeQuizAttempt(Request $request, $id)
     {
         try {
@@ -314,4 +151,149 @@ class QuizAttemptController extends Controller
             throw $th;
         }
     }
+
+
+
+ /**
+     * @OA\Post(
+     *     path="/v1.0/quizzes/{id}/attempts/start",
+     *     operationId="startQuizAttempt",
+     *     tags={"QuizAttempts"},
+     *     summary="Start a quiz attempt for authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=201, description="Quiz attempt started")
+     * )
+     */
+    public function startQuizAttempt($id)
+    {
+        $user = Auth::user();
+        $quiz = Quiz::findOrFail($id);
+
+        // check if already has active attempt
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->whereNull('completed_at')
+            ->first();
+
+        if ($attempt) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have an active attempt.',
+                'attempt_id' => $attempt->id,
+            ], 400);
+        }
+
+        $attempt = QuizAttempt::create([
+            'quiz_id' => $quiz->id,
+            'user_id' => $user->id,
+            'score' => 0,
+            'started_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz attempt started',
+            'data' => [
+                'attempt_id' => $attempt->id,
+                'time_limit' => $quiz->time_limit, // minutes
+                'expires_at' => now()->addMinutes($quiz->time_limit)->toIso8601String(),
+            ]
+        ], 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/v1.0/quizzes/{id}/attempts/submit",
+     *     operationId="submitQuizAttempt",
+     *     tags={"QuizAttempts"},
+     *     summary="Submit a quiz attempt for authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=201, description="Quiz attempt submitted")
+     * )
+     */
+    public function submitQuizAttempt(Request $request, $id)
+    {
+        $request->validate([
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|exists:questions,id',
+            'answers.*.user_answer' => 'required'
+        ]);
+
+        $user = Auth::user();
+        $quiz = Quiz::findOrFail($id);
+
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->whereNull('completed_at')
+            ->firstOrFail();
+
+        // ⏱️ enforce timer
+        $elapsed = now()->diffInSeconds($attempt->started_at);
+        $limit_seconds = $quiz->time_limit * 60;
+
+        if ($elapsed > $limit_seconds) {
+            $attempt->is_expired = true;
+            $attempt->completed_at = now();
+            $attempt->save();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Time is up! Quiz attempt expired.',
+                'data' => [
+                    'attempt_id' => $attempt->id,
+                    'elapsed' => $elapsed,
+                    'time_limit' => $limit_seconds,
+                ]
+            ], 403);
+        }
+
+        // ✅ proceed with scoring
+        $score = 0;
+        $feedback = [];
+
+        foreach ($request->answers as $answer) {
+            $question = Question::find($answer['question_id']);
+            if (!$question) {
+                continue;
+            }
+
+            if ($question->question_type !== 'essay') {
+                $correct = $question->options()->where('is_correct', true)->first();
+                $is_correct = $correct && $correct->id == $answer['user_answer'];
+                $score += $is_correct ? $question->points : 0;
+            } else {
+                $feedback[] = [
+                    'question_id' => $question->id,
+                    'user_answer' => $answer['user_answer'],
+                    'message' => 'Requires manual grading',
+                ];
+            }
+        }
+
+        $attempt->score = $score;
+        $attempt->is_passed = $score >= 50;
+        $attempt->completed_at = now();
+        $attempt->time_spent = $elapsed;
+        $attempt->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz attempt submitted',
+            'data' => [
+                'attempt_id' => $attempt->id,
+                'score' => $attempt->score,
+                'is_passed' => $attempt->is_passed,
+                'time_spent' => $attempt->time_spent,
+                'feedback' => $feedback,
+            ]
+        ], 201);
+    }
+
+
+
+
+
+
+
+    
 }

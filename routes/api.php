@@ -132,12 +132,18 @@ Route::middleware('auth:api')->group(function () {
     // Lesson progress
     Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'updateLessonProgress']);
 
+    Route::put('/v1.0/lessons/{id}/time', [LessonProgressController::class, 'trackLessonTime']);
+    
 
     // Get quiz with questions
     Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
 
     // Submit quiz attempt
     Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'submitQuizAttempt']);
+
+    Route::post('/v1.0/quizzes/{id}/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
+
+    
 
 
 
