@@ -15,10 +15,10 @@ class CreateCourseNoticesTable extends Migration
     {
         Schema::create('course_notices', function (Blueprint $table) {
             $table->id();
-          $table->unsignedBigInteger('course_id');
-    $table->string('title');
-    $table->text('message');
-    $table->timestamps();
+            $table->unsignedBigInteger('course_id');
+            $table->string('title');
+            $table->text('message');
+            $table->timestamps();
         });
     }
 

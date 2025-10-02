@@ -2133,6 +2133,10 @@
                                     "name": {
                                         "type": "string",
                                         "example": "Data Science"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "description"
                                     }
                                 },
                                 "type": "object"
@@ -2154,6 +2158,10 @@
                                         "name": {
                                             "type": "string",
                                             "example": "Data Science"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "description"
                                         },
                                         "updated_at": {
                                             "type": "string",
@@ -2283,6 +2291,10 @@
                                     "name": {
                                         "type": "string",
                                         "example": "Data Science"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "description"
                                     }
                                 },
                                 "type": "object"
@@ -2304,6 +2316,10 @@
                                         "name": {
                                             "type": "string",
                                             "example": "Data Science"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "description"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -2454,6 +2470,10 @@
                                         "name": {
                                             "type": "string",
                                             "example": "Web Development"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "description"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -4883,6 +4903,118 @@
                 ]
             }
         },
+        "/v1.0/lessons/{id}/time": {
+            "put": {
+                "tags": [
+                    "LessonProgress"
+                ],
+                "summary": "Track lesson time (start / stop / heartbeat) for authenticated user",
+                "operationId": "trackLessonTime",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "event"
+                                ],
+                                "properties": {
+                                    "event": {
+                                        "type": "string",
+                                        "enum": [
+                                            "start",
+                                            "stop",
+                                            "heartbeat"
+                                        ],
+                                        "example": "start"
+                                    },
+                                    "client_timestamp": {
+                                        "description": "Optional client unix timestamp",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lesson time tracked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson time tracked"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lesson_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "total_time_spent": {
+                                                    "description": "seconds",
+                                                    "type": "integer",
+                                                    "example": 3600
+                                                },
+                                                "is_completed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "last_accessed": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-02T12:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Lesson not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/options": {
             "get": {
                 "tags": [
@@ -4973,6 +5105,16 @@
                                         "description": "Associated question ID",
                                         "type": "integer",
                                         "example": 5
+                                    },
+                                    "image": {
+                                        "description": "The Image of this option belongs to",
+                                        "type": "string",
+                                        "example": "png"
+                                    },
+                                    "explanation": {
+                                        "description": "The explanation of this option belongs to",
+                                        "type": "string",
+                                        "example": "this one correct"
                                     }
                                 },
                                 "type": "object"
@@ -5157,6 +5299,16 @@
                                         "description": "The question ID this option belongs to",
                                         "type": "integer",
                                         "example": 5
+                                    },
+                                    "image": {
+                                        "description": "The Image of this option belongs to",
+                                        "type": "string",
+                                        "example": "png"
+                                    },
+                                    "explanation": {
+                                        "description": "The explanation of this option belongs to",
+                                        "type": "string",
+                                        "example": "this one correct"
                                     }
                                 },
                                 "type": "object"
@@ -5715,11 +5867,15 @@
                                         "description": "Type of the question",
                                         "type": "string",
                                         "enum": [
-                                            "mcq",
                                             "true_false",
-                                            "short_answer"
+                                            "single",
+                                            "multiple",
+                                            "matching",
+                                            "file_matching",
+                                            "keywords",
+                                            "fill_in_the_blanks"
                                         ],
-                                        "example": "mcq"
+                                        "example": "true_false"
                                     },
                                     "points": {
                                         "description": "Number of points awarded for the question",
@@ -5733,6 +5889,10 @@
                                         "minimum": 0,
                                         "example": 30,
                                         "nullable": true
+                                    },
+                                    "is_required": {
+                                        "type": "boolean",
+                                        "example": true
                                     }
                                 },
                                 "type": "object"
@@ -5747,40 +5907,66 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "quiz_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "question_text": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "What is the capital of France?"
+                                            "example": "Question created successfully."
                                         },
-                                        "question_type": {
-                                            "type": "string",
-                                            "example": "mcq"
-                                        },
-                                        "points": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "time_limit": {
-                                            "type": "integer",
-                                            "example": 30,
-                                            "nullable": true
-                                        },
-                                        "created_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-09-28T12:00:00Z"
-                                        },
-                                        "updated_at": {
-                                            "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-09-28T12:00:00Z"
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quiz_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "question_text": {
+                                                    "type": "string",
+                                                    "example": "What is the capital of France?"
+                                                },
+                                                "question_type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "true_false",
+                                                        "single",
+                                                        "multiple",
+                                                        "matching",
+                                                        "file_matching",
+                                                        "keywords",
+                                                        "fill_in_the_blanks"
+                                                    ],
+                                                    "example": "mcq"
+                                                },
+                                                "points": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "time_limit": {
+                                                    "type": "integer",
+                                                    "example": 30,
+                                                    "nullable": true
+                                                },
+                                                "is_required": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-28T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-28T12:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -5794,9 +5980,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Invalid request."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -5810,9 +6004,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Unauthenticated."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -5826,9 +6028,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "You do not have permission to perform this action."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -5842,9 +6052,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Quiz not found."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -5858,9 +6076,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "A question with this text already exists for this quiz."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -5874,11 +6100,15 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "The question_text field is required."
+                                            "example": "Validation failed."
                                         },
-                                        "errors": {
+                                        "data": {
                                             "properties": {
                                                 "question_text": {
                                                     "type": "array",
@@ -5916,9 +6146,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "An unexpected error occurred."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6148,9 +6386,13 @@
                                         "description": "Type of the question",
                                         "type": "string",
                                         "enum": [
-                                            "mcq",
                                             "true_false",
-                                            "short_answer"
+                                            "single",
+                                            "multiple",
+                                            "matching",
+                                            "file_matching",
+                                            "keywords",
+                                            "fill_in_the_blanks"
                                         ],
                                         "example": "true_false"
                                     },
@@ -6166,6 +6408,10 @@
                                         "minimum": 0,
                                         "example": 60,
                                         "nullable": true
+                                    },
+                                    "is_required": {
+                                        "type": "boolean",
+                                        "example": true
                                     }
                                 },
                                 "type": "object"
@@ -6186,9 +6432,9 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Question updated successfully"
+                                            "example": "Question updated successfully."
                                         },
-                                        "question": {
+                                        "data": {
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
@@ -6204,6 +6450,15 @@
                                                 },
                                                 "question_type": {
                                                     "type": "string",
+                                                    "enum": [
+                                                        "true_false",
+                                                        "single",
+                                                        "multiple",
+                                                        "matching",
+                                                        "file_matching",
+                                                        "keywords",
+                                                        "fill_in_the_blanks"
+                                                    ],
                                                     "example": "true_false"
                                                 },
                                                 "points": {
@@ -6214,6 +6469,10 @@
                                                     "type": "integer",
                                                     "example": 60,
                                                     "nullable": true
+                                                },
+                                                "is_required": {
+                                                    "type": "boolean",
+                                                    "example": true
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -6240,9 +6499,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Invalid request."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6256,9 +6523,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Unauthenticated."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6272,9 +6547,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "You do not have permission to perform this action."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6288,9 +6571,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "Question not found."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6304,9 +6595,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "A question with this text already exists for this quiz."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6320,11 +6619,15 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
-                                            "example": "The question_text field is required."
+                                            "example": "Validation failed."
                                         },
-                                        "errors": {
+                                        "data": {
                                             "properties": {
                                                 "question_text": {
                                                     "type": "array",
@@ -6362,9 +6665,17 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "message": {
                                             "type": "string",
                                             "example": "An unexpected error occurred."
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": null
                                         }
                                     },
                                     "type": "object"
@@ -6519,230 +6830,6 @@
                     },
                     "500": {
                         "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An unexpected error occurred."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/quizzes/{id}/attempts": {
-            "post": {
-                "tags": [
-                    "QuizAttempts"
-                ],
-                "summary": "Submit a quiz attempt for authenticated user",
-                "operationId": "submitQuizAttempt",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Quiz ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "answers"
-                                ],
-                                "properties": {
-                                    "answers": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "question_id": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "user_answer": {
-                                                    "type": "string",
-                                                    "example": "A"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Quiz attempt submitted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Quiz attempt submitted"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "attempt_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "score": {
-                                                    "type": "number",
-                                                    "example": 80
-                                                },
-                                                "is_passed": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "feedback": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "question_id": {
-                                                                "type": "integer",
-                                                                "example": 5
-                                                            },
-                                                            "user_answer": {
-                                                                "type": "string",
-                                                                "example": "My essay answer"
-                                                            },
-                                                            "message": {
-                                                                "type": "string",
-                                                                "example": "Requires manual grading"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request - Invalid parameters",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request parameters."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Authentication required",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Access denied",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to submit this quiz."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Quiz or question not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Question not found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The answers field is required."
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "answers": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The answers field is required."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6953,6 +7040,44 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/quizzes/{id}/attempts/start": {
+            "post": {
+                "tags": [
+                    "QuizAttempts"
+                ],
+                "summary": "Start a quiz attempt for authenticated user",
+                "operationId": "startQuizAttempt",
+                "responses": {
+                    "201": {
+                        "description": "Quiz attempt started"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/quizzes/{id}/attempts/submit": {
+            "post": {
+                "tags": [
+                    "QuizAttempts"
+                ],
+                "summary": "Submit a quiz attempt for authenticated user",
+                "operationId": "submitQuizAttempt",
+                "responses": {
+                    "201": {
+                        "description": "Quiz attempt submitted"
                     }
                 },
                 "security": [

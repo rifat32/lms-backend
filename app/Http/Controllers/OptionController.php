@@ -41,6 +41,18 @@ class OptionController extends Controller
      *                 type="integer",
      *                 example=5,
      *                 description="The question ID this option belongs to"
+     *             ),
+     *             @OA\Property(
+     *                 property="image",
+     *                 type="string",
+     *                 example="png",
+     *                 description="The Image of this option belongs to"
+     *             ),
+     *             @OA\Property(
+     *                 property="explanation",
+     *                 type="string",
+     *                 example="this one correct",
+     *                 description="The explanation of this option belongs to"
      *             )
      *         )
      *     ),
@@ -136,7 +148,19 @@ class OptionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1, description="ID of the option to update"),
      *             @OA\Property(property="text", type="string", example="Option A", description="Option text"),
      *             @OA\Property(property="is_correct", type="boolean", example=true, description="Whether this option is correct"),
-     *             @OA\Property(property="question_id", type="integer", example=5, description="Associated question ID")
+     *             @OA\Property(property="question_id", type="integer", example=5, description="Associated question ID"),
+     *             @OA\Property(
+     *                 property="image",
+     *                 type="string",
+     *                 example="png",
+     *                 description="The Image of this option belongs to"
+     *             ),
+     *             @OA\Property(
+     *                 property="explanation",
+     *                 type="string",
+     *                 example="this one correct",
+     *                 description="The explanation of this option belongs to"
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -259,7 +283,7 @@ class OptionController extends Controller
     {
 
         // GET ALL options
-          $query = Option::query();
+        $query = Option::query();
 
         $options = retrieve_data($query, 'created_at', 'options');
 
@@ -270,8 +294,6 @@ class OptionController extends Controller
             'meta' => $options['meta'],
             'data' => $options['data'],
         ], 200);
-
-
     }
 
 

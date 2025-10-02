@@ -154,15 +154,6 @@ class LessonProgressController extends Controller
 
 
 
-
-   /**
- * @OA\Tag(
- *     name="LessonProgress",
- *     description="Endpoints to update lesson time and progress"
- * )
- */
-class LessonProgressController extends Controller
-{
     /**
      * @OA\Put(
      *     path="/v1.0/lessons/{id}/time",
@@ -309,10 +300,4 @@ class LessonProgressController extends Controller
             throw $th;
         }
     }
-}
-
-
-
-
-
 }

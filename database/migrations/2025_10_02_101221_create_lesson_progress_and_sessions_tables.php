@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateLessonProgressAndSessionsTables extends Migration
 {
 
-        public function up()
+    public function up()
     {
         Schema::create('lesson_progresses', function (Blueprint $table) {
             $table->id();
@@ -39,8 +39,4 @@ class CreateLessonProgressAndSessionsTables extends Migration
         Schema::dropIfExists('lesson_sessions');
         Schema::dropIfExists('lesson_progresses');
     }
-
-
-
-
 }

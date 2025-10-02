@@ -16,11 +16,11 @@ class CreateCourseFaqsTable extends Migration
         Schema::create('course_faqs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('course_id');
-    $table->string('question');
-    $table->text('answer')->nullable();
-    $table->timestamps();
+            $table->string('question');
+            $table->text('answer')->nullable();
+            $table->timestamps();
 
-    $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
         });
     }
 

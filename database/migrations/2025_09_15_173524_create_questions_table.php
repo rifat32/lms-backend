@@ -17,9 +17,10 @@ class CreateQuestionsTable extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained('quizzes')->cascadeOnDelete();
             $table->text('question_text');
-            $table->enum('question_type', ['mcq', 'true_false', 'short_answer']);
+            $table->enum('question_type', ['true_false', 'single', 'multiple', 'matching', 'file_matching', 'keywords', 'fill_in_the_blanks']);
             $table->integer('points')->default(1);
             $table->integer('time_limit')->nullable();
+            $table->boolean('is_required')->default(true);
 
             $table->timestamps();
         });

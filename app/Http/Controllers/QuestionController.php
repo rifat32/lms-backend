@@ -23,41 +23,18 @@ class QuestionController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             required={"quiz_id", "question_text", "question_type", "points"},
-     *             @OA\Property(
-     *                 property="quiz_id",
-     *                 type="integer",
-     *                 example=1,
-     *                 description="ID of the quiz this question belongs to"
-     *             ),
-     *             @OA\Property(
-     *                 property="question_text",
-     *                 type="string",
-     *                 maxLength=255,
-     *                 example="What is the capital of France?",
-     *                 description="The text of the question"
-     *             ),
+     *             @OA\Property(property="quiz_id", type="integer", example=1, description="ID of the quiz this question belongs to"),
+     *             @OA\Property(property="question_text", type="string", maxLength=255, example="What is the capital of France?", description="The text of the question"),
      *             @OA\Property(
      *                 property="question_type",
      *                 type="string",
-     *                 enum={"mcq", "true_false", "short_answer"},
-     *                 example="mcq",
+     *                 example="true_false",
+     *                 enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"},
      *                 description="Type of the question"
      *             ),
-     *             @OA\Property(
-     *                 property="points",
-     *                 type="integer",
-     *                 minimum=1,
-     *                 example=5,
-     *                 description="Number of points awarded for the question"
-     *             ),
-     *             @OA\Property(
-     *                 property="time_limit",
-     *                 type="integer",
-     *                 nullable=true,
-     *                 minimum=0,
-     *                 example=30,
-     *                 description="Time limit for the question in seconds (nullable)"
-     *             )
+     *             @OA\Property(property="points", type="integer", minimum=1, example=5, description="Number of points awarded for the question"),
+     *             @OA\Property(property="time_limit", type="integer", nullable=true, minimum=0, example=30, description="Time limit for the question in seconds (nullable)"),
+     *             @OA\Property(property="is_required", type="boolean", example=true)
      *         )
      *     ),
      *     @OA\Response(
@@ -65,14 +42,19 @@ class QuestionController extends Controller
      *         description="Question created successfully",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="quiz_id", type="integer", example=1),
-     *             @OA\Property(property="question_text", type="string", example="What is the capital of France?"),
-     *             @OA\Property(property="question_type", type="string", example="mcq"),
-     *             @OA\Property(property="points", type="integer", example=5),
-     *             @OA\Property(property="time_limit", type="integer", example=30, nullable=true),
-     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T12:00:00Z")
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Question created successfully."),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="quiz_id", type="integer", example=1),
+     *                 @OA\Property(property="question_text", type="string", example="What is the capital of France?"),
+     *                 @OA\Property(property="question_type", type="string", example="mcq", enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"}),
+     *                 @OA\Property(property="points", type="integer", example=5),
+     *                 @OA\Property(property="time_limit", type="integer", example=30, nullable=true),
+     *                 @OA\Property(property="is_required", type="boolean", example=true),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T12:00:00Z")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -80,7 +62,9 @@ class QuestionController extends Controller
      *         description="Bad Request",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Invalid request.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid request."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -88,7 +72,9 @@ class QuestionController extends Controller
      *         description="Unauthenticated",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -96,7 +82,9 @@ class QuestionController extends Controller
      *         description="Forbidden",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -104,7 +92,9 @@ class QuestionController extends Controller
      *         description="Quiz not found",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Quiz not found.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Quiz not found."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -112,7 +102,9 @@ class QuestionController extends Controller
      *         description="Conflict",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="A question with this text already exists for this quiz.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="A question with this text already exists for this quiz."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -120,8 +112,9 @@ class QuestionController extends Controller
      *         description="Validation error",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="The question_text field is required."),
-     *             @OA\Property(property="errors", type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed."),
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="question_text", type="array",
      *                     @OA\Items(type="string", example="The question_text field is required.")
      *                 ),
@@ -139,11 +132,14 @@ class QuestionController extends Controller
      *         description="Internal server error",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     )
      * )
      */
+
 
 
     public function createQuestion(QuestionRequest $request)
@@ -172,7 +168,6 @@ class QuestionController extends Controller
             throw $th;
         }
     }
-
     /**
      * @OA\Put(
      *     path="/v1.0/questions/{id}",
@@ -195,41 +190,18 @@ class QuestionController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             required={"quiz_id", "question_text", "question_type", "points"},
-     *             @OA\Property(
-     *                 property="quiz_id",
-     *                 type="integer",
-     *                 example=1,
-     *                 description="ID of the quiz this question belongs to"
-     *             ),
-     *             @OA\Property(
-     *                 property="question_text",
-     *                 type="string",
-     *                 maxLength=255,
-     *                 example="What is the capital of Germany?",
-     *                 description="The text of the question"
-     *             ),
+     *             @OA\Property(property="quiz_id", type="integer", example=1, description="ID of the quiz this question belongs to"),
+     *             @OA\Property(property="question_text", type="string", maxLength=255, example="What is the capital of Germany?", description="The text of the question"),
      *             @OA\Property(
      *                 property="question_type",
      *                 type="string",
-     *                 enum={"mcq", "true_false", "short_answer"},
      *                 example="true_false",
+     *                 enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"},
      *                 description="Type of the question"
      *             ),
-     *             @OA\Property(
-     *                 property="points",
-     *                 type="integer",
-     *                 minimum=1,
-     *                 example=10,
-     *                 description="Number of points awarded for the question"
-     *             ),
-     *             @OA\Property(
-     *                 property="time_limit",
-     *                 type="integer",
-     *                 nullable=true,
-     *                 minimum=0,
-     *                 example=60,
-     *                 description="Time limit for the question in seconds (nullable)"
-     *             )
+     *             @OA\Property(property="points", type="integer", minimum=1, example=10, description="Number of points awarded for the question"),
+     *             @OA\Property(property="time_limit", type="integer", nullable=true, minimum=0, example=60, description="Time limit for the question in seconds (nullable)"),
+     *             @OA\Property(property="is_required", type="boolean", example=true)
      *         )
      *     ),
      *
@@ -239,16 +211,15 @@ class QuestionController extends Controller
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Question updated successfully"),
-     *             @OA\Property(
-     *                 property="question",
-     *                 type="object",
+     *             @OA\Property(property="message", type="string", example="Question updated successfully."),
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=10),
      *                 @OA\Property(property="quiz_id", type="integer", example=1),
      *                 @OA\Property(property="question_text", type="string", example="What is the capital of Germany?"),
-     *                 @OA\Property(property="question_type", type="string", example="true_false"),
+     *                 @OA\Property(property="question_type", type="string", example="true_false", enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"}),
      *                 @OA\Property(property="points", type="integer", example=10),
      *                 @OA\Property(property="time_limit", type="integer", nullable=true, example=60),
+     *                 @OA\Property(property="is_required", type="boolean", example=true),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
      *             )
@@ -259,7 +230,9 @@ class QuestionController extends Controller
      *         description="Bad Request",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Invalid request.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid request."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -267,7 +240,9 @@ class QuestionController extends Controller
      *         description="Unauthenticated",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -275,7 +250,9 @@ class QuestionController extends Controller
      *         description="Forbidden",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -283,7 +260,9 @@ class QuestionController extends Controller
      *         description="Question not found",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="Question not found.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Question not found."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -291,7 +270,9 @@ class QuestionController extends Controller
      *         description="Conflict",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="A question with this text already exists for this quiz.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="A question with this text already exists for this quiz."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     ),
      *     @OA\Response(
@@ -299,8 +280,9 @@ class QuestionController extends Controller
      *         description="Validation error",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="The question_text field is required."),
-     *             @OA\Property(property="errors", type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed."),
+     *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="question_text", type="array",
      *                     @OA\Items(type="string", example="The question_text field is required.")
      *                 ),
@@ -318,7 +300,9 @@ class QuestionController extends Controller
      *         description="Internal server error",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred."),
+     *             @OA\Property(property="data", type="object", example=null)
      *         )
      *     )
      * )
@@ -424,8 +408,8 @@ class QuestionController extends Controller
 
     public function getAllQuestions(Request $request)
     {
- // GET ALL QUESTIONS
-          $query = Question::query();
+        // GET ALL QUESTIONS
+        $query = Question::query();
 
         $questions = retrieve_data($query, 'created_at', 'questions');
 
@@ -436,9 +420,6 @@ class QuestionController extends Controller
             'meta' => $questions['meta'],
             'data' => $questions['data'],
         ], 200);
-
-       
-       
     }
 
     /**

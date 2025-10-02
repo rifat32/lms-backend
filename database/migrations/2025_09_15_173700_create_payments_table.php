@@ -15,17 +15,17 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-      $table->unsignedBigInteger('user_id');
-    $table->unsignedBigInteger('course_id');
-    $table->decimal('amount', 10, 2);
-    $table->string('method');
-    $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
-    $table->string('transaction_id')->unique();
-    $table->timestamp('paid_at')->nullable();
-    $table->timestamps();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('course_id');
+            $table->decimal('amount', 10, 2);
+            $table->string('method');
+            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->string('transaction_id')->unique();
+            $table->timestamp('paid_at')->nullable();
+            $table->timestamps();
 
-    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-    $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
         });
     }
 

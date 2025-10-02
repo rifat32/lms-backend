@@ -29,9 +29,11 @@ class OptionRequest extends FormRequest
             'question_id' => ['required', 'integer', new ValidQuestion()],
             'option_text' => 'required|string|max:255',
             'is_correct' => 'required|boolean',
+            'image' => 'nullable|string',
+            'explanation' => 'nullable|string',
         ];
 
-        if ($this->isMethod('post') || $this->isMethod('put')) {
+        if ($this->isMethod('patch') || $this->isMethod('put')) {
             $rules['id'] = ['required', 'integer', new ValidOption()];
         }
 
