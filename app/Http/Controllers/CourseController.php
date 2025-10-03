@@ -615,7 +615,31 @@ class CourseController extends Controller
             // FIND BY ID
             $course = Course::find($request_payload['id']);
 
+   if ($request->hasFile('cover')) {
+    log_message("Cover file detected. Uploading...", "course.txt");
 
+    $file = $request->file('cover');
+    $extension = $file->getClientOriginalExtension();
+    $filename = uniqid() . '_' . time() . '.' . $extension; 
+    $folder_path = "business_1/course_{$course->id}";
+
+    log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
+
+    $file->storeAs($folder_path, $filename, 'public');
+
+    // Delete old cover if exists
+    if ($course->cover) {
+        $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
+        if (Storage::disk('public')->exists($old_path)) {
+            Storage::disk('public')->delete($old_path);
+        }
+    }
+
+    $course->cover = $filename; // store only filename
+    $course->save();
+} else {
+    log_message("No cover uploaded.", "course.txt");
+}
             $course->categories()->sync($request_payload["category_ids"]);
 
             // SEND RESPONSE
