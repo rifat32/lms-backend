@@ -454,13 +454,6 @@ class CourseController extends Controller
 
     $file->storeAs($folder_path, $filename, 'public');
 
-    // Delete old cover if exists
-    if ($course->cover) {
-        $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
-        if (Storage::disk('public')->exists($old_path)) {
-            Storage::disk('public')->delete($old_path);
-        }
-    }
 
     $course->cover = $filename; // store only filename
     $course->save();
