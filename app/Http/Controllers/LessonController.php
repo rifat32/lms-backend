@@ -298,15 +298,15 @@ public function createLesson(LessonRequest $request)
      *     )
      * )
      */
-   public function deleteLesson($ids)
+public function deleteLesson($ids)
 {
     try {
         DB::beginTransaction();
 
-        // Validate and convert comma-separated IDs to an array
+        // Convert comma-separated IDs to array
         $idsArray = array_map('intval', explode(',', $ids));
 
-        // Get existing lessons
+        // Fetch lessons
         $lessons = Lesson::whereIn('id', $idsArray)->get();
 
         $existingIds = $lessons->pluck('id')->toArray();
@@ -323,17 +323,16 @@ public function createLesson(LessonRequest $request)
             ], 404);
         }
 
-        // Delete lesson files
+        // Delete lesson files (use raw DB value, not accessor!)
         foreach ($lessons as $lesson) {
-            if (!empty($lesson->files)) {
-                $files = json_decode($lesson->files, true);
-                if (is_array($files)) {
-                    foreach ($files as $file) {
-                        // Build full path based on stored structure
-                        $path = "business_1/lesson_{$lesson->id}/$file";
-                        if (Storage::disk('public')->exists($path)) {
-                            Storage::disk('public')->delete($path);
-                        }
+            $raw_files = $lesson->getRawOriginal('files'); // raw JSON string from DB
+            $files = $raw_files ? json_decode($raw_files, true) : [];
+
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $path = "business_1/lesson_{$lesson->id}/$file";
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
                     }
                 }
             }
