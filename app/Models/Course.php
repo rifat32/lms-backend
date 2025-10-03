@@ -37,8 +37,17 @@ class Course extends Model
     ];
 
 
-    // Relationships
 
+    // Relationships
+public function getCoverAttribute($value)
+{
+    if (!$value) {
+        return null;
+    }
+
+    $folder_path = "business_1/course_{$this->id}";
+    return asset("storage/{$folder_path}/{$value}");
+}
 
 
   public function categories()

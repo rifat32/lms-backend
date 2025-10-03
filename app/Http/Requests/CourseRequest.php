@@ -28,7 +28,8 @@ class CourseRequest extends FormRequest
     {
         $rules = [
 
-    'cover' => 'nullable|string|max:255',
+    'cover' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
+
     'title' => 'required|string|max:255',
     'description' => 'nullable|string',
     'price' => 'nullable|numeric|min:0',

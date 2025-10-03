@@ -241,15 +241,23 @@ public function createLesson(LessonRequest $request)
                 ], 404);
             }
 
-            // Handle file uploads
-            if ($request->hasFile('files')) {
-                $uploaded_files = [];
-                foreach ($request->file('files') as $file) {
-                    $path = $file->store('lessons/files', 'public');
-                    $uploaded_files[] = $path;
-                }
-                $request_payload['files'] = json_encode($uploaded_files);
-            }
+  
+      if ($request->hasFile('files')) {
+    // Get existing files
+    $raw_files = $lesson->getRawOriginal('files');
+    $existing_files = $raw_files ? json_decode($raw_files, true) : [];
+
+    $uploaded_files = $existing_files; // start with existing
+
+    // Upload new files
+    foreach ($request->file('files') as $file) {
+        $path = $file->store('lessons/files', 'public');
+        $uploaded_files[] = $path; // append
+    }
+
+    $request_payload['files'] = json_encode($uploaded_files);
+}
+
 
             $lesson->update($request_payload);
 

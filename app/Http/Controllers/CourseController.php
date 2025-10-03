@@ -7,6 +7,7 @@ use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Tag(
@@ -441,6 +442,33 @@ class CourseController extends Controller
             // CREATE
             $course = Course::create($request_payload);
 
+            if ($request->hasFile('cover')) {
+    log_message("Cover file detected. Uploading...", "course.txt");
+
+    $file = $request->file('cover');
+    $extension = $file->getClientOriginalExtension();
+    $filename = uniqid() . '_' . time() . '.' . $extension; 
+    $folder_path = "business_1/course_{$course->id}";
+
+    log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
+
+    $file->storeAs($folder_path, $filename, 'public');
+
+    // Delete old cover if exists
+    if ($course->cover) {
+        $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
+        if (Storage::disk('public')->exists($old_path)) {
+            Storage::disk('public')->delete($old_path);
+        }
+    }
+
+    $course->cover = $filename; // store only filename
+    $course->save();
+} else {
+    log_message("No cover uploaded.", "course.txt");
+}
+
+
 
             $course->categories()->sync($request_payload["category_ids"]);
 
@@ -671,7 +699,9 @@ class CourseController extends Controller
             $idsOfArray = array_map('intval', explode(',', $ids));
 
             // VALIDATE PAYLOAD
-            $existingIds = Course::whereIn('id', $idsOfArray)->pluck('id')->toArray();
+            $courses = Course::whereIn('id', $idsOfArray)->get();
+
+            $existingIds = $courses->pluck('id')->toArray();
 
             if (count($existingIds) !== count($idsOfArray)) {
                 $missingIds = array_diff($idsOfArray, $existingIds);
@@ -684,8 +714,25 @@ class CourseController extends Controller
                 ], 400);
             }
 
+            foreach ($courses as $course) {
+    $raw_cover = $course->getRawOriginal('cover');
+    if ($raw_cover) {
+        $path = "business_1/course_{$course->id}/$raw_cover";
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+}
+
+
             // DELETE THE RECORDS
             Course::whereIn('id', $existingIds)->delete();
+
+
+
+
+
+            
 
             DB::commit();
 
