@@ -19,7 +19,14 @@ class CourseCategory extends Model
   // RELATIONSHIPS
   public function courses()
   {
-    return $this->hasMany(Course::class, 'category_id');
+    return $this->belongsToMany(
+        Course::class,   // Related model
+        'course_category_courses', // Pivot table name
+        'course_category_id',       // Foreign key on pivot table referencing current model
+        'course_id',     // Foreign key on pivot table referencing related model
+        'id',              // Local key on current model
+        'id'               // Local key on related model
+    )->withTimestamps();
   }
 
 

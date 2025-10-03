@@ -26,36 +26,40 @@ class CourseRequest extends FormRequest
      */
     public function rules()
     {
-
         $rules = [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'category_id' => ['required', 'numeric', new ValidCourseCategory()],
-            'created_by' => ['nullable', 'numeric', new ValidUser()],
-            'is_free' => 'boolean',
-            'status' => 'nullable|in:draft,published,archived',
-            'url' => 'nullable|string|max:255',
-            'level' => 'nullable|string|max:100',
-            'cover' => 'nullable|string|max:255',
-            'preview_video' => 'nullable|string|max:255',
-            'duration' => 'nullable|integer|min:0',
-            'video_duration' => 'nullable|integer|min:0',
-            'course_preview_description' => 'nullable|string|max:500',
-            'course_status' => 'nullable|string|max:100',
-            'status_start_date' => 'nullable|date',
-            'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
-            'number_of_students' => 'nullable|integer|min:0',
-            'course_view' => 'nullable|string|max:255',
-            'is_featured' => 'nullable|boolean',
-            'is_lock_lessons_in_order' => 'nullable|boolean',
-            'access_duration' => 'nullable|string|max:100',
-            'access_device_type' => 'nullable|string|max:100',
-            'certificate_info' => 'nullable|string|max:255',
-            // Pricing-related rules
-            'pricing' => 'nullable|in:is_one_time_purchase,price,sale_price,sale_end_date,enterprise_price,is_included_membership,is_affiliatable,point_of_a_course,price_info',
 
-        ];
+    'cover' => 'nullable|string|max:255',
+    'title' => 'required|string|max:255',
+    'description' => 'nullable|string',
+    'price' => 'nullable|numeric|min:0',
+    'sale_price' => 'nullable|numeric|min:0|lte:price',
+    'price_start_date' => 'nullable|date',
+    'price_end_date' => 'nullable|date|after_or_equal:price_start_date',
+    'is_free' => 'nullable|boolean',
+    'status' => 'required|in:draft,published,archived',
+    'status_start_date' => 'nullable|date',
+    'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
+    'url' => 'nullable|string|max:255',
+    'level' => 'nullable|string|max:50',
+    
+    'preview_video_source_type' => 'nullable|in:HTML,YouTube,Vimeo,External Link,Embed',
+    'preview_video_url' => 'nullable|string|max:255|url',
+    'preview_video_poster' => 'nullable|string|max:255',
+    'preview_video_embed' => 'nullable|string',
+    'duration' => 'nullable|string|max:50',
+    'video_duration' => 'nullable|string|max:50',
+    'course_preview_description' => 'nullable|string|max:500',
+    'is_featured' => 'nullable|boolean',
+    'is_lock_lessons_in_order' => 'nullable|boolean',
+    'category_ids' => 'present|array',
+    'category_ids.*' => ['numeric', new ValidCourseCategory()],
+    
+    'created_by' => ['nullable', 'numeric', new ValidUser()],
+
+
+];
+
+      
 
         if ($this->isMethod('put') || $this->isMethod('patch')) {
             // Update: id is required and numeric

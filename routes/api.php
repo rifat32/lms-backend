@@ -88,6 +88,11 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/sections'], function () {
         Route::post('/', [SectionController::class, 'createSection']);       // Create
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
+
+        Route::put('/-with-lessons', [SectionController::class, 'updateSectionWithLessons']); // Update with lessons
+
+
+
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
@@ -169,3 +174,9 @@ Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCou
 
 // Public verification route
 Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verifyCertificate']);
+
+
+
+
+  Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
+

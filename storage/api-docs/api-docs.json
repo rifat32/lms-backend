@@ -2651,6 +2651,185 @@
                 ]
             }
         },
+        "/v1.0/client/courses": {
+            "get": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Get all courses",
+                "operationId": "getCoursesClient",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filter by category ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "searchKey",
+                        "in": "query",
+                        "description": "Search by keyword in title or description",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Laravel"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of courses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Courses retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Learn Laravel framework"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid query parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/courses": {
             "get": {
                 "tags": [
@@ -2736,7 +2915,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -2841,10 +3020,9 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "id",
                                     "title",
-                                    "description",
-                                    "category_id",
-                                    "id"
+                                    "category_id"
                                 ],
                                 "properties": {
                                     "id": {
@@ -2853,24 +3031,31 @@
                                     },
                                     "title": {
                                         "type": "string",
-                                        "example": "Updated Title"
+                                        "example": "Laravel Basics"
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "Updated description"
+                                        "example": "A complete Laravel course"
                                     },
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 59.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
-                                    "category_id": {
-                                        "type": "integer",
-                                        "example": 2
+                                    "sale_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
-                                    "lecturer_id": {
-                                        "type": "integer",
-                                        "example": 3
+                                    "price_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "price_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
                                     },
                                     "is_free": {
                                         "type": "boolean",
@@ -2883,11 +3068,84 @@
                                             "published",
                                             "archived"
                                         ],
-                                        "example": "published"
+                                        "example": "draft"
                                     },
-                                    "duration_days": {
+                                    "status_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "status_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "example": "https://example.com/laravel-basics"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "example": "Beginner"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "preview_video_source_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "HTML",
+                                            "YouTube",
+                                            "Vimeo",
+                                            "External Link",
+                                            "Embed"
+                                        ],
+                                        "example": "YouTube"
+                                    },
+                                    "preview_video_url": {
+                                        "type": "string",
+                                        "example": "https://youtu.be/example"
+                                    },
+                                    "preview_video_poster": {
+                                        "type": "string",
+                                        "example": "poster.jpg"
+                                    },
+                                    "preview_video_embed": {
+                                        "type": "string",
+                                        "example": "<iframe src='https://example.com/embed'></iframe>"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "example": "8 hours"
+                                    },
+                                    "video_duration": {
+                                        "type": "string",
+                                        "example": "2 hours"
+                                    },
+                                    "course_preview_description": {
+                                        "type": "string",
+                                        "example": "This is a preview of the Laravel Basics course."
+                                    },
+                                    "is_featured": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_lock_lessons_in_order": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "created_by": {
                                         "type": "integer",
-                                        "example": 45
+                                        "example": 1
+                                    },
+                                    "category_ids": {
+                                        "description": "Array of category IDs for this course",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -2908,24 +3166,31 @@
                                         },
                                         "title": {
                                             "type": "string",
-                                            "example": "Updated Title"
+                                            "example": "Laravel Basics"
                                         },
                                         "description": {
                                             "type": "string",
-                                            "example": "Updated description"
+                                            "example": "A complete Laravel course"
                                         },
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 59.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
-                                        "category_id": {
-                                            "type": "integer",
-                                            "example": 2
+                                        "sale_price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 29.989999999999998436805981327779591083526611328125
                                         },
-                                        "lecturer_id": {
-                                            "type": "integer",
-                                            "example": 3
+                                        "price_start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-10-01"
+                                        },
+                                        "price_end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-12-31"
                                         },
                                         "is_free": {
                                             "type": "boolean",
@@ -2933,16 +3198,89 @@
                                         },
                                         "status": {
                                             "type": "string",
-                                            "example": "published"
+                                            "enum": [
+                                                "draft",
+                                                "published",
+                                                "archived"
+                                            ],
+                                            "example": "draft"
                                         },
-                                        "duration_days": {
-                                            "type": "integer",
-                                            "example": 45
-                                        },
-                                        "updated_at": {
+                                        "status_start_date": {
                                             "type": "string",
-                                            "format": "date-time",
-                                            "example": "2025-09-19T12:00:00Z"
+                                            "format": "date",
+                                            "example": "2025-10-01"
+                                        },
+                                        "status_end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-12-31"
+                                        },
+                                        "url": {
+                                            "type": "string",
+                                            "example": "https://example.com/laravel-basics"
+                                        },
+                                        "level": {
+                                            "type": "string",
+                                            "example": "Beginner"
+                                        },
+                                        "cover": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "preview_video_source_type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "HTML",
+                                                "YouTube",
+                                                "Vimeo",
+                                                "External Link",
+                                                "Embed"
+                                            ],
+                                            "example": "YouTube"
+                                        },
+                                        "preview_video_url": {
+                                            "type": "string",
+                                            "example": "https://youtu.be/example"
+                                        },
+                                        "preview_video_poster": {
+                                            "type": "string",
+                                            "example": "poster.jpg"
+                                        },
+                                        "preview_video_embed": {
+                                            "type": "string",
+                                            "example": "<iframe src='https://example.com/embed'></iframe>"
+                                        },
+                                        "duration": {
+                                            "type": "string",
+                                            "example": "8 hours"
+                                        },
+                                        "video_duration": {
+                                            "type": "string",
+                                            "example": "2 hours"
+                                        },
+                                        "course_preview_description": {
+                                            "type": "string",
+                                            "example": "This is a preview of the Laravel Basics course."
+                                        },
+                                        "is_featured": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "is_lock_lessons_in_order": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "created_by": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "category_ids": {
+                                            "description": "Array of category IDs for this course",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 1
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -3046,13 +3384,6 @@
                                                         "type": "string",
                                                         "example": "The category id field is required."
                                                     }
-                                                },
-                                                "lecturer_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The lecturer id field is required."
-                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -3083,30 +3414,40 @@
                             "schema": {
                                 "required": [
                                     "title",
-                                    "description",
                                     "category_id"
                                 ],
                                 "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
                                     "title": {
                                         "type": "string",
                                         "example": "Laravel Basics"
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "Learn Laravel framework"
+                                        "example": "A complete Laravel course"
                                     },
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
-                                    "category_id": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "sale_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
-                                    "lecturer_id": {
-                                        "type": "integer",
-                                        "example": 2
+                                    "price_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "price_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
                                     },
                                     "is_free": {
                                         "type": "boolean",
@@ -3121,9 +3462,82 @@
                                         ],
                                         "example": "draft"
                                     },
-                                    "duration_days": {
+                                    "status_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "status_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "example": "https://example.com/laravel-basics"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "example": "Beginner"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "preview_video_source_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "HTML",
+                                            "YouTube",
+                                            "Vimeo",
+                                            "External Link",
+                                            "Embed"
+                                        ],
+                                        "example": "YouTube"
+                                    },
+                                    "preview_video_url": {
+                                        "type": "string",
+                                        "example": "https://youtu.be/example"
+                                    },
+                                    "preview_video_poster": {
+                                        "type": "string",
+                                        "example": "poster.jpg"
+                                    },
+                                    "preview_video_embed": {
+                                        "type": "string",
+                                        "example": "<iframe src='https://example.com/embed'></iframe>"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "example": "8 hours"
+                                    },
+                                    "video_duration": {
+                                        "type": "string",
+                                        "example": "2 hours"
+                                    },
+                                    "course_preview_description": {
+                                        "type": "string",
+                                        "example": "This is a preview of the Laravel Basics course."
+                                    },
+                                    "is_featured": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_lock_lessons_in_order": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "created_by": {
                                         "type": "integer",
-                                        "example": 30
+                                        "example": 1
+                                    },
+                                    "category_ids": {
+                                        "description": "Array of category IDs for this course",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -3153,15 +3567,7 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
-                                        },
-                                        "category_id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "lecturer_id": {
-                                            "type": "integer",
-                                            "example": 2
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "is_free": {
                                             "type": "boolean",
@@ -3171,9 +3577,13 @@
                                             "type": "string",
                                             "example": "draft"
                                         },
-                                        "duration_days": {
+                                        "category_id": {
                                             "type": "integer",
-                                            "example": 30
+                                            "example": 1
+                                        },
+                                        "created_by": {
+                                            "type": "integer",
+                                            "example": 1
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -3184,6 +3594,14 @@
                                             "type": "string",
                                             "format": "date-time",
                                             "example": "2025-09-18T12:00:00Z"
+                                        },
+                                        "category_ids": {
+                                            "description": "Array of category IDs for this course",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 1
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -3286,13 +3704,6 @@
                                                     "items": {
                                                         "type": "string",
                                                         "example": "The category id field is required."
-                                                    }
-                                                },
-                                                "lecturer_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The lecturer id field is required."
                                                     }
                                                 }
                                             },
@@ -4182,7 +4593,7 @@
                                                             },
                                                             "price": {
                                                                 "type": "number",
-                                                                "example": 49.99
+                                                                "example": 49.99000000000000198951966012828052043914794921875
                                                             }
                                                         },
                                                         "type": "object"
@@ -8052,6 +8463,298 @@
                                                     "items": {
                                                         "type": "string",
                                                         "example": "The course_id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/sections-with-lessons": {
+            "put": {
+                "tags": [
+                    "section"
+                ],
+                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "operationId": "updateSectionWithLessons",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "title",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Introduction to Laravel"
+                                    },
+                                    "sectionable": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "lesson",
+                                                        "quiz"
+                                                    ],
+                                                    "example": "lesson"
+                                                },
+                                                "order": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Section updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Section updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Laravel"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "quizzes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Quiz One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A section with this title already exists for this course."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The title field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The title field is required."
+                                                    }
+                                                },
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                },
+                                                "sectionable": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The sectionable field is required."
                                                     }
                                                 }
                                             },

@@ -28,7 +28,6 @@ class CreateLessonsTable extends Migration
             $table->text('description')->nullable();
             $table->longText('content')->nullable();
             $table->json('files')->nullable();
-            $table->foreignId('section_id')->constrained('sections')->cascadeOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 

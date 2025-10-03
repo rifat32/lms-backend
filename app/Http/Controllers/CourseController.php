@@ -16,6 +16,108 @@ use Illuminate\Support\Facades\DB;
  */
 class CourseController extends Controller
 {
+
+      /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses",
+     *     tags={"course_management.course"},
+     *     operationId="getCoursesClient",
+     *     summary="Get all courses",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by category ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by keyword in title or description",
+     *         @OA\Schema(type="string", example="Laravel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", default=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=10, example=10)
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of courses",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Courses retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                     @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *                     @OA\Property(property="price", type="number", format="float", example=49.99),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-19T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid query parameters")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getCoursesClient(Request $request)
+    {
+
+        $query = Course::filters();
+
+        $courses = retrieve_data($query, 'created_at', 'courses');
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Courses retrieved successfully',
+            'meta' => $courses['meta'],
+            'data' => $courses['data'],
+        ], 200);
+
+
+    }
     /**
      * @OA\Get(
      *     path="/v1.0/courses",
@@ -205,7 +307,7 @@ class CourseController extends Controller
         if (empty($course)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Course not found'
+                'message' => 'Course not found by'
             ], 404);
         }
 
@@ -216,95 +318,113 @@ class CourseController extends Controller
         ], 200);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/v1.0/courses",
-     *     tags={"course_management.course"},
-     *     operationId="createCourse",
-     *     summary="Create a new course (Admin only)",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"title","description","category_id"},
-     *             @OA\Property(property="title", type="string", example="Laravel Basics"),
-     *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
-     *             @OA\Property(property="price", type="number", format="float", example=49.99),
-     *             @OA\Property(property="category_id", type="integer", example=1),
-     *             @OA\Property(property="lecturer_id", type="integer", example=2),
-     *             @OA\Property(property="is_free", type="boolean", example=false),
-     *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
-     *             @OA\Property(property="duration_days", type="integer", example=30)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Course created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=10),
-     *             @OA\Property(property="title", type="string", example="Laravel Basics"),
-     *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
-     *             @OA\Property(property="price", type="number", format="float", example=49.99),
-     *             @OA\Property(property="category_id", type="integer", example=1),
-     *             @OA\Property(property="lecturer_id", type="integer", example=2),
-     *             @OA\Property(property="is_free", type="boolean", example=false),
-     *             @OA\Property(property="status", type="string", example="draft"),
-     *             @OA\Property(property="duration_days", type="integer", example=30),
-     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not Found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Category not found.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=409,
-     *         description="Conflict",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The title field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="title", type="array",
-     *                     @OA\Items(type="string", example="The title field is required.")
-     *                 ),
-     *                 @OA\Property(property="description", type="array",
-     *                     @OA\Items(type="string", example="The description field is required.")
-     *                 ),
-     *                 @OA\Property(property="category_id", type="array",
-     *                     @OA\Items(type="string", example="The category id field is required.")
-     *                 ),
-     *                 @OA\Property(property="lecturer_id", type="array",
-     *                     @OA\Items(type="string", example="The lecturer id field is required.")
-     *                 )
-     *             )
-     *         )
-     *     )
-     * )
-     */
+  /**
+ * @OA\Post(
+ *     path="/v1.0/courses",
+ *     tags={"course_management.course"},
+ *     operationId="createCourse",
+ *     summary="Create a new course (Admin only)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"title","category_id"},
+ *             @OA\Property(property="id", type="integer", example=10),
+  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+*         @OA\Property(property="price", type="number", format="float", example=49.99),
+*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="is_free", type="boolean", example=false),
+*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+*         @OA\Property(property="level", type="string", example="Beginner"),
+*         @OA\Property(property="cover", type="string", example=""),
+*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+*         @OA\Property(property="duration", type="string", example="8 hours"),
+*         @OA\Property(property="video_duration", type="string", example="2 hours"),
+*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+*         @OA\Property(property="is_featured", type="boolean", example=true),
+*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+*         @OA\Property(property="created_by", type="integer", example=1),
+   *         @OA\Property(
+*             property="category_ids",
+*             type="array",
+*             @OA\Items(type="integer", example=1),
+*             description="Array of category IDs for this course"
+*         )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=201,
+ *         description="Course created successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="id", type="integer", example=10),
+ *             @OA\Property(property="title", type="string", example="Laravel Basics"),
+ *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+ *             @OA\Property(property="price", type="number", format="float", example=49.99),
+ *             @OA\Property(property="is_free", type="boolean", example=false),
+ *             @OA\Property(property="status", type="string", example="draft"),
+ *             @OA\Property(property="category_id", type="integer", example=1),
+ *             @OA\Property(property="created_by", type="integer", example=1),
+ *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+ *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+ * *         @OA\Property(
+*             property="category_ids",
+*             type="array",
+*             @OA\Items(type="integer", example=1),
+*             description="Array of category IDs for this course"
+*         )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Not Found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Category not found.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=409,
+ *         description="Conflict",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The title field is required."),
+ *             @OA\Property(property="errors", type="object",
+ *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
+ *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
+ *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
+ *             )
+ *         )
+ *     )
+ * )
+ */
 
 
 
@@ -321,6 +441,9 @@ class CourseController extends Controller
             // CREATE
             $course = Course::create($request_payload);
 
+
+            $course->categories()->sync($request_payload["category_ids"]);
+
             // COMMIT TRANSACTION
             DB::commit();
             // SEND RESPONSE
@@ -335,95 +458,129 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * @OA\Put(
-     *     path="/v1.0/courses",
-     *     tags={"course_management.course"},
-     *     operationId="updateCourse",
-     *     summary="Update a course (Admin only)",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"title","description","category_id", "id"},
-     *             @OA\Property(property="id", type="integer", example=10),
-     *             @OA\Property(property="title", type="string", example="Updated Title"),
-     *             @OA\Property(property="description", type="string", example="Updated description"),
-     *             @OA\Property(property="price", type="number", format="float", example=59.99),
-     *             @OA\Property(property="category_id", type="integer", example=2),
-     *             @OA\Property(property="lecturer_id", type="integer", example=3),
-     *             @OA\Property(property="is_free", type="boolean", example=false),
-     *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="published"),
-     *             @OA\Property(property="duration_days", type="integer", example=45)
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Course updated successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=10),
-     *             @OA\Property(property="title", type="string", example="Updated Title"),
-     *             @OA\Property(property="description", type="string", example="Updated description"),
-     *             @OA\Property(property="price", type="number", format="float", example=59.99),
-     *             @OA\Property(property="category_id", type="integer", example=2),
-     *             @OA\Property(property="lecturer_id", type="integer", example=3),
-     *             @OA\Property(property="is_free", type="boolean", example=false),
-     *             @OA\Property(property="status", type="string", example="published"),
-     *             @OA\Property(property="duration_days", type="integer", example=45),
-     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Course not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Course not found.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=409,
-     *         description="Conflict",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The title field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="title", type="array",
-     *                     @OA\Items(type="string", example="The title field is required.")
-     *                 ),
-     *                 @OA\Property(property="description", type="array",
-     *                     @OA\Items(type="string", example="The description field is required.")
-     *                 ),
-     *                 @OA\Property(property="category_id", type="array",
-     *                     @OA\Items(type="string", example="The category id field is required.")
-     *                 ),
-     *                 @OA\Property(property="lecturer_id", type="array",
-     *                     @OA\Items(type="string", example="The lecturer id field is required.")
-     *                 )
-     *             )
-     *         )
-     *     )
-     * )
-     */
+   /**
+ * @OA\Put(
+ *     path="/v1.0/courses",
+ *     tags={"course_management.course"},
+ *     operationId="updateCourse",
+ *     summary="Update a course (Admin only)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"id","title","category_id"},
+ *             @OA\Property(property="id", type="integer", example=10),
+  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+*         @OA\Property(property="price", type="number", format="float", example=49.99),
+*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="is_free", type="boolean", example=false),
+*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+*         @OA\Property(property="level", type="string", example="Beginner"),
+*         @OA\Property(property="cover", type="string", example=""),
+*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+*         @OA\Property(property="duration", type="string", example="8 hours"),
+*         @OA\Property(property="video_duration", type="string", example="2 hours"),
+*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+*         @OA\Property(property="is_featured", type="boolean", example=true),
+*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+*         @OA\Property(property="created_by", type="integer", example=1),
+   *         @OA\Property(
+*             property="category_ids",
+*             type="array",
+*             @OA\Items(type="integer", example=1),
+*             description="Array of category IDs for this course"
+*         )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Course updated successfully",
+ *         @OA\JsonContent(
+
+  *             @OA\Property(property="id", type="integer", example=10),
+  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+*         @OA\Property(property="price", type="number", format="float", example=49.99),
+*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="is_free", type="boolean", example=false),
+*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+*         @OA\Property(property="level", type="string", example="Beginner"),
+*         @OA\Property(property="cover", type="string", example=""),
+*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+*         @OA\Property(property="duration", type="string", example="8 hours"),
+*         @OA\Property(property="video_duration", type="string", example="2 hours"),
+*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+*         @OA\Property(property="is_featured", type="boolean", example=true),
+*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+*         @OA\Property(property="created_by", type="integer", example=1),
+   *         @OA\Property(
+*             property="category_ids",
+*             type="array",
+*             @OA\Items(type="integer", example=1),
+*             description="Array of category IDs for this course"
+*         )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthenticated",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Course not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Course not found.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=409,
+ *         description="Conflict",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The title field is required."),
+ *             @OA\Property(property="errors", type="object",
+ *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
+ *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
+ *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
+ *             )
+ *         )
+ *     )
+ * )
+ */
+
 
 
     public function updateCourse(CourseRequest $request)
@@ -436,6 +593,9 @@ class CourseController extends Controller
 
             // FIND BY ID
             $course = Course::find($request_payload['id']);
+
+
+            $course->categories()->sync($request_payload["category_ids"]);
 
             // SEND RESPONSE
             if (empty($course)) {

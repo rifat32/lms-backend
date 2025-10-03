@@ -9,41 +9,50 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Course extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'title',
         'description',
         'price',
-        'category_id',
+        'sale_price',
+        'price_start_date',
+        'price_end_date',
         'is_free',
         'status',
+        'status_start_date',
+        'status_end_date',
         'url',
         'level',
         'cover',
-        'preview_video',
+        'preview_video_source_type',
+        'preview_video_url',
+        'preview_video_poster',
+        'preview_video_embed',
         'duration',
         'video_duration',
         'course_preview_description',
-        'course_status',
-        'status_start_date',
-        'status_end_date',
-        'number_of_students',
-        'course_view',
         'is_featured',
         'is_lock_lessons_in_order',
-        'access_duration',
-        'access_device_type',
-        'certificate_info',
-        'pricing',
         'created_by',
     ];
 
 
     // Relationships
 
-    public function category()
-    {
-        return $this->belongsTo(CourseCategory::class, 'category_id');
-    }
+
+
+  public function categories()
+{
+    return $this->belongsToMany(
+        CourseCategory::class,   // Related model
+        'course_category_courses', // Pivot table name
+        'course_id',       // Foreign key on pivot table referencing current model
+        'course_category_id',     // Foreign key on pivot table referencing related model
+        'id',              // Local key on current model
+        'id'               // Local key on related model
+    )->withTimestamps();
+}
+
 
     public function sections(): HasMany
     {

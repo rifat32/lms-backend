@@ -23,4 +23,10 @@ class Quiz extends Model
     {
         return $this->hasMany(Question::class, "id", "quiz_id");
     }
+
+
+     public function sections()
+    {
+        return $this->morphToMany(Section::class, 'sectionable');
+    }
 }

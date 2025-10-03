@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonRequest;
 use App\Models\Lesson;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -81,27 +82,45 @@ class LessonController extends Controller
 
 public function createLesson(LessonRequest $request)
 {
+    // Log start of request immediately
+    log_message("Request received to create lesson.", "lesson.txt");
+  
     try {
+        log_message("Attempting to start database transaction.", "lesson.txt");
         DB::beginTransaction();
 
         $request_payload = $request->validated();
+        log_message("Request validated. Payload: " . json_encode($request_payload), "lesson.txt");
 
         $lesson = Lesson::create($request_payload); // create first to get ID
-
+        log_message("Lesson record created with ID: {$lesson->id}", "lesson.txt");
+        
         // Handle file uploads
         if ($request->hasFile('files')) {
+            log_message("Files detected. Starting upload process.", "lesson.txt");
             $uploaded_files = [];
             foreach ($request->file('files') as $file) {
                 $extension = $file->getClientOriginalExtension();
-                $filename = uniqid() . '.' . $extension; // unique file name
-                $folder_path = "business_1/section_{$lesson->section_id}/lesson_{$lesson->id}";
+                $filename = uniqid() . '_' . time() . '.' . $extension; 
+                $folder_path = "business_1/lesson_{$lesson->id}";
+                
+                log_message("Attempting to store file: {$filename} in path: {$folder_path}", "lesson.txt");
+                
+                // This line is a common point of failure (permissions or path)
                 $file->storeAs($folder_path, $filename, 'public');
+                
                 $uploaded_files[] = $filename; // save only filename in DB
             }
-            $lesson->files = json_encode($uploaded_files);
+            log_message("Files successfully uploaded. Saving filenames to lesson record.", "lesson.txt");
+            
+            $lesson->files = $uploaded_files;
             $lesson->save();
+        } else {
+             log_message("No files to upload.", "lesson.txt");
         }
 
+        log_message("Lesson file data saved. Committing transaction.", "lesson.txt");
+      
         DB::commit();
 
         return response()->json([
@@ -110,9 +129,29 @@ public function createLesson(LessonRequest $request)
             'data' => $lesson
         ], 201);
 
-    } catch (\Throwable $th) {
+    } catch (\Exception $e) {
+        // Rollback on any failure
         DB::rollBack();
-        throw $th;
+
+        // 🚨 CRITICAL FIX: Explicitly log the exception details for full context 
+        $exception_details = [
+            'error_message' => $e->getMessage(),
+            'file'          => $e->getFile(),
+            'line'          => $e->getLine(),
+            'trace'         => $e->getTraceAsString(), // This is what you need!
+        ];
+        
+        // Use your custom log_message function with the structured data
+        log_message($exception_details, "lesson.txt");
+
+        // Log the end of the failed process
+        log_message("Database transaction rolled back. Lesson creation failed.", "lesson.txt");
+       
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create lesson',
+            'error' => $e->getMessage()
+        ], 500);
     }
 }
 
@@ -291,7 +330,7 @@ public function createLesson(LessonRequest $request)
                 if (is_array($files)) {
                     foreach ($files as $file) {
                         // Build full path based on stored structure
-                        $path = "business_1/section_{$lesson->section_id}/lesson_{$lesson->id}/$file";
+                        $path = "business_1/lesson_{$lesson->id}/$file";
                         if (Storage::disk('public')->exists($path)) {
                             Storage::disk('public')->delete($path);
                         }

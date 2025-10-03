@@ -17,13 +17,30 @@ class Section extends Model
         'created_by'
     ];
 
-    public function lessons(): HasMany
-    {
-        return $this->hasMany(Lesson::class, 'section_id');
-    }
+
+
+ 
 
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+       public function sectionables()
+    {
+        return $this->hasMany(Sectionable::class);
+    }
+
+    public function lessons()
+    {
+        return $this->morphedByMany(Lesson::class, 'sectionable', 'sectionables');
+    }
+
+    public function quizzes()
+    {
+        return $this->morphedByMany(Quiz::class, 'sectionable', 'sectionables');
+    }
+
+
+
 }

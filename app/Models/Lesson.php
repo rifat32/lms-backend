@@ -9,14 +9,12 @@ class Lesson extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'course_id',
         'title',
         'content_type',
         'content_url',
         'sort_order',
-        'section_id',
         'duration',
         'is_preview',
         'is_time_locked',
@@ -25,31 +23,43 @@ class Lesson extends Model
         'unlock_day_after_purchase',
         'description',
         'content',
-        'files'
+        'files',
+
     ];
 
+    /**
+     * The attributes that should be cast.
+     * * Laravel now handles the JSON decoding of the 'files' attribute.
+     * $value passed to the accessor is GUARANTEED to be a PHP array (or null).
+     */
     protected $casts = [
         'files' => 'array',
     ];
- public function getFilesAttribute($value)
-    {
-        $files = json_decode($value, true) ?? [];
 
-        $full_paths = array_map(function ($filename) {
-            // return full path for each file
-            return asset("storage/business_1/section_{$this->section_id}/lesson_{$this->id}/$filename");
-        }, $files);
+    
+   public function getFilesAttribute($value)
+{
+    // Decode only if it’s a string
+    $files = is_string($value) ? json_decode($value, true) : ($value ?? []);
 
-        return $full_paths;
-    }
+    // Ensure it's always an array
+    $files = array_filter($files ?? []);
 
+    return array_map(function ($filename) {
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage/{$folder_path}/{$filename}");
+    }, $files);
+}
+
+    
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-    public function section()
+   
+    public function sections()
     {
-        return $this->belongsTo(Section::class, 'section_id');
+        return $this->morphToMany(Section::class, 'sectionable');
     }
 }

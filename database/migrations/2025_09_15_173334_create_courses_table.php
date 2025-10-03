@@ -17,30 +17,42 @@ class CreateCoursesTable extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
+
             $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('sale_price', 10, 2)->default(0);
+            $table->date("price_start_date")->nullable();
+            $table->date("price_end_date")->nullable();
+
             $table->boolean('is_free')->default(false);
+
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->date('status_start_date')->nullable();
+            $table->date('status_end_date')->nullable();
+
             $table->string('url')->nullable();
             $table->string('level')->nullable();
             $table->string('cover')->nullable();
-            $table->string('preview_video')->nullable();
-            $table->integer('duration')->nullable();
-            $table->integer('video_duration')->nullable();
+
+
+
+            $table->string('preview_video_source_type')->nullable(); // HTML, YouTube, Vimeo, External Link, Embed
+            $table->string('preview_video_url')->nullable();         // YouTube, Vimeo, External Link, or HTML video file
+            $table->string('preview_video_poster')->nullable();      // Poster image for the video preview
+            $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
+
+
+
+            $table->string('duration')->nullable();
+            $table->string('video_duration')->nullable();
             $table->string('course_preview_description')->nullable();
-            $table->string('course_status')->nullable();
-            $table->string('status_start_date')->nullable();
-            $table->string('status_end_date')->nullable();
-            $table->integer('number_of_students')->nullable();
-            $table->string('course_view')->nullable();
+
+
             $table->boolean('is_featured')->nullable();
             $table->boolean('is_lock_lessons_in_order')->nullable();
-            $table->string('access_duration')->nullable();
-            $table->string('access_device_type')->nullable();
-            $table->string('certificate_info')->nullable();
-            $table->enum('pricing', ['is_one_time_purchase', 'price', 'sale_price', 'sale_end_date', 'enterprise_price', 'is_included_membership', 'is_affiliatable', 'point_of_a_course', 'price_info']);
-            $table->foreignId('category_id')
-                ->constrained('course_categories')
-                ->cascadeOnDelete();
+
+          
+
+
             $table->foreignId('created_by')
                 ->nullable()
                 ->constrained('users')
