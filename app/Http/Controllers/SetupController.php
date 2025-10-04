@@ -64,6 +64,7 @@ class SetupController extends Controller
         return response()->json(['message' => 'Swagger Refreshed']);
     }
 
+
         public function migrate(Request $request)
     {
         Artisan::call('check:migrate');
