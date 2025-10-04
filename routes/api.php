@@ -82,6 +82,7 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/lessons'], function () {
         Route::post('/', [LessonController::class, 'createLesson']);
         Route::put('/', [LessonController::class, 'updateLesson']);
+        Route::get('/', [LessonController::class, 'getLessons']);
         Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
@@ -144,6 +145,7 @@ Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSect
 
     // Get quiz with questions
     Route::prefix('v1.0')->group(function () {
+    Route::get('/v1.0/quizzes', [QuizController::class, 'getQuizWithQuestions']);    
     Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
     Route::post('quizzes', [QuizController::class, 'store']);
     Route::put('quizzes/{id}', [QuizController::class, 'update']);

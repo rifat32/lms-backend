@@ -55,7 +55,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john.student@yopmail.com"
+                                        "example": "admin@yopmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -64,7 +64,7 @@
                                     },
                                     "role": {
                                         "type": "string",
-                                        "example": "student"
+                                        "example": "admin"
                                     }
                                 },
                                 "type": "object"
@@ -97,11 +97,11 @@
                                         },
                                         "email": {
                                             "type": "string",
-                                            "example": "john.student@yopmail.com"
+                                            "example": "admin@yopmail.com"
                                         },
                                         "role": {
                                             "type": "string",
-                                            "example": "student"
+                                            "example": "admin"
                                         },
                                         "created_at": {
                                             "type": "string",
@@ -156,7 +156,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "john.student@yopmail.com"
+                                        "example": "admin@yopmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -208,11 +208,11 @@
                                                 },
                                                 "email": {
                                                     "type": "string",
-                                                    "example": "john.student@yopmail.com"
+                                                    "example": "admin@yopmail.com"
                                                 },
                                                 "role": {
                                                     "type": "string",
-                                                    "example": "student"
+                                                    "example": "admin"
                                                 }
                                             },
                                             "type": "object"
@@ -4824,6 +4824,183 @@
             }
         },
         "/v1.0/lessons": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Get all lessons",
+                "operationId": "getLessons",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filter by category ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "searchKey",
+                        "in": "query",
+                        "description": "Search by keyword in title or description",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Laravel"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of courses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Courses retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Learn Laravel framework"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid query parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Lessons"
@@ -4837,8 +5014,7 @@
                             "schema": {
                                 "required": [
                                     "title",
-                                    "content_type",
-                                    "section_id"
+                                    "content_type"
                                 ],
                                 "properties": {
                                     "title": {
@@ -4860,10 +5036,6 @@
                                         "example": "https://example.com/video.mp4"
                                     },
                                     "sort_order": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "section_id": {
                                         "type": "integer",
                                         "example": 1
                                     },
@@ -4940,10 +5112,6 @@
                                         "data": {
                                             "properties": {
                                                 "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "section_id": {
                                                     "type": "integer",
                                                     "example": 1
                                                 },
@@ -6318,6 +6486,379 @@
                 ]
             }
         },
+        "/v1.0/question-categories": {
+            "get": {
+                "tags": [
+                    "question_management.category"
+                ],
+                "summary": "Get all question categories",
+                "description": "Fetches all question categories in the system.",
+                "operationId": "getQuestionCategories",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question categories fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mathematics"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-04T15:23:01.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "example": "2025-10-04T15:23:01.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "question_management.question_category"
+                ],
+                "summary": "Update an existing question category",
+                "operationId": "updateQuestionCategory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Programming"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "All programming related questions"
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "example": "programming"
+                                    },
+                                    "parent_question_category_id": {
+                                        "type": "integer",
+                                        "example": null,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Question category updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question category updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Programming"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "All programming related questions"
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "programming"
+                                                },
+                                                "parent_question_category_id": {
+                                                    "type": "integer",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-10-04T21:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Question category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "question_management.category"
+                ],
+                "summary": "Create a new question category",
+                "operationId": "createQuestionCategory",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "slug"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Programming"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Questions related to programming topics."
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "example": "programming"
+                                    },
+                                    "parent_question_category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Question category created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question category created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Programming"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Questions related to programming topics."
+                                                },
+                                                "slug": {
+                                                    "type": "string",
+                                                    "example": "programming"
+                                                },
+                                                "parent_question_category_id": {
+                                                    "type": "integer",
+                                                    "example": null
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-10-04T12:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/question-categories/{id}": {
+            "delete": {
+                "tags": [
+                    "question_management.category"
+                ],
+                "summary": "Delete a question category",
+                "description": "Deletes a question category by its ID.",
+                "operationId": "deleteQuestionCategory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the question category to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question category deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Question category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/questions": {
             "get": {
                 "tags": [
@@ -6460,6 +7001,159 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "question_management.question"
+                ],
+                "summary": "Update an existing question with options",
+                "description": "Updates a question and its options by question ID.",
+                "operationId": "updateQuestion",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the question to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "question_text",
+                                    "question_type",
+                                    "points",
+                                    "options"
+                                ],
+                                "properties": {
+                                    "question_text": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Updated question text"
+                                    },
+                                    "question_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "true_false",
+                                            "single",
+                                            "multiple",
+                                            "matching",
+                                            "file_matching",
+                                            "keywords",
+                                            "fill_in_the_blanks"
+                                        ],
+                                        "example": "single"
+                                    },
+                                    "points": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "example": 5
+                                    },
+                                    "time_limit": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "example": 30,
+                                        "nullable": true
+                                    },
+                                    "is_required": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "options": {
+                                        "description": "List of options for the question",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "option_text": {
+                                                    "type": "string",
+                                                    "example": "Paris",
+                                                    "nullable": true
+                                                },
+                                                "is_correct": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "explanation": {
+                                                    "type": "string",
+                                                    "example": "Paris is the capital of France",
+                                                    "nullable": true
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/image.png",
+                                                    "nullable": true
+                                                },
+                                                "matching_pair_text": {
+                                                    "type": "string",
+                                                    "example": "France",
+                                                    "nullable": true
+                                                },
+                                                "matching_pair_image": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/pair-image.png",
+                                                    "nullable": true
+                                                },
+                                                "category_ids": {
+                                                    "description": "Array of category IDs for this course",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Question updated successfully"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Question not found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "question_management.question"
@@ -6561,6 +7255,14 @@
                                                     "type": "string",
                                                     "example": "https://example.com/pair-image.png",
                                                     "nullable": true
+                                                },
+                                                "category_ids": {
+                                                    "description": "Array of category IDs for this course",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -6863,151 +7565,6 @@
                                 }
                             }
                         }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "question_management.question"
-                ],
-                "summary": "Update an existing question with options",
-                "description": "Updates a question and its options by question ID.",
-                "operationId": "updateQuestion",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the question to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 10
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "question_text",
-                                    "question_type",
-                                    "points",
-                                    "options"
-                                ],
-                                "properties": {
-                                    "question_text": {
-                                        "type": "string",
-                                        "maxLength": 255,
-                                        "example": "Updated question text"
-                                    },
-                                    "question_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "true_false",
-                                            "single",
-                                            "multiple",
-                                            "matching",
-                                            "file_matching",
-                                            "keywords",
-                                            "fill_in_the_blanks"
-                                        ],
-                                        "example": "single"
-                                    },
-                                    "points": {
-                                        "type": "integer",
-                                        "minimum": 1,
-                                        "example": 5
-                                    },
-                                    "time_limit": {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "example": 30,
-                                        "nullable": true
-                                    },
-                                    "is_required": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "options": {
-                                        "description": "List of options for the question",
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": null,
-                                                    "nullable": true
-                                                },
-                                                "option_text": {
-                                                    "type": "string",
-                                                    "example": "Paris",
-                                                    "nullable": true
-                                                },
-                                                "is_correct": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "explanation": {
-                                                    "type": "string",
-                                                    "example": "Paris is the capital of France",
-                                                    "nullable": true
-                                                },
-                                                "image": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/image.png",
-                                                    "nullable": true
-                                                },
-                                                "matching_pair_text": {
-                                                    "type": "string",
-                                                    "example": "France",
-                                                    "nullable": true
-                                                },
-                                                "matching_pair_image": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/pair-image.png",
-                                                    "nullable": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Question updated successfully"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Question not found"
-                    },
-                    "409": {
-                        "description": "Conflict"
-                    },
-                    "422": {
-                        "description": "Validation error"
-                    },
-                    "500": {
-                        "description": "Internal server error"
                     }
                 },
                 "security": [
@@ -7694,6 +8251,201 @@
             }
         },
         "/v1.0/quizzes": {
+            "get": {
+                "tags": [
+                    "Quizzes"
+                ],
+                "summary": "Get quiz details with questions and options",
+                "operationId": "getQuizWithQuestions",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Quiz ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "is_randomized",
+                        "in": "query",
+                        "description": "Whether to randomize the quiz questions",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "question_limit",
+                        "in": "query",
+                        "description": "The maximum number of questions to include in the quiz",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quiz retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Laravel Basics Quiz"
+                                                },
+                                                "questions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "What is Laravel?"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "multiple_choice"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "option_id": {
+                                                                            "type": "integer",
+                                                                            "example": 101
+                                                                        },
+                                                                        "text": {
+                                                                            "type": "string",
+                                                                            "example": "A PHP framework"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Quizzes"
@@ -9632,6 +10384,10 @@
             "description": "Endpoints to update lesson progress for enrolled users"
         },
         {
+            "name": "question_management.category",
+            "description": "Endpoints for managing question categories"
+        },
+        {
             "name": "QuizAttempts",
             "description": "Endpoints to attempt quizzes and grade essays (Admin)"
         },
@@ -9662,6 +10418,10 @@
         {
             "name": "question_management.options",
             "description": "question_management.options"
+        },
+        {
+            "name": "question_management.question_category",
+            "description": "question_management.question_category"
         },
         {
             "name": "question_management.question",

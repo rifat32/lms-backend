@@ -17,6 +17,110 @@ use Illuminate\Support\Facades\Storage;
  */
 class LessonController extends Controller
 {
+
+
+  /**
+     * @OA\Get(
+     *     path="/v1.0/lessons",
+     *     tags={"Lessons"},
+     *     operationId="getLessons",
+     *     summary="Get all lessons",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by category ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by keyword in title or description",
+     *         @OA\Schema(type="string", example="Laravel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", default=1, example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default=10, example=10)
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of courses",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Courses retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                     @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *                     @OA\Property(property="price", type="number", format="float", example=49.99),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-19T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid query parameters")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getLessons(Request $request)
+    {
+
+        $query = Lesson::filters();
+
+        $lessons = retrieve_data($query, 'created_at', 'lessons');
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson retrieved successfully',
+            'meta' => $lessons['meta'],
+            'data' => $lessons['data'],
+        ], 200);
+
+    }
+
+
     /**
      * @OA\Post(
      *     path="/v1.0/lessons",

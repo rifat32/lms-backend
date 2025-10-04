@@ -72,24 +72,8 @@ class QuestionCategoryController extends Controller
         }
     }
 
-    <?php
 
-namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\QuestionCategoryRequest;
-use App\Models\QuestionCategory;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
-/**
- * @OA\Tag(
- *     name="question_management.question_category",
- *     description="Endpoints for managing question categories"
- * )
- */
-class QuestionCategoryController extends Controller
-{
     /**
      * @OA\Put(
      *     path="/v1.0/question-categories",
@@ -207,13 +191,21 @@ class QuestionCategoryController extends Controller
 
     public function getQuestionCategories(Request $request)
     {
-        $categories = QuestionCategory::orderBy('id', 'desc')->get();
 
+        $query = QuestionCategory::query();
+
+        $categories = retrieve_data($query, 'created_at', 'question_categories');
+
+        // SEND RESPONSE
         return response()->json([
             'success' => true,
-            'message' => 'Question categories fetched successfully',
-            'data' => $categories
+            'message' => 'Question Category retrieved successfully',
+            'meta' => $categories['meta'],
+            'data' => $categories['data'],
         ], 200);
+
+
+
     }
 
    /**
