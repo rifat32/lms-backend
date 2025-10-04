@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCourse;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SectionWithLessonRequest extends FormRequest
@@ -24,7 +25,7 @@ class SectionWithLessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            "id" => ['required', 'integer', new ValidSection()],
+            "id" => "nullable|integer|exists:sections,id",
             'title' => 'required|string|max:255',
             'course_id' => ['required', 'numeric', new ValidCourse()],
                'sectionable' => 'array|required',
@@ -33,6 +34,8 @@ class SectionWithLessonRequest extends FormRequest
         'sectionable.*.order' => 'nullable|integer',
         ];
 
+
+        
         return $rules;
     }
 

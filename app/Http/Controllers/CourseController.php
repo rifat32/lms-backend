@@ -21,9 +21,9 @@ class CourseController extends Controller
 
 
 
-     
 
-      /**
+
+    /**
      * @OA\Get(
      *     path="/v1.0/client/courses",
      *     tags={"course_management.course"},
@@ -121,8 +121,6 @@ class CourseController extends Controller
             'meta' => $courses['meta'],
             'data' => $courses['data'],
         ], 200);
-
-
     }
     /**
      * @OA\Get(
@@ -222,8 +220,6 @@ class CourseController extends Controller
             'meta' => $courses['meta'],
             'data' => $courses['data'],
         ], 200);
-
-
     }
 
     /**
@@ -324,113 +320,113 @@ class CourseController extends Controller
         ], 200);
     }
 
-  /**
- * @OA\Post(
- *     path="/v1.0/courses",
- *     tags={"course_management.course"},
- *     operationId="createCourse",
- *     summary="Create a new course (Admin only)",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"title","category_id"},
- *             @OA\Property(property="id", type="integer", example=10),
-  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
-*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
-*         @OA\Property(property="price", type="number", format="float", example=49.99),
-*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
-*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="is_free", type="boolean", example=false),
-*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
-*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
-*         @OA\Property(property="level", type="string", example="Beginner"),
-*         @OA\Property(property="cover", type="string", example=""),
-*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
-*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
-*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
-*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
-*         @OA\Property(property="duration", type="string", example="8 hours"),
-*         @OA\Property(property="video_duration", type="string", example="2 hours"),
-*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
-*         @OA\Property(property="is_featured", type="boolean", example=true),
-*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
-*         @OA\Property(property="created_by", type="integer", example=1),
-   *         @OA\Property(
-*             property="category_ids",
-*             type="array",
-*             @OA\Items(type="integer", example=1),
-*             description="Array of category IDs for this course"
-*         )
- *         )
- *     ),
- *     @OA\Response(
- *         response=201,
- *         description="Course created successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="id", type="integer", example=10),
- *             @OA\Property(property="title", type="string", example="Laravel Basics"),
- *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
- *             @OA\Property(property="price", type="number", format="float", example=49.99),
- *             @OA\Property(property="is_free", type="boolean", example=false),
- *             @OA\Property(property="status", type="string", example="draft"),
- *             @OA\Property(property="category_id", type="integer", example=1),
- *             @OA\Property(property="created_by", type="integer", example=1),
- *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
- *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
- * *         @OA\Property(
-*             property="category_ids",
-*             type="array",
-*             @OA\Items(type="integer", example=1),
-*             description="Array of category IDs for this course"
-*         )
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Forbidden",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Not Found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Category not found.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=409,
- *         description="Conflict",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The title field is required."),
- *             @OA\Property(property="errors", type="object",
- *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
- *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
- *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
- *             )
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Post(
+     *     path="/v1.0/courses",
+     *     tags={"course_management.course"},
+     *     operationId="createCourse",
+     *     summary="Create a new course (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title","category_id"},
+     *             @OA\Property(property="id", type="integer", example=10),
+     *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+     *         @OA\Property(property="price", type="number", format="float", example=49.99),
+     *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+     *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="is_free", type="boolean", example=false),
+     *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+     *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+     *         @OA\Property(property="level", type="string", example="Beginner"),
+     *         @OA\Property(property="cover", type="string", example=""),
+     *         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+     *         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+     *         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+     *         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+     *         @OA\Property(property="duration", type="string", example="8 hours"),
+     *         @OA\Property(property="video_duration", type="string", example="2 hours"),
+     *         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+     *         @OA\Property(property="is_featured", type="boolean", example=true),
+     *         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+     *         @OA\Property(property="created_by", type="integer", example=1),
+     *         @OA\Property(
+     *             property="category_ids",
+     *             type="array",
+     *             @OA\Items(type="integer", example=1),
+     *             description="Array of category IDs for this course"
+     *         )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Course created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=10),
+     *             @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *             @OA\Property(property="price", type="number", format="float", example=49.99),
+     *             @OA\Property(property="is_free", type="boolean", example=false),
+     *             @OA\Property(property="status", type="string", example="draft"),
+     *             @OA\Property(property="category_id", type="integer", example=1),
+     *             @OA\Property(property="created_by", type="integer", example=1),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+     * *         @OA\Property(
+     *             property="category_ids",
+     *             type="array",
+     *             @OA\Items(type="integer", example=1),
+     *             description="Array of category IDs for this course"
+     *         )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not Found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Category not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The title field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
+     *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
+     *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
+     *             )
+     *         )
+     *     )
+     * )
+     */
 
 
 
@@ -448,23 +444,20 @@ class CourseController extends Controller
             $course = Course::create($request_payload);
 
 
-            
+
             if ($request->hasFile('cover')) {
-    log_message("Cover file detected. Uploading...", "course.txt");
 
-    $file = $request->file('cover');
-    $extension = $file->getClientOriginalExtension();
-    $filename = uniqid() . '_' . time() . '.' . $extension; 
-    $folder_path = "business_1/course_{$course->id}";
-
-    log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
-
-    $file->storeAs($folder_path, $filename, 'public');
+                $file = $request->file('cover');
+                $extension = $file->getClientOriginalExtension();
+                $filename = uniqid() . '_' . time() . '.' . $extension;
+                $folder_path = "business_1/course_{$course->id}";
 
 
-    $course->cover = $filename; // store only filename
-    $course->save();
-} 
+                $file->storeAs($folder_path, $filename, 'public');
+
+                $course->cover = $filename; // store only filename
+                $course->save();
+            }
 
 
 
@@ -484,128 +477,128 @@ class CourseController extends Controller
         }
     }
 
-   /**
- * @OA\Put(
- *     path="/v1.0/courses",
- *     tags={"course_management.course"},
- *     operationId="updateCourse",
- *     summary="Update a course (Admin only)",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"id","title","category_id"},
- *             @OA\Property(property="id", type="integer", example=10),
-  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
-*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
-*         @OA\Property(property="price", type="number", format="float", example=49.99),
-*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
-*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="is_free", type="boolean", example=false),
-*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
-*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
-*         @OA\Property(property="level", type="string", example="Beginner"),
-*         @OA\Property(property="cover", type="string", example=""),
-*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
-*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
-*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
-*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
-*         @OA\Property(property="duration", type="string", example="8 hours"),
-*         @OA\Property(property="video_duration", type="string", example="2 hours"),
-*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
-*         @OA\Property(property="is_featured", type="boolean", example=true),
-*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
-*         @OA\Property(property="created_by", type="integer", example=1),
-   *         @OA\Property(
-*             property="category_ids",
-*             type="array",
-*             @OA\Items(type="integer", example=1),
-*             description="Array of category IDs for this course"
-*         )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Course updated successfully",
- *         @OA\JsonContent(
+    /**
+     * @OA\Put(
+     *     path="/v1.0/courses",
+     *     tags={"course_management.course"},
+     *     operationId="updateCourse",
+     *     summary="Update a course (Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","title","category_id"},
+     *             @OA\Property(property="id", type="integer", example=10),
+     *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+     *         @OA\Property(property="price", type="number", format="float", example=49.99),
+     *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+     *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="is_free", type="boolean", example=false),
+     *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+     *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+     *         @OA\Property(property="level", type="string", example="Beginner"),
+     *         @OA\Property(property="cover", type="string", example=""),
+     *         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+     *         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+     *         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+     *         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+     *         @OA\Property(property="duration", type="string", example="8 hours"),
+     *         @OA\Property(property="video_duration", type="string", example="2 hours"),
+     *         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+     *         @OA\Property(property="is_featured", type="boolean", example=true),
+     *         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+     *         @OA\Property(property="created_by", type="integer", example=1),
+     *         @OA\Property(
+     *             property="category_ids",
+     *             type="array",
+     *             @OA\Items(type="integer", example=1),
+     *             description="Array of category IDs for this course"
+     *         )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course updated successfully",
+     *         @OA\JsonContent(
 
-  *             @OA\Property(property="id", type="integer", example=10),
-  *         @OA\Property(property="title", type="string", example="Laravel Basics"),
-*         @OA\Property(property="description", type="string", example="A complete Laravel course"),
-*         @OA\Property(property="price", type="number", format="float", example=49.99),
-*         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
-*         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="is_free", type="boolean", example=false),
-*         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
-*         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
-*         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
-*         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
-*         @OA\Property(property="level", type="string", example="Beginner"),
-*         @OA\Property(property="cover", type="string", example=""),
-*         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
-*         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
-*         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
-*         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
-*         @OA\Property(property="duration", type="string", example="8 hours"),
-*         @OA\Property(property="video_duration", type="string", example="2 hours"),
-*         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
-*         @OA\Property(property="is_featured", type="boolean", example=true),
-*         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
-*         @OA\Property(property="created_by", type="integer", example=1),
-   *         @OA\Property(
-*             property="category_ids",
-*             type="array",
-*             @OA\Items(type="integer", example=1),
-*             description="Array of category IDs for this course"
-*         )
- *         )
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Unauthenticated.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Forbidden",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Course not found",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Course not found.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=409,
- *         description="Conflict",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The title field is required."),
- *             @OA\Property(property="errors", type="object",
- *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
- *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
- *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
- *             )
- *         )
- *     )
- * )
- */
+     *             @OA\Property(property="id", type="integer", example=10),
+     *         @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *         @OA\Property(property="description", type="string", example="A complete Laravel course"),
+     *         @OA\Property(property="price", type="number", format="float", example=49.99),
+     *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
+     *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="is_free", type="boolean", example=false),
+     *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
+     *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
+     *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
+     *         @OA\Property(property="url", type="string", example="https://example.com/laravel-basics"),
+     *         @OA\Property(property="level", type="string", example="Beginner"),
+     *         @OA\Property(property="cover", type="string", example=""),
+     *         @OA\Property(property="preview_video_source_type", type="string", enum={"HTML","YouTube","Vimeo","External Link","Embed"}, example="YouTube"),
+     *         @OA\Property(property="preview_video_url", type="string", example="https://youtu.be/example"),
+     *         @OA\Property(property="preview_video_poster", type="string", example="poster.jpg"),
+     *         @OA\Property(property="preview_video_embed", type="string", example="<iframe src='https://example.com/embed'></iframe>"),
+     *         @OA\Property(property="duration", type="string", example="8 hours"),
+     *         @OA\Property(property="video_duration", type="string", example="2 hours"),
+     *         @OA\Property(property="course_preview_description", type="string", example="This is a preview of the Laravel Basics course."),
+     *         @OA\Property(property="is_featured", type="boolean", example=true),
+     *         @OA\Property(property="is_lock_lessons_in_order", type="boolean", example=true),
+     *         @OA\Property(property="created_by", type="integer", example=1),
+     *         @OA\Property(
+     *             property="category_ids",
+     *             type="array",
+     *             @OA\Items(type="integer", example=1),
+     *             description="Array of category IDs for this course"
+     *         )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Course not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="A course with this title already exists.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The title field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="title", type="array", @OA\Items(type="string", example="The title field is required.")),
+     *                 @OA\Property(property="description", type="array", @OA\Items(type="string", example="The description field is required.")),
+     *                 @OA\Property(property="category_id", type="array", @OA\Items(type="string", example="The category id field is required."))
+     *             )
+     *         )
+     *     )
+     * )
+     */
 
 
 
@@ -620,31 +613,31 @@ class CourseController extends Controller
             // FIND BY ID
             $course = Course::find($request_payload['id']);
 
-   if ($request->hasFile('cover')) {
-    log_message("Cover file detected. Uploading...", "course.txt");
+            if ($request->hasFile('cover')) {
+                log_message("Cover file detected. Uploading...", "course.txt");
 
-    $file = $request->file('cover');
-    $extension = $file->getClientOriginalExtension();
-    $filename = uniqid() . '_' . time() . '.' . $extension; 
-    $folder_path = "business_1/course_{$course->id}";
+                $file = $request->file('cover');
+                $extension = $file->getClientOriginalExtension();
+                $filename = uniqid() . '_' . time() . '.' . $extension;
+                $folder_path = "business_1/course_{$course->id}";
 
-    log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
+                log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
 
-    $file->storeAs($folder_path, $filename, 'public');
+                $file->storeAs($folder_path, $filename, 'public');
 
-    // Delete old cover if exists
-    if ($course->cover) {
-        $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
-        if (Storage::disk('public')->exists($old_path)) {
-            Storage::disk('public')->delete($old_path);
-        }
-    }
+                // Delete old cover if exists
+                if ($course->cover) {
+                    $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
+                    if (Storage::disk('public')->exists($old_path)) {
+                        Storage::disk('public')->delete($old_path);
+                    }
+                }
 
-    $course->cover = $filename; // store only filename
-    $course->save();
-} else {
-    log_message("No cover uploaded.", "course.txt");
-}
+                $course->cover = $filename; // store only filename
+                $course->save();
+            } else {
+                log_message("No cover uploaded.", "course.txt");
+            }
             $course->categories()->sync($request_payload["category_ids"]);
 
             // SEND RESPONSE
@@ -737,14 +730,14 @@ class CourseController extends Controller
             }
 
             foreach ($courses as $course) {
-    $raw_cover = $course->getRawOriginal('cover');
-    if ($raw_cover) {
-        $path = "business_1/course_{$course->id}/$raw_cover";
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
-    }
-}
+                $raw_cover = $course->getRawOriginal('cover');
+                if ($raw_cover) {
+                    $path = "business_1/course_{$course->id}/$raw_cover";
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
 
 
             // DELETE THE RECORDS
@@ -754,7 +747,7 @@ class CourseController extends Controller
 
 
 
-            
+
 
             DB::commit();
 

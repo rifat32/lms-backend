@@ -12,6 +12,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
 use App\Http\Controllers\OptionController;
+use App\Http\Controllers\QuestionCategoryController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
@@ -93,15 +94,13 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [SectionController::class, 'createSection']);       // Create
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
 
-        Route::put('/-with-lessons', [SectionController::class, 'updateSectionWithLessons']); // Update with lessons
-
-
+       
 
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
-
+Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
@@ -116,7 +115,6 @@ Route::middleware('auth:api')->group(function () {
     // QUESTION
     Route::group(['prefix' => '/v1.0/questions'], function () {
         Route::post('/', [QuestionController::class, 'createQuestion']);
-        Route::put('/', [QuestionController::class, 'updateQuestion']);
         Route::put('/', [QuestionController::class, 'updateQuestion']);
         Route::get('/', [QuestionController::class, 'getAllQuestions']);
         Route::get('/{id}', [QuestionController::class, 'getQuestionById']);
@@ -160,6 +158,12 @@ Route::middleware('auth:api')->group(function () {
 
     
 
+  Route::group(['prefix' => '/v1.0/question-categories'], function () {
+    Route::post('/', [QuestionCategoryController::class, 'createQuestionCategory']); // Already exists
+    Route::put('/', [QuestionCategoryController::class, 'updateQuestionCategory']);  // Update
+    Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
+    Route::delete('/{id}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
+});
 
 
     // Generate certificate after completing a course

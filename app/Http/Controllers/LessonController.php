@@ -26,12 +26,11 @@ class LessonController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","content_type","section_id"},
+     *             required={"title","content_type"},
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *             @OA\Property(property="sort_order", type="integer", example=1),
-     *             @OA\Property(property="section_id", type="integer", example=1),
      *             @OA\Property(property="duration", type="integer", example=45, description="Duration in minutes"),
      *             @OA\Property(property="is_preview", type="boolean", example=true),
      *             @OA\Property(property="is_time_locked", type="boolean", example=false),
@@ -60,7 +59,6 @@ class LessonController extends Controller
      *             @OA\Property(property="message", type="string", example="Lesson created successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="section_id", type="integer", example=1),
      *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *                 @OA\Property(property="duration", type="integer", example=45),
      *                 @OA\Property(property="is_preview", type="boolean", example=true),

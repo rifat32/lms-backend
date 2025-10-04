@@ -39,4 +39,10 @@ class Question extends Model
     {
         return $this->belongsToMany(Quiz::class, 'quiz_questions', 'question_id', 'quiz_id');
     }
+
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(QuestionCategory::class, 'question_category_question', 'question_id', 'category_id');
+    }
 }
