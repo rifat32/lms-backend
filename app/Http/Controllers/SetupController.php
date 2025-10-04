@@ -66,8 +66,7 @@ class SetupController extends Controller
 
         public function migrate(Request $request)
     {
-
-        Artisan::call('migrate');
+        Artisan::call('check:migrate');
         return "migrated";
     }
 
