@@ -24,6 +24,7 @@ class Lesson extends Model
         'description',
         'content',
         'files',
+        'materials',
 
     ];
 
@@ -34,6 +35,7 @@ class Lesson extends Model
      */
     protected $casts = [
         'files' => 'array',
+        'materials' => 'array',
     ];
 
     
@@ -49,6 +51,20 @@ class Lesson extends Model
         $folder_path = "business_1/lesson_{$this->id}";
         return asset("storage/{$folder_path}/{$filename}");
     }, $files);
+}
+
+  public function getMaterialsAttribute($value)
+{
+    // Decode only if it’s a string
+    $materials = is_string($value) ? json_decode($value, true) : ($value ?? []);
+
+    // Ensure it's always an array
+    $materials = array_filter($files ?? []);
+
+    return array_map(function ($filename) {
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage/{$folder_path}/{$filename}");
+    }, $materials);
 }
 
     

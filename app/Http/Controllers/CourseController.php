@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
+use App\Models\CourseFaq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Storage;
  */
 class CourseController extends Controller
 {
+
+
+
+     
 
       /**
      * @OA\Get(

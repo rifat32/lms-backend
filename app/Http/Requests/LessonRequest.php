@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidCourse;
+
 use App\Rules\ValidLesson;
-use App\Rules\ValidSection;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonRequest extends FormRequest
@@ -19,10 +19,10 @@ class LessonRequest extends FormRequest
         $rules = [
             // 'course_id' => ['required', 'integer', new ValidCourse()],
             'title' => 'required|string|max:255',
-            'content_type' => 'required|in:video,text,file,quiz',
+            'content_type' => 'required|in:video,text,pdf,audio,file',
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
-            'section_id' => ['required', 'integer', new ValidSection()],
+
 
             // new fields
             'duration' => 'nullable|integer|min:1',
@@ -34,7 +34,9 @@ class LessonRequest extends FormRequest
             'description' => 'nullable|string',
             'content' => 'nullable|string',
             'files' => 'nullable|array',        // if multiple
-            'files.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480' // max 20MB per file
+            'files.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480', // max 20MB per file
+            'materials' => 'nullable|array',
+            'materials.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480' // max 20MB per file
         ];
 
         if ($this->isMethod('put') || $this->isMethod('patch')) {

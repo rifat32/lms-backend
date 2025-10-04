@@ -66,23 +66,7 @@ class SectionController extends Controller
                 ], 400);
             }
 
-            // Delete all lesson files
-            $lessons = Lesson::whereIn('section_id', $existingIds)->get();
-
-             // Delete lesson files (use raw DB value, not accessor!)
-        foreach ($lessons as $lesson) {
-            $raw_files = $lesson->getRawOriginal('files'); // raw JSON string from DB
-            $files = $raw_files ? json_decode($raw_files, true) : [];
-
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    $path = "business_1/lesson_{$lesson->id}/$file";
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
-                    }
-                }
-            }
-        }
+          
 
             // Delete sections (cascade deletes lessons if DB is set up)
             Section::whereIn('id', $existingIds)->delete();

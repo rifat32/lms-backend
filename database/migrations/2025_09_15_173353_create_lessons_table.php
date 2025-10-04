@@ -16,7 +16,7 @@ class CreateLessonsTable extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->enum('content_type', ['video', 'text', 'file', 'quiz']);
+            $table->enum('content_type', ['video', 'text','pdf','audio', 'file']);
             $table->string('content_url')->nullable();
             $table->integer('sort_order')->default(0);
             $table->integer('duration')->nullable(); // duration in minutes
@@ -28,6 +28,9 @@ class CreateLessonsTable extends Migration
             $table->text('description')->nullable();
             $table->longText('content')->nullable();
             $table->json('files')->nullable();
+            $table->json('materials')->nullable();
+
+        
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 

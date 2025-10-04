@@ -26,8 +26,7 @@ class LessonController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"title","content_type", "course_id","section_id"},
-     *             @OA\Property(property="course_id", type="integer", example=1),
+     *             required={"title","content_type","section_id"},
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
@@ -45,6 +44,11 @@ class LessonController extends Controller
      *                 property="files",
      *                 type="array",
      *                 @OA\Items(type="string", format="binary")
+     *             ),
+     *   @OA\Property(
+     *                 property="materials",
+     *                 type="array",
+     *                 @OA\Items(type="string", format="binary")
      *             )
      *         )
      *     ),
@@ -56,7 +60,6 @@ class LessonController extends Controller
      *             @OA\Property(property="message", type="string", example="Lesson created successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="course_id", type="integer", example=101),
      *                 @OA\Property(property="section_id", type="integer", example=1),
      *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *                 @OA\Property(property="duration", type="integer", example=45),
@@ -68,6 +71,8 @@ class LessonController extends Controller
      *                 @OA\Property(property="description", type="string", example="This lesson introduces Laravel basics."),
      *                 @OA\Property(property="content", type="string", example="Lesson detailed text content here..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
+          *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
+     * 
      *                 @OA\Property(property="content_type", type="string", example="video"),
      *                 @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *                 @OA\Property(property="sort_order", type="integer", example=1),
@@ -115,9 +120,29 @@ public function createLesson(LessonRequest $request)
             
             $lesson->files = $uploaded_files;
             $lesson->save();
-        } else {
-             log_message("No files to upload.", "lesson.txt");
-        }
+        } 
+  // Handle file uploads
+        if ($request->hasFile('materials')) {
+            log_message("Files detected. Starting upload process.", "lesson.txt");
+            $uploaded_files = [];
+            foreach ($request->file('materials') as $file) {
+                $extension = $file->getClientOriginalExtension();
+                $filename = uniqid() . '_' . time() . '.' . $extension; 
+                $folder_path = "business_1/lesson_{$lesson->id}";
+                
+                log_message("Attempting to store file: {$filename} in path: {$folder_path}", "lesson.txt");
+                
+                // This line is a common point of failure (permissions or path)
+                $file->storeAs($folder_path, $filename, 'public');
+                
+                $uploaded_files[] = $filename; // save only filename in DB
+            }
+            log_message("Files successfully uploaded. Saving filenames to lesson record.", "lesson.txt");
+            
+            $lesson->materials = $uploaded_files;
+            $lesson->save();
+        } 
+        
 
         log_message("Lesson file data saved. Committing transaction.", "lesson.txt");
       
@@ -172,9 +197,8 @@ public function createLesson(LessonRequest $request)
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"id", "course_id", "title", "content_type"},
+     *             required={"id",  "title", "content_type"},
      *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Updated Lesson Title"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/updated-video.mp4"),
@@ -191,7 +215,14 @@ public function createLesson(LessonRequest $request)
      *                 property="files",
      *                 type="array",
      *                 @OA\Items(type="string", format="binary")
+     *             ),
+     *   *             @OA\Property(
+     *                 property="materials",
+     *                 type="array",
+     *                 @OA\Items(type="string", format="binary")
      *             )
+     * 
+     * 
      *         )
      *     ),
      *     @OA\Response(
@@ -202,7 +233,7 @@ public function createLesson(LessonRequest $request)
      *             @OA\Property(property="message", type="string", example="Lesson updated successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=10),
-     *                 @OA\Property(property="course_id", type="integer", example=101),
+
      *                 @OA\Property(property="title", type="string", example="Updated Lesson Title"),
      *                 @OA\Property(property="duration", type="integer", example=50),
      *                 @OA\Property(property="is_preview", type="boolean", example=true),
@@ -213,6 +244,9 @@ public function createLesson(LessonRequest $request)
      *                 @OA\Property(property="description", type="string", example="Updated lesson description."),
      *                 @OA\Property(property="content", type="string", example="Updated detailed content..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
+        *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
+     * 
+     * 
      *                 @OA\Property(property="content_type", type="string", example="video"),
      *                 @OA\Property(property="content_url", type="string", example="https://example.com/updated-video.mp4"),
      *                 @OA\Property(property="sort_order", type="integer", example=2),
@@ -256,6 +290,22 @@ public function createLesson(LessonRequest $request)
     }
 
     $request_payload['files'] = json_encode($uploaded_files);
+}
+
+ if ($request->hasFile('materials')) {
+    // Get existing files
+    $raw_files = $lesson->getRawOriginal('files');
+    $existing_files = $raw_files ? json_decode($raw_files, true) : [];
+
+    $uploaded_files = $existing_files; // start with existing
+
+    // Upload new files
+    foreach ($request->file('materials') as $file) {
+        $path = $file->store('lessons/files', 'public');
+        $uploaded_files[] = $path; // append
+    }
+
+    $request_payload['materials'] = json_encode($uploaded_files);
 }
 
 
@@ -344,7 +394,22 @@ public function deleteLesson($ids)
                     }
                 }
             }
+
+            $raw_materials = $lesson->getRawOriginal('materials'); // raw JSON string from DB
+            $materials = $raw_materials ? json_decode($raw_materials, true) : [];
+
+            if (is_array($materials)) {
+                foreach ($materials as $material) {
+                    $path = "business_1/lesson_{$lesson->id}/$material";
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
         }
+
+       
+        
 
         // Delete lessons
         Lesson::whereIn('id', $existingIds)->delete();

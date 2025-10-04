@@ -6,6 +6,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseFaqController;
 use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
@@ -64,6 +65,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{ids}', [CourseCategoryController::class, 'deleteCourseCategory']);
     });
 
+
+    Route::put('/v1.0/course-faqs', [CourseFaqController::class, 'updateCourseFaqs']);
+    Route::get('/v1.0/course-faqs/{course_id}', [CourseFaqController::class, 'getCourseFaqs']);
     // COURSE
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
