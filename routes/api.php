@@ -145,7 +145,13 @@ Route::middleware('auth:api')->group(function () {
     
 
     // Get quiz with questions
+    Route::prefix('v1.0')->group(function () {
     Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
+    Route::post('quizzes', [QuizController::class, 'store']);
+    Route::put('quizzes/{id}', [QuizController::class, 'update']);
+    Route::delete('quizzes/{id}', [QuizController::class, 'destroy']);
+});
+  
 
     // Submit quiz attempt
     Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'submitQuizAttempt']);

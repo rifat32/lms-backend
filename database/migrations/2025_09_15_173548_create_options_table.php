@@ -14,15 +14,16 @@ class CreateOptionsTable extends Migration
     public function up()
     {
         Schema::create('options', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained('questions')->cascadeOnDelete();
-            $table->string('option_text');
-            $table->boolean('is_correct')->default(false);
-            $table->text('explanation')->nullable();
-            $table->string('image')->nullable();
-
-            $table->timestamps();
-        });
+        $table->id();
+        $table->foreignId('question_id')->constrained('questions')->cascadeOnDelete();
+        $table->string('option_text')->nullable();
+        $table->boolean('is_correct')->default(false);
+        $table->text('explanation')->nullable();
+        $table->string('image')->nullable(); // for image-based options
+        $table->string('matching_pair_text')->nullable(); // for matching
+        $table->string('matching_pair_image')->nullable(); // for image matching
+        $table->timestamps();
+    });
     }
 
     /**

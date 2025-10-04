@@ -11,17 +11,26 @@ class Quiz extends Model
     use HasFactory;
 
     protected $fillable = [
-        'course_id',
         'title',
         'description',
         'time_limit',
+        'time_unit',
+        'style',
         'is_randomized',
+        'show_correct_answer',
+        'allow_retake_after_pass',
+        'max_attempts',
+        'points_cut_after_retake',
+        'passing_grade',
         'question_limit',
     ];
 
+
+
+
     public function questions(): HasMany
     {
-        return $this->hasMany(Question::class, "id", "quiz_id");
+        return $this->belongsToMany(Question::class, 'quiz_questions', 'quiz_id', 'question_id');
     }
 
 

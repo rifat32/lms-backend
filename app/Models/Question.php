@@ -16,7 +16,6 @@ class Question extends Model
     const TYPES =  ['true_false', 'single', 'multiple', 'matching', 'file_matching', 'keywords', 'fill_in_the_blanks'];
 
     protected $fillable = [
-        'quiz_id',
         'question_text',
         'question_type',
         'points',
@@ -35,8 +34,7 @@ class Question extends Model
         return $this->hasMany(Option::class, 'question_id', 'id');
     }
 
-    public function quiz(): BelongsTo
-    {
-        return $this->belongsTo(Quiz::class, 'quiz_id');
-    }
+   
+
+
 }

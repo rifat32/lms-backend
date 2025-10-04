@@ -26,14 +26,26 @@ class QuestionRequest extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'quiz_id' => ['required', 'integer', new ValidQuiz()],
-            'question_text' => 'required|string|max:255',
-            'question_type' => ['required', 'in:' . implode(',', Question::TYPES)],
-            'points' => 'required|integer|min:1',
-            'time_limit' => 'nullable|integer|min:0',
-            'is_required' => 'required|boolean',
-        ];
+       $rules = [
+    'question_text' => 'required|string|max:255',
+    'question_type' => ['required', 'in:' . implode(',', Question::TYPES)],
+    'points' => 'required|integer|min:1',
+    'time_limit' => 'nullable|integer|min:0',
+    'is_required' => 'required|boolean',
+
+    // Options array must be present
+    'options' => 'required|array|min:1',
+
+    // Each option field
+    'options.*.id' => 'nullable|integer|exists:options,id', // optional ID for update
+    'options.*.option_text' => 'nullable|string|max:255',
+    'options.*.is_correct' => 'required|boolean',
+    'options.*.explanation' => 'nullable|string',
+    'options.*.image' => 'nullable', // Accept string URL or uploaded file, validate in controller
+    'options.*.matching_pair_text' => 'nullable|string|max:255',
+    'options.*.matching_pair_image' => 'nullable', // Accept string URL or uploaded file
+];
+
 
         if ($this->isMethod('patch') || $this->isMethod('put')) {
             $rules['id'] = ['required', 'integer', new ValidQuestion()];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QuizRequest;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
 
@@ -163,4 +164,112 @@ class QuizController extends Controller
             'data' => $result
         ], 200);
     }
+
+
+     /**
+     * @OA\Post(
+     *     path="/v1.0/quizzes",
+     *     operationId="createQuiz",
+     *     tags={"Quizzes"},
+     *     summary="Create a new quiz and attach questions",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"title"},
+     *             @OA\Property(property="title", type="string", example="Laravel Basics Quiz"),
+     *             @OA\Property(property="description", type="string", example="Short description of the quiz"),
+     *             @OA\Property(property="time_limit", type="integer", example=2),
+     *             @OA\Property(property="time_unit", type="string", example="Hours"),
+     *             @OA\Property(property="style", type="string", example="pagination"),
+     *             @OA\Property(property="is_randomized", type="boolean", example=true),
+     *             @OA\Property(property="show_correct_answer", type="boolean", example=false),
+     *             @OA\Property(property="allow_retake_after_pass", type="boolean", example=true),
+     *             @OA\Property(property="max_attempts", type="integer", example=4),
+     *             @OA\Property(property="points_cut_after_retake", type="integer", example=20),
+     *             @OA\Property(property="passing_grade", type="integer", example=50),
+     *             @OA\Property(property="question_limit", type="integer", example=10),
+     *             @OA\Property(property="question_ids", type="array", @OA\Items(type="integer", example=1))
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Quiz created successfully")
+     * )
+     */
+    public function store(QuizRequest $request): JsonResponse
+    {
+        $quizData = $request->validated();
+        $quiz = Quiz::create($quizData);
+
+        if (!empty($quizData['question_ids'])) {
+            $quiz->questions()->attach($quizData['question_ids']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz created successfully',
+            'data' => $quiz->load('questions')
+        ], 201);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/v1.0/quizzes/{id}",
+     *     operationId="updateQuiz",
+     *     tags={"Quizzes"},
+     *     summary="Update a quiz and sync questions",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="title", type="string", example="Updated Quiz Title"),
+     *             @OA\Property(property="description", type="string", example="Updated description"),
+     *             @OA\Property(property="question_ids", type="array", @OA\Items(type="integer", example=2))
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Quiz updated successfully")
+     * )
+     */
+    public function update(QuizRequest $request, $id): JsonResponse
+    {
+        $quiz = Quiz::findOrFail($id);
+        $quizData = $request->validated();
+
+        $quiz->update($quizData);
+
+        if (isset($quizData['question_ids'])) {
+            $quiz->questions()->sync($quizData['question_ids']); // sync instead of attach
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz updated successfully',
+            'data' => $quiz->load('questions')
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/quizzes/{id}",
+     *     operationId="deleteQuiz",
+     *     tags={"Quizzes"},
+     *     summary="Delete a quiz",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
+     *     @OA\Response(response=200, description="Quiz deleted successfully")
+     * )
+     */
+    public function destroy($id): JsonResponse
+    {
+        $quiz = Quiz::findOrFail($id);
+
+        $quiz->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz deleted successfully'
+        ]);
+    }
+
+
 }

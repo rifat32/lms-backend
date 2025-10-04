@@ -447,6 +447,8 @@ class CourseController extends Controller
             // CREATE
             $course = Course::create($request_payload);
 
+
+            
             if ($request->hasFile('cover')) {
     log_message("Cover file detected. Uploading...", "course.txt");
 
@@ -462,9 +464,7 @@ class CourseController extends Controller
 
     $course->cover = $filename; // store only filename
     $course->save();
-} else {
-    log_message("No cover uploaded.", "course.txt");
-}
+} 
 
 
 

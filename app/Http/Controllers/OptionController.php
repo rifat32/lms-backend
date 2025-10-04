@@ -36,6 +36,13 @@ class OptionController extends Controller
      *                 example=true,
      *                 description="Whether this option is correct"
      *             ),
+     *     *             @OA\Property(
+     *                 property="matching_pair_image",
+     *                 type="string",
+     *                 example=true,
+     *                 description="matching_pair_image"
+     *             ),
+     * 
      *             @OA\Property(
      *                 property="question_id",
      *                 type="integer",
@@ -64,6 +71,7 @@ class OptionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="text", type="string", example="Option A"),
      *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *             @OA\Property(property="matching_pair_image", type="string", example="png"),
      *             @OA\Property(property="question_id", type="integer", example=5),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T12:00:00Z")
@@ -117,6 +125,9 @@ class OptionController extends Controller
             // Ensure the question_id is present in the request payload
             $option = Option::create($request_payload);
 
+
+            
+
             //commit the transaction
             DB::commit();
 
@@ -148,6 +159,8 @@ class OptionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1, description="ID of the option to update"),
      *             @OA\Property(property="text", type="string", example="Option A", description="Option text"),
      *             @OA\Property(property="is_correct", type="boolean", example=true, description="Whether this option is correct"),
+     *  *             @OA\Property(property="matching_pair_image", type="string", example=true, description="matching_pair_image"),
+     * 
      *             @OA\Property(property="question_id", type="integer", example=5, description="Associated question ID"),
      *             @OA\Property(
      *                 property="image",
@@ -171,6 +184,7 @@ class OptionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="text", type="string", example="Option A"),
      *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *            @OA\Property(property="matching_pair_image", type="string", example="png"),
      *             @OA\Property(property="question_id", type="integer", example=5),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
@@ -269,6 +283,7 @@ class OptionController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="text", type="string", example="Option A"),
      *                 @OA\Property(property="is_correct", type="boolean", example=true),
+     *                @OA\Property(property="matching_pair_image", type="string", example="png"),
      *                 @OA\Property(property="question_id", type="integer", example=10),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
@@ -320,6 +335,7 @@ class OptionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="text", type="string", example="Option A"),
      *             @OA\Property(property="is_correct", type="boolean", example=true),
+     *            @OA\Property(property="matching_pair_image", type="string", example="png"),
      *             @OA\Property(property="question_id", type="integer", example=5),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
@@ -451,6 +467,7 @@ class OptionController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="text", type="string", example="Option A"),
      *                 @OA\Property(property="is_correct", type="boolean", example=true),
+     *                @OA\Property(property="matching_pair_image", type="string", example="png"),
      *                 @OA\Property(property="question_id", type="integer", example=5),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T13:00:00Z")
