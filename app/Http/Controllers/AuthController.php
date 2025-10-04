@@ -29,9 +29,9 @@ class AuthController extends Controller
      *             @OA\Property(property="title", type="string", example="Mr."),
      *             @OA\Property(property="first_name", type="string", example="John"),
      *             @OA\Property(property="last_name", type="string", example="Doe"),
-     *             @OA\Property(property="email", type="string", format="email", example="john.student@yopmail.com"),
+     *             @OA\Property(property="email", type="string", format="email", example="admin@yopmail.com"),
      *             @OA\Property(property="password", type="string", format="password", example="12345678@We"),
-     *             @OA\Property(property="role", type="string", example="student")
+     *             @OA\Property(property="role", type="string", example="admin")
      *         )
      *     ),
      *     @OA\Response(
@@ -42,8 +42,8 @@ class AuthController extends Controller
      *             @OA\Property(property="title", type="string", example="Mr."),
      *             @OA\Property(property="first_name", type="string", example="John"),
      *             @OA\Property(property="last_name", type="string", example="Doe"),
-     *             @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
-     *             @OA\Property(property="role", type="string", example="student"),
+     *             @OA\Property(property="email", type="string", example="admin@yopmail.com"),
+     *             @OA\Property(property="role", type="string", example="admin"),
      *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-17T12:00:00Z")
      *         )
      *     ),
@@ -122,7 +122,7 @@ class AuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email", example="john.student@yopmail.com"),
+     *             @OA\Property(property="email", type="string", format="email", example="admin@yopmail.com"),
      *             @OA\Property(property="password", type="string", format="password", example="12345678@We")
      *         )
      *     ),
@@ -138,8 +138,8 @@ class AuthController extends Controller
      *                 @OA\Property(property="title", type="string", example="Mr."),
      *                 @OA\Property(property="first_name", type="string", example="John"),
      *                 @OA\Property(property="last_name", type="string", example="Doe"),
-     *                 @OA\Property(property="email", type="string", example="john.student@yopmail.com"),
-     *                 @OA\Property(property="role", type="string", example="student")
+     *                 @OA\Property(property="email", type="string", example="admin@yopmail.com"),
+     *                 @OA\Property(property="role", type="string", example="admin")
      *             )
      *         )
      *     ),

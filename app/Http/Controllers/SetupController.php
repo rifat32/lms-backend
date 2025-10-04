@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Utils\SetupUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Laravel\Passport\Passport;
-use Spatie\Permission\Models\Role;
 
 class SetupController extends Controller
 {
@@ -65,7 +63,7 @@ class SetupController extends Controller
     }
 
 
-        public function migrate(Request $request)
+    public function migrate(Request $request)
     {
         Artisan::call('check:migrate');
         return "migrated";

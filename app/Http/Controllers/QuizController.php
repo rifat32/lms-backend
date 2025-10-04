@@ -166,7 +166,7 @@ class QuizController extends Controller
     }
 
 
-     /**
+    /**
      * @OA\Post(
      *     path="/v1.0/quizzes",
      *     operationId="createQuiz",
@@ -195,7 +195,7 @@ class QuizController extends Controller
      *     @OA\Response(response=201, description="Quiz created successfully")
      * )
      */
-    public function store(QuizRequest $request): JsonResponse
+    public function store(QuizRequest $request)
     {
         $quizData = $request->validated();
         $quiz = Quiz::create($quizData);
@@ -270,6 +270,4 @@ class QuizController extends Controller
             'message' => 'Quiz deleted successfully'
         ]);
     }
-
-
 }

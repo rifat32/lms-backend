@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Quiz extends Model
 {
@@ -28,13 +28,13 @@ class Quiz extends Model
 
 
 
-    public function questions(): HasMany
+    public function questions(): BelongsToMany
     {
         return $this->belongsToMany(Question::class, 'quiz_questions', 'quiz_id', 'question_id');
     }
 
 
-     public function sections()
+    public function sections()
     {
         return $this->morphToMany(Section::class, 'sectionable');
     }
