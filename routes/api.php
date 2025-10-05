@@ -63,7 +63,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/', [CourseCategoryController::class, 'updateCourseCategory']);
         Route::get('/', [CourseCategoryController::class, 'getCourseCategory']);
         Route::get('/{id}', [CourseCategoryController::class, 'getCourseCategoryById']);
-        Route::get('/{ids}', [CourseCategoryController::class, 'deleteCourseCategory']);
+        Route::delete('/{ids}', [CourseCategoryController::class, 'deleteCourseCategory']);
     });
 
 
@@ -95,13 +95,13 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [SectionController::class, 'createSection']);       // Create
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
 
-       
+
 
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
-Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
+    Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
@@ -141,31 +141,31 @@ Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSect
     Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'updateLessonProgress']);
 
     Route::put('/v1.0/lessons/{id}/time', [LessonProgressController::class, 'trackLessonTime']);
-    
+
 
     // Get quiz with questions
     Route::prefix('v1.0')->group(function () {
-    Route::get('/v1.0/quizzes', [QuizController::class, 'getQuizWithQuestions']);    
-    Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
-    Route::post('quizzes', [QuizController::class, 'store']);
-    Route::put('quizzes/{id}', [QuizController::class, 'update']);
-    Route::delete('quizzes/{id}', [QuizController::class, 'destroy']);
-});
-  
+        Route::get('/v1.0/quizzes', [QuizController::class, 'getQuizWithQuestions']);
+        Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
+        Route::post('quizzes', [QuizController::class, 'store']);
+        Route::put('quizzes/{id}', [QuizController::class, 'update']);
+        Route::delete('quizzes/{id}', [QuizController::class, 'destroy']);
+    });
+
 
     // Submit quiz attempt
     Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'submitQuizAttempt']);
 
     Route::post('/v1.0/quizzes/{id}/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
 
-    
 
-  Route::group(['prefix' => '/v1.0/question-categories'], function () {
-    Route::post('/', [QuestionCategoryController::class, 'createQuestionCategory']); // Already exists
-    Route::put('/', [QuestionCategoryController::class, 'updateQuestionCategory']);  // Update
-    Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
-    Route::delete('/{id}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
-});
+
+    Route::group(['prefix' => '/v1.0/question-categories'], function () {
+        Route::post('/', [QuestionCategoryController::class, 'createQuestionCategory']); // Already exists
+        Route::put('/', [QuestionCategoryController::class, 'updateQuestionCategory']);  // Update
+        Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
+        Route::delete('/{id}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
+    });
 
 
     // Generate certificate after completing a course
@@ -194,5 +194,4 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 
-  Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
-
+Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);

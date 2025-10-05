@@ -28,18 +28,14 @@ class SectionWithLessonRequest extends FormRequest
             "id" => "nullable|integer|exists:sections,id",
             'title' => 'required|string|max:255',
             'course_id' => ['required', 'numeric', new ValidCourse()],
-               'sectionable' => 'array|required',
-        'sectionable.*.id' => 'required|integer',
-        'sectionable.*.type' => 'required|string|in:lesson,quiz',
-        'sectionable.*.order' => 'nullable|integer',
+            'sectionable' => 'array|required',
+            'sectionable.*.id' => 'required|integer',
+            'sectionable.*.type' => 'required|string|in:lesson,quiz',
+            'sectionable.*.order' => 'nullable|integer',
         ];
 
 
-        
+
         return $rules;
     }
-
-
-
-
 }
