@@ -522,7 +522,12 @@ class SectionController extends Controller
     public function getSections(Request $request)
     {
 
-        $query = Section::with(['sectionables.sectionable']);
+        $query = Section::with([
+            'sectionables.sectionable',
+            'course' => function ($q) {
+                $q->select('id', 'title');
+            }
+        ]);
 
         $sections = retrieve_data($query, 'created_at', 'sections');
 
