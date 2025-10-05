@@ -110,18 +110,266 @@ class CourseController extends Controller
     public function getCoursesClient(Request $request)
     {
 
-        $query = Course::filters();
+        $query = Course::
+        with([
+            'categories',
+            'sections' => function ($q) {
+                $q
+                ->with([
+                    "sectionables" => function ($sq) {
+                        $sq->with([
+                            'sectionable' => function ($ssq) {
+                                $ssq->select('id', 'title');
+                            }
+                        ]);
+                    }
+                ]);
+            },
+            'reviews',
+        ])
+        ->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
 
         // SEND RESPONSE
         return response()->json([
             'success' => true,
-            'message' => 'Courses retrieved successfully',
+            'message' => 'Courses retrieved successfully tttttt',
             'meta' => $courses['meta'],
             'data' => $courses['data'],
         ], 200);
     }
+
+
+    /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses/{id}",
+     *     tags={"course_management.course"},
+     *     operationId="getCourseByIdClient",
+     *     summary="Get a single course by ID",
+     *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course details retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Introduction to Programming"),
+     *                 @OA\Property(property="description", type="string", example="A beginner course on programming"),
+     *                 @OA\Property(
+     *                     property="lessons",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Lesson 1")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="faqs",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="question", type="string", example="What is a variable?"),
+     *                         @OA\Property(property="answer", type="string", example="A variable is...")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="notices",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Exam Notice"),
+     *                         @OA\Property(property="description", type="string", example="Exam will be held on...")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course not found")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getCourseByIdClient($id)
+    {
+        // FIND BY ID
+        $course = Course::
+         with([
+            'categories',
+            'sections' => function ($q) {
+                $q
+                ->with([
+                    "sectionables" => function ($sq) {
+                        $sq->with([
+                            'sectionable' => function ($ssq) {
+                                $ssq->select('id', 'title');
+                            }
+                        ]);
+                    }
+                ]);
+            },
+            'reviews',
+        ])
+  
+       
+        
+        ->find($id);
+
+        // SEND RESPONSE
+        if (empty($course)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found by'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course retrieved successfully',
+            'data' => $course
+        ], 200);
+    }
+
+
+  /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses/secure/{id}",
+     *     tags={"course_management.course"},
+     *     operationId="getCourseByIdSecureClient",
+     *     summary="Get a single course by ID",
+     *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course details retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Introduction to Programming"),
+     *                 @OA\Property(property="description", type="string", example="A beginner course on programming"),
+     *                 @OA\Property(
+     *                     property="lessons",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Lesson 1")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="faqs",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="question", type="string", example="What is a variable?"),
+     *                         @OA\Property(property="answer", type="string", example="A variable is...")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="notices",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Exam Notice"),
+     *                         @OA\Property(property="description", type="string", example="Exam will be held on...")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course not found")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getCourseByIdSecureClient($id)
+    {
+        // FIND BY ID
+        $course = Course::with(
+            [
+            'categories',
+              'sections' => function ($q) {
+                $q
+                ->with([
+                    "sectionables" => function ($sq) {
+                        $sq->with([
+                            'sectionable' => function ($ssq) {
+                                $ssq->select('id', 'title');
+                            }
+                        ]);
+                    }
+                ]);
+            },
+            'reviews',
+            ]
+        )
+        ->rescrictBeforeEnrollment()
+       
+        
+        ->find($id);
+
+        // SEND RESPONSE
+        if (empty($course)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found by'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course retrieved successfully',
+            'data' => $course
+        ], 200);
+    }
+
+
+
+
     /**
      * @OA\Get(
      *     path="/v1.0/courses",

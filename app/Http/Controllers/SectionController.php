@@ -344,6 +344,7 @@ class SectionController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="course_id", type="integer", example=1),
+     *                 @OA\Property(property="order", type="string", example="1"),
      *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-20T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-20T12:00:00Z"),

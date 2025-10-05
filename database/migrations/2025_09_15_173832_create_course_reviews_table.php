@@ -23,6 +23,8 @@ class CreateCourseReviewsTable extends Migration
 
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            
         });
     }
 

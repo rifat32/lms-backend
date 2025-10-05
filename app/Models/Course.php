@@ -101,4 +101,18 @@ public function getCoverAttribute($value)
             $q->where('category_id', request('category_id'));
         });
     }
+
+     public function scopeRescrictBeforeEnrollment($query)
+    {
+        return $query->whereHas("enrollments" , function ($q) {
+            $q->where("user_id" , auth()->user()->id)
+            ->where(function ($q) {
+                $q->whereDate('enrolled_at', '<=', now())
+                ->where(function ($q) {
+                    $q->whereNull('expiry_date')
+                    ->orWhereDate('expiry_date', '>=', now());
+                });   
+            });
+        });
+    }
 }

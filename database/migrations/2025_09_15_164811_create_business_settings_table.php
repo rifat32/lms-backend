@@ -19,6 +19,13 @@ class CreateBusinessSettingsTable extends Migration
             $table->string('business_time_zone')->nullable();
             $table->string('identifier_prefix')->nullable();
             $table->boolean('delete_read_notifications_after_30_days')->nullable();
+
+          
+
+            $table->string('STRIPE_KEY')->nullable();
+            $table->string('STRIPE_SECRET')->nullable();
+            $table->boolean('stripe_enabled')->default(false);
+
             $table->timestamps();
         });
     }

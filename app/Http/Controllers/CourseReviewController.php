@@ -218,7 +218,9 @@ class CourseReviewController extends Controller
         ]);
 
         $user = Auth::user();
-        $course = Course::findOrFail($id);
+        $course = Course::
+           findOrFail($id)
+         ->rescrictBeforeEnrollment();
 
         $review = CourseReview::create([
             'course_id' => $course->id,
@@ -234,4 +236,25 @@ class CourseReviewController extends Controller
             'data' =>  ['review_id' => $review->id,]
         ], 201);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

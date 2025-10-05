@@ -18,6 +18,7 @@ use App\Http\Controllers\QuizAttemptController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -181,6 +182,17 @@ Route::middleware('auth:api')->group(function () {
 
     // Enrollments report
     Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollments']);
+
+
+
+
+       Route::put('/v1.0/business-settings', [SettingController::class, "updateBusinessSettings"]);
+    Route::get('/v1.0/business-settings', [SettingController::class, "getBusinessSettings"]);
+
+
+    
+     Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
+    
 });
 
 // Get all reviews (auth optional)
@@ -193,5 +205,11 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 
-
+Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
+
+
+Route::get('/v1.0/client/business-settings', [SettingController::class, "getBusinessSettingsClient"]);
+
+
+Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");

@@ -130,6 +130,17 @@ class EnrollmentController extends Controller
                 'enrolled_at' => now(),
             ]);
 
+
+            $course = Course::findOrFail($request->course_id);
+
+            if(!$course->is_free) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot enroll in a paid course without payment.',
+                ], 403); // Forbidden
+            }
+            
+
             // COMMIT TRANSACTION
             DB::commit(); // Uncomment if you want to use transactions
             // RETURN SUCCESS RESPONSE
