@@ -196,108 +196,154 @@ class LessonProgressController extends Controller
      *     @OA\Response(response=422, description="Validation error")
      * )
      */
+    // public function trackLessonTime(LessonTimeRequest $request, $id)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $user = Auth::user();
+    //         $data = $request->validated(); // <-- using validated data
+    //         $event = $data['event'];
+
+    //         $lesson = Lesson::findOrFail($id);
+
+    //         // create or fetch progress row
+    //         $progress = LessonProgress::firstOrCreate(
+    //             ['user_id' => $user->id, 'lesson_id' => $lesson->id],
+    //             ['total_time_spent' => 0, 'is_completed' => false]
+    //         );
+
+    //         if ($event === 'start') {
+    //             // avoid creating duplicate open sessions
+    //             $open = LessonSession::where('user_id', $user->id)
+    //                 ->where('lesson_id', $lesson->id)
+    //                 ->whereNull('end_time')
+    //                 ->exists();
+
+    //             if (! $open) {
+    //                 LessonSession::create([
+    //                     'user_id' => $user->id,
+    //                     'lesson_id' => $lesson->id,
+    //                     'start_time' => now(),
+    //                 ]);
+    //             }
+
+    //             // update last_accessed
+    //             $progress->last_accessed = now();
+    //             $progress->save();
+    //         }
+
+    //         if ($event === 'stop') {
+    //             $session = LessonSession::where('user_id', $user->id)
+    //                 ->where('lesson_id', $lesson->id)
+    //                 ->whereNull('end_time')
+    //                 ->latest()
+    //                 ->first();
+
+    //             if ($session) {
+    //                 $session->end_time = now();
+    //                 // $session->start_time is cast to datetime so diffInSeconds works
+    //                 $session->duration = $session->end_time->diffInSeconds($session->start_time);
+    //                 $session->save();
+
+    //                 // increment safely
+    //                 $progress->increment('total_time_spent', $session->duration);
+    //                 $progress->last_accessed = now();
+    //                 $progress->save();
+    //             }
+    //         }
+
+    //         if ($event === 'heartbeat') {
+    //             // If there's no open session, create one to avoid missing time
+    //             $session = LessonSession::where('user_id', $user->id)
+    //                 ->where('lesson_id', $lesson->id)
+    //                 ->whereNull('end_time')
+    //                 ->latest()
+    //                 ->first();
+
+    //             if (!$session) {
+    //                 LessonSession::create([
+    //                     'user_id' => $user->id,
+    //                     'lesson_id' => $lesson->id,
+    //                     'start_time' => now(),
+    //                 ]);
+    //             }
+
+    //             $progress->last_accessed = now();
+    //             $progress->save();
+    //         }
+
+    //         // Auto-complete if lesson duration defined (lesson->duration expected to be minutes)
+    //         $lesson_duration_seconds = ($lesson->duration ?? 0) * 60;
+    //         $progress->refresh(); // reload latest totals
+    //         if ($lesson_duration_seconds > 0 && $progress->total_time_spent >= $lesson_duration_seconds && ! $progress->is_completed) {
+    //             $progress->is_completed = true;
+    //             $progress->save();
+
+    //             // optionally: update Enrollment progress here (if you have Enrollment model logic)
+    //         }
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Lesson time tracked',
+    //             'data' => [
+    //                 'user_id' => $user->id,
+    //                 'lesson_id' => $lesson->id,
+    //                 'total_time_spent' => $progress->total_time_spent,
+    //                 'is_completed' => $progress->is_completed,
+    //                 'last_accessed' => optional($progress->last_accessed)->toIso8601String(),
+    //             ],
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         DB::rollBack();
+    //         throw $th;
+    //     }
+    // }
+
     public function trackLessonTime(LessonTimeRequest $request, $id)
-    {
-        DB::beginTransaction();
-        try {
-            $user = Auth::user();
-            $data = $request->validated(); // <-- using validated data
-            $event = $data['event'];
+{
+    DB::beginTransaction();
+    try {
+        $user = Auth::user();
+        $lesson = Lesson::findOrFail($id);
 
-            $lesson = Lesson::findOrFail($id);
+        // create or fetch progress row
+        $progress = LessonProgress::firstOrCreate(
+            ['user_id' => $user->id, 'lesson_id' => $lesson->id],
+            ['total_time_spent' => 0, 'is_completed' => false]
+        );
 
-            // create or fetch progress row
-            $progress = LessonProgress::firstOrCreate(
-                ['user_id' => $user->id, 'lesson_id' => $lesson->id],
-                ['total_time_spent' => 0, 'is_completed' => false]
-            );
+        // increment 1 minute (60 seconds) on each API call
+        $progress->increment('total_time_spent', 60);
 
-            if ($event === 'start') {
-                // avoid creating duplicate open sessions
-                $open = LessonSession::where('user_id', $user->id)
-                    ->where('lesson_id', $lesson->id)
-                    ->whereNull('end_time')
-                    ->exists();
+        // update last_accessed
+        $progress->last_accessed = now();
+        $progress->save();
 
-                if (! $open) {
-                    LessonSession::create([
-                        'user_id' => $user->id,
-                        'lesson_id' => $lesson->id,
-                        'start_time' => now(),
-                    ]);
-                }
-
-                // update last_accessed
-                $progress->last_accessed = now();
-                $progress->save();
-            }
-
-            if ($event === 'stop') {
-                $session = LessonSession::where('user_id', $user->id)
-                    ->where('lesson_id', $lesson->id)
-                    ->whereNull('end_time')
-                    ->latest()
-                    ->first();
-
-                if ($session) {
-                    $session->end_time = now();
-                    // $session->start_time is cast to datetime so diffInSeconds works
-                    $session->duration = $session->end_time->diffInSeconds($session->start_time);
-                    $session->save();
-
-                    // increment safely
-                    $progress->increment('total_time_spent', $session->duration);
-                    $progress->last_accessed = now();
-                    $progress->save();
-                }
-            }
-
-            if ($event === 'heartbeat') {
-                // If there's no open session, create one to avoid missing time
-                $session = LessonSession::where('user_id', $user->id)
-                    ->where('lesson_id', $lesson->id)
-                    ->whereNull('end_time')
-                    ->latest()
-                    ->first();
-
-                if (!$session) {
-                    LessonSession::create([
-                        'user_id' => $user->id,
-                        'lesson_id' => $lesson->id,
-                        'start_time' => now(),
-                    ]);
-                }
-
-                $progress->last_accessed = now();
-                $progress->save();
-            }
-
-            // Auto-complete if lesson duration defined (lesson->duration expected to be minutes)
-            $lesson_duration_seconds = ($lesson->duration ?? 0) * 60;
-            $progress->refresh(); // reload latest totals
-            if ($lesson_duration_seconds > 0 && $progress->total_time_spent >= $lesson_duration_seconds && ! $progress->is_completed) {
-                $progress->is_completed = true;
-                $progress->save();
-
-                // optionally: update Enrollment progress here (if you have Enrollment model logic)
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Lesson time tracked',
-                'data' => [
-                    'user_id' => $user->id,
-                    'lesson_id' => $lesson->id,
-                    'total_time_spent' => $progress->total_time_spent,
-                    'is_completed' => $progress->is_completed,
-                    'last_accessed' => optional($progress->last_accessed)->toIso8601String(),
-                ],
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+        // auto-complete if lesson duration defined (lesson->duration expected in minutes)
+        $lesson_duration_seconds = ($lesson->duration ?? 0) * 60;
+        if ($lesson_duration_seconds > 0 && $progress->total_time_spent >= $lesson_duration_seconds && ! $progress->is_completed) {
+            $progress->is_completed = true;
+            $progress->save();
         }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson time tracked',
+            'data' => [
+                'user_id' => $user->id,
+                'lesson_id' => $lesson->id,
+                'total_time_spent' => $progress->total_time_spent,
+                'is_completed' => $progress->is_completed,
+                'last_accessed' => optional($progress->last_accessed)->toIso8601String(),
+            ],
+        ], 200);
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        throw $th;
     }
+}
 }
