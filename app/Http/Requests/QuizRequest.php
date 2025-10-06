@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Quiz;
+use App\Rules\ValidQuestion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -29,7 +30,7 @@ class QuizRequest extends FormRequest
             'passing_grade' => 'nullable|integer|min:0|max:100',
             'question_limit' => 'nullable|integer|min:0',
             'question_ids' => 'nullable|array',
-            'question_ids.*' => 'integer|exists:questions,id',
+            'question_ids.*' => ['required', 'integer', new ValidQuestion()],
         ];
 
         if ($this->isMethod('patch') || $this->isMethod('put')) {

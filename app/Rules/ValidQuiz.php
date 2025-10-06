@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Quiz;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidQuiz implements Rule
@@ -25,7 +26,7 @@ class ValidQuiz implements Rule
      */
     public function passes($attribute, $value)
     {
-        //
+        return Quiz::where('id', $value)->exists();
     }
 
     /**
@@ -35,6 +36,6 @@ class ValidQuiz implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'The :attribute is invalid.';
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Models\Option;
 use Illuminate\Contracts\Validation\Rule;
 
 class ValidOption implements Rule
@@ -25,7 +26,7 @@ class ValidOption implements Rule
      */
     public function passes($attribute, $value)
     {
-        //
+        return Option::where('id', $value)->exists();
     }
 
     /**
@@ -35,6 +36,6 @@ class ValidOption implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'The :attribute is invalid.';
     }
 }
