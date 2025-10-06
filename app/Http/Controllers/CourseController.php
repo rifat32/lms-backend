@@ -457,7 +457,9 @@ class CourseController extends Controller
     public function getCourses(Request $request)
     {
 
-        $query = Course::filters();
+        $query = Course::with(['categories' => function ($q) {
+            $q->select('course-categories.id', 'course-categories.name');
+        }])->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
 
