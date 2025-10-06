@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 
 class Course extends Model
 {
@@ -137,6 +138,19 @@ class Course extends Model
                                 ->orWhereDate('expiry_date', '>=', now());
                         });
                 });
+        })->when(request()->filled('status'), function ($q) {
+            $validStatus = array_values(Course::STATUS);
+            $status = request('status');
+
+            if (!in_array($status, $validStatus)) {
+                throw ValidationException::withMessages([
+                    'status' => 'Invalid status value. allowed values: ' . implode(', ', $validStatus)
+                ]);
+            }
+
+            $q->where('status', $status);
+        })->when(request()->filled('search_key'), function ($q) {
+            $q->where('title', 'like', '%' . request('search_key') . '%');
         });
     }
 }

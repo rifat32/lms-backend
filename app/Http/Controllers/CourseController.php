@@ -35,28 +35,35 @@ class CourseController extends Controller
      *         in="query",
      *         required=false,
      *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Parameter(
      *         name="searchKey",
      *         in="query",
      *         required=false,
-     *         description="Search by keyword in title or description",
-     *         @OA\Schema(type="string", example="Laravel")
+     *         description="Search by keyword in title only",
+     *         @OA\Schema(type="string", example="")
      *     ),
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         required=false,
      *         description="Page number for pagination",
-     *         @OA\Schema(type="integer", default=1, example=1)
+     *         @OA\Schema(type="integer", default="", example="")
      *     ),
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Number of items per page",
-     *         @OA\Schema(type="integer", default=10, example=10)
+     *         @OA\Schema(type="integer", default="", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Course status only: draft, published, archived",
+     *         @OA\Schema(type="string", default="", example="")
      *     ),
      * 
      *     @OA\Response(
@@ -110,26 +117,31 @@ class CourseController extends Controller
     public function getCoursesClient(Request $request)
     {
 
-        $query = Course::
-        with([
+        $query = Course::with([
             'categories',
             'sections' => function ($q) {
                 $q
-                ->with([
-                    "sectionables" => function ($sq) {
-                        $sq->with([
-                            'sectionable' => function ($ssq) {
-                                $ssq->select('id', 'title');
-                            }
-                        ]);
-                    }
-                ]);
+                    ->with([
+                        "sectionables" => function ($sq) {
+                            $sq->with([
+                                'sectionable' => function ($ssq) {
+                                    $ssq->select('id', 'title');
+                                }
+                            ]);
+                        }
+                    ]);
             },
             'reviews',
         ])
-        ->filters();
+            ->filters();
 
+        // 
         $courses = retrieve_data($query, 'created_at', 'courses');
+
+        // Remove pivot from all categories
+        $courses['data'] = $courses['data']->each(function ($course) {
+            return $course->categories->makeHidden('pivot');
+        });
 
         // SEND RESPONSE
         return response()->json([
@@ -216,27 +228,26 @@ class CourseController extends Controller
     public function getCourseByIdClient($id)
     {
         // FIND BY ID
-        $course = Course::
-         with([
+        $course = Course::with([
             'categories',
             'sections' => function ($q) {
                 $q
-                ->with([
-                    "sectionables" => function ($sq) {
-                        $sq->with([
-                            'sectionable' => function ($ssq) {
-                                $ssq->select('id', 'title');
-                            }
-                        ]);
-                    }
-                ]);
+                    ->with([
+                        "sectionables" => function ($sq) {
+                            $sq->with([
+                                'sectionable' => function ($ssq) {
+                                    $ssq->select('id', 'title');
+                                }
+                            ]);
+                        }
+                    ]);
             },
             'reviews',
         ])
-  
-       
-        
-        ->find($id);
+
+
+
+            ->find($id);
 
         // SEND RESPONSE
         if (empty($course)) {
@@ -254,7 +265,7 @@ class CourseController extends Controller
     }
 
 
-  /**
+    /**
      * @OA\Get(
      *     path="/v1.0/client/courses/secure/{id}",
      *     tags={"course_management.course"},
@@ -331,26 +342,26 @@ class CourseController extends Controller
         // FIND BY ID
         $course = Course::with(
             [
-            'categories',
-              'sections' => function ($q) {
-                $q
-                ->with([
-                    "sectionables" => function ($sq) {
-                        $sq->with([
-                            'sectionable' => function ($ssq) {
-                                $ssq->select('id', 'title');
+                'categories',
+                'sections' => function ($q) {
+                    $q
+                        ->with([
+                            "sectionables" => function ($sq) {
+                                $sq->with([
+                                    'sectionable' => function ($ssq) {
+                                        $ssq->select('id', 'title');
+                                    }
+                                ]);
                             }
                         ]);
-                    }
-                ]);
-            },
-            'reviews',
+                },
+                'reviews',
             ]
         )
-        ->rescrictBeforeEnrollment()
-       
-        
-        ->find($id);
+            ->rescrictBeforeEnrollment()
+
+
+            ->find($id);
 
         // SEND RESPONSE
         if (empty($course)) {
@@ -382,28 +393,35 @@ class CourseController extends Controller
      *         in="query",
      *         required=false,
      *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Parameter(
      *         name="searchKey",
      *         in="query",
      *         required=false,
-     *         description="Search by keyword in title or description",
-     *         @OA\Schema(type="string", example="Laravel")
+     *         description="Search by keyword in title only",
+     *         @OA\Schema(type="string", example="")
      *     ),
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         required=false,
      *         description="Page number for pagination",
-     *         @OA\Schema(type="integer", default=1, example=1)
+     *         @OA\Schema(type="integer", default="", example="")
      *     ),
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Number of items per page",
-     *         @OA\Schema(type="integer", default=10, example=10)
+     *         @OA\Schema(type="integer", default="", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Course status only: draft, published, archived",
+     *         @OA\Schema(type="string", default="", example="")
      *     ),
      * 
      *     @OA\Response(
@@ -458,10 +476,15 @@ class CourseController extends Controller
     {
 
         $query = Course::with(['categories' => function ($q) {
-            $q->select('course-categories.id', 'course-categories.name');
+            $q->select('course_categories.id', 'course_categories.name');
         }])->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
+
+        // Remove pivot from all categories
+        $courses['data'] = $courses['data']->each(function ($course) {
+            return $course->categories->makeHidden('pivot');
+        });
 
         // SEND RESPONSE
         return response()->json([
