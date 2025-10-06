@@ -260,7 +260,7 @@ class LessonProgressController extends Controller
                     ->latest()
                     ->first();
 
-                if (! $session) {
+                if (!$session) {
                     LessonSession::create([
                         'user_id' => $user->id,
                         'lesson_id' => $lesson->id,

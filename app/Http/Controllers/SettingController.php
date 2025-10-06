@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateBusinessSettingRequest;
 use App\Models\BusinessSetting;
 use Exception;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class SettingController extends Controller
         /**
      *
      * @OA\Put(
-     *      path="/v1.0/business-settingss",
+     *      path="/v1.0/business-settings",
      *      operationId="updateBusinessSettings",
      *      tags={"setting"},
      *       security={
@@ -24,26 +25,11 @@ class SettingController extends Controller
      *         required=true,
      *         @OA\JsonContent(
 
-     *          @OA\Property(property="allow_receptionist_user_discount", type="string", format="string",example=""),
-     *           @OA\Property(property="discount_percentage_limit", type="string", format="string",example=""),
+
      *          @OA\Property(property="STRIPE_KEY", type="string", format="string",example="STRIPE_KEY"),
      *           @OA\Property(property="STRIPE_SECRET", type="string", format="string",example="STRIPE_SECRET"),
-     *  *   @OA\Property(property="stripe_enabled", type="boolean", example=true),
-     *      @OA\Property(property="is_expert_price", type="boolean", example=true),
-     *   @OA\Property(property="allow_pay_after_service", type="boolean", example=false),
-     *   @OA\Property(property="allow_expert_booking", type="boolean", example=true),
-     *   @OA\Property(property="allow_expert_self_busy", type="boolean", example=true),
-     *   @OA\Property(property="allow_expert_booking_cancel", type="boolean", example=false),
-     *   @OA\Property(property="allow_expert_take_payment", type="boolean", example=false),
-     *
-     *   @OA\Property(property="allow_expert_view_revenue", type="boolean", example=true),
-     *   @OA\Property(property="allow_expert_view_customer_details", type="boolean", example=false),
-     *   @OA\Property(property="allow_receptionist_add_question", type="boolean", example=true),
-     *   @OA\Property(property="default_currency", type="string", format="string", example="USD"),
-     *   @OA\Property(property="default_language", type="string", format="string", example="en"),
-     *   @OA\Property(property="vat_enabled", type="boolean", example=true),
-     *   @OA\Property(property="vat_percentage", type="number", format="float", example=15.00),
-     *  *   @OA\Property(property="vat_number", type="number", format="float", example=15.00)
+     *  *   @OA\Property(property="stripe_enabled", type="boolean", example=true)
+ 
      *
      *
      *         ),
@@ -86,12 +72,8 @@ class SettingController extends Controller
     {
 
         try {
-            $this->storeActivity($request, "DUMMY activity", "DUMMY description");
-            if (!$request->user()->hasPermissionTo('business_setting_update')) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
-            }
+   
+            
             $request_data = $request->validated();
             $request_data["business_id"] = auth()->user()->business_id;
 
@@ -131,7 +113,7 @@ class SettingController extends Controller
             $busunessSetting = BusinessSetting::first();
 
             if (!$busunessSetting) {
-                BusinessSetting::create($request_data);
+             $busunessSetting =   BusinessSetting::create($request_data);
             } else {
 
 

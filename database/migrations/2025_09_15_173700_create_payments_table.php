@@ -20,7 +20,7 @@ class CreatePaymentsTable extends Migration
             $table->decimal('amount', 10, 2);
             $table->string('method');
             $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
-            $table->string('transaction_id')->unique();
+            $table->string('transaction_id')->nullable()->unique();
             $table->string('payment_intent_id')->nullable()->unique();
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
