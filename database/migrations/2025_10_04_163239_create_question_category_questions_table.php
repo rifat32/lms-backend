@@ -15,8 +15,8 @@ class CreateQuestionCategoryQuestionsTable extends Migration
     {
         Schema::create('question_category_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('question_id')->constrained()->onDelete('cascade');
+            $table->foreignId('question_category_id')->constrained('question_categories')->onDelete('cascade');
+            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->timestamps();
         });
     }
