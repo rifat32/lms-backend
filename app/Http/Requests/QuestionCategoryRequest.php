@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidQuestionCategory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class QuestionCategoryRequest extends FormRequest
@@ -17,12 +18,12 @@ class QuestionCategoryRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'slug' => 'required|string|max:255',
-            'parent_question_category_id' => 'nullable|exists:question_categories,id'
+            'parent_question_category_id' => ['nullable', 'integer', new ValidQuestionCategory()],
         ];
 
 
         if ($this->isMethod('put') || $this->isMethod('patch')) {
-            $rules['id'] = 'required|exists:question_categories,id';
+            $rules['id'] = ['required', 'integer', new ValidQuestionCategory()];
         }
         return $rules;
     }

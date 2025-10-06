@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Question;
+use App\Rules\ValidOption;
 use App\Rules\ValidQuestion;
+use App\Rules\ValidQuestionCategory;
 use App\Rules\ValidQuiz;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,28 +28,28 @@ class QuestionRequest extends FormRequest
      */
     public function rules()
     {
-       $rules = [
-    'question_text' => 'required|string|max:255',
-    'question_type' => ['required', 'in:' . implode(',', Question::TYPES)],
-    'points' => 'required|integer|min:1',
-    'time_limit' => 'nullable|integer|min:0',
-    'is_required' => 'required|boolean',
+        $rules = [
+            'question_text' => 'required|string|max:255',
+            'question_type' => ['required', 'in:' . implode(',', array_values(Question::TYPES))],
+            'points' => 'required|integer|min:1',
+            'time_limit' => 'nullable|integer|min:0',
+            'is_required' => 'required|boolean',
 
-    'category_ids' => 'present|array',
-    'category_ids.*' => 'integer|exists:question_categories,id',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => ['required', 'integer', new ValidQuestionCategory()],
 
-    // Options array must be present
-    'options' => 'required|array|min:1',
+            // Options array must be present
+            'options' => 'required|array|min:1',
 
-    // Each option field
-    'options.*.id' => 'nullable|integer|exists:options,id', // optional ID for update
-    'options.*.option_text' => 'nullable|string|max:255',
-    'options.*.is_correct' => 'required|boolean',
-    'options.*.explanation' => 'nullable|string',
-    'options.*.image' => 'nullable', // Accept string URL or uploaded file, validate in controller
-    'options.*.matching_pair_text' => 'nullable|string|max:255',
-    'options.*.matching_pair_image' => 'nullable', // Accept string URL or uploaded file
-];
+            // Each option field
+            'options.*.id' => ['nullable', 'integer', new ValidOption()], // optional ID for update
+            'options.*.option_text' => 'nullable|string|max:255',
+            'options.*.is_correct' => 'required|boolean',
+            'options.*.explanation' => 'nullable|string',
+            'options.*.image' => 'nullable', // Accept string URL or uploaded file, validate in controller
+            'options.*.matching_pair_text' => 'nullable|string|max:255',
+            'options.*.matching_pair_image' => 'nullable', // Accept string URL or uploaded file
+        ];
 
 
         if ($this->isMethod('patch') || $this->isMethod('put')) {
@@ -61,7 +63,7 @@ class QuestionRequest extends FormRequest
     {
         return [
             'question_type.required' => 'Please select a question type.',
-            'question_type.in' => 'The selected question type is invalid. Allowed types are: ' . implode(', ', Question::TYPES),
+            'question_type.in' => 'The selected question type is invalid. Allowed types are: ' . implode(', ', array_values(Question::TYPES)),
         ];
     }
 }

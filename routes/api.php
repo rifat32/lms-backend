@@ -124,6 +124,7 @@ Route::group(['prefix' => '/v1.0/payments'], function () {
         Route::put('/', [QuestionController::class, 'updateQuestion']);
         Route::get('/', [QuestionController::class, 'getAllQuestions']);
         Route::get('/{id}', [QuestionController::class, 'getQuestionById']);
+        Route::delete('/{ids}', [QuestionController::class, 'deleteQuestion']);
     });
 
     // QUESTION OPTIONS
@@ -190,13 +191,12 @@ Route::group(['prefix' => '/v1.0/payments'], function () {
 
 
 
-       Route::put('/v1.0/business-settings', [SettingController::class, "updateBusinessSettings"]);
+    Route::put('/v1.0/business-settings', [SettingController::class, "updateBusinessSettings"]);
     Route::get('/v1.0/business-settings', [SettingController::class, "getBusinessSettings"]);
 
 
-    
-     Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
-    
+
+    Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
 });
 
 // Get all reviews (auth optional)

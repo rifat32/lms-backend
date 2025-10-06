@@ -9,14 +9,13 @@ class BusinessSetting extends Model
 {
     use HasFactory;
 
-           protected $fillable = [
+    protected $fillable = [
         'STRIPE_KEY',
         "STRIPE_SECRET",
         'stripe_enabled',
     ];
 
-       protected $hidden = [
+    protected $hidden = [
         "STRIPE_SECRET"
     ];
-
 }

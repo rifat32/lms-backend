@@ -10,6 +10,30 @@ class Course extends Model
 {
     use HasFactory;
 
+    public const STATUS = [
+        'DRAFT' => 'draft',
+        'PUBLISHED' => 'published',
+        'ARCHIVED' => 'archived',
+    ];
+
+    public const PREVIEW_VIDEO_SOURCE_TYPE = [
+        'HTML' => 'HTML',
+        'YOUTUBE' => 'YouTube',
+        'VIMEO' => 'Vimeo',
+        'EXTERNAL' => 'External Link',
+        'EMBED' => 'Embed',
+    ];
+
+    // public const STATUS = ['draft', 'published', 'archived'];
+
+    // public const PREVIEW_VIDEO_SOURCE_TYPE = [
+    //     'HTML',
+    //     'YouTube',
+    //     'Vimeo',
+    //     'External Link',
+    //     'Embed',
+    // ];
+
     protected $fillable = [
         'title',
         'description',
@@ -39,28 +63,28 @@ class Course extends Model
 
 
     // Relationships
-public function getCoverAttribute($value)
-{
-    if (!$value) {
-        return null;
+    public function getCoverAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $folder_path = "business_1/course_{$this->id}";
+        return asset("storage/{$folder_path}/{$value}");
     }
 
-    $folder_path = "business_1/course_{$this->id}";
-    return asset("storage/{$folder_path}/{$value}");
-}
 
-
-  public function categories()
-{
-    return $this->belongsToMany(
-        CourseCategory::class,   // Related model
-        'course_category_courses', // Pivot table name
-        'course_id',       // Foreign key on pivot table referencing current model
-        'course_category_id',     // Foreign key on pivot table referencing related model
-        'id',              // Local key on current model
-        'id'               // Local key on related model
-    )->withTimestamps();
-}
+    public function categories()
+    {
+        return $this->belongsToMany(
+            CourseCategory::class,   // Related model
+            'course_category_courses', // Pivot table name
+            'course_id',       // Foreign key on pivot table referencing current model
+            'course_category_id',     // Foreign key on pivot table referencing related model
+            'id',              // Local key on current model
+            'id'               // Local key on related model
+        )->withTimestamps();
+    }
 
 
     public function sections(): HasMany
@@ -102,17 +126,17 @@ public function getCoverAttribute($value)
         });
     }
 
-     public function scopeRescrictBeforeEnrollment($query)
+    public function scopeRescrictBeforeEnrollment($query)
     {
-        return $query->whereHas("enrollments" , function ($q) {
-            $q->where("user_id" , auth()->user()->id)
-            ->where(function ($q) {
-                $q->whereDate('enrolled_at', '<=', now())
+        return $query->whereHas("enrollments", function ($q) {
+            $q->where("user_id", auth()->user()->id)
                 ->where(function ($q) {
-                    $q->whereNull('expiry_date')
-                    ->orWhereDate('expiry_date', '>=', now());
-                });   
-            });
+                    $q->whereDate('enrolled_at', '<=', now())
+                        ->where(function ($q) {
+                            $q->whereNull('expiry_date')
+                                ->orWhereDate('expiry_date', '>=', now());
+                        });
+                });
         });
     }
 }

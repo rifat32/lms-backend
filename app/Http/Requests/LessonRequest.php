@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests;
 
-
+use App\Models\Lesson;
 use App\Rules\ValidLesson;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LessonRequest extends FormRequest
 {
@@ -17,14 +18,10 @@ class LessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            // 'course_id' => ['required', 'integer', new ValidCourse()],
             'title' => 'required|string|max:255',
-            'content_type' => 'required|in:video,text,pdf,audio,file',
+            'content_type' => ['required', Rule::in(array_values(Lesson::CONTENT_TYPES))],
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
-
-
-            // new fields
             'duration' => 'nullable|integer|min:1',
             'is_preview' => 'nullable|boolean',
             'is_time_locked' => 'nullable|boolean',
@@ -33,6 +30,8 @@ class LessonRequest extends FormRequest
             'unlock_day_after_purchase' => 'nullable|integer|min:0',
             'description' => 'nullable|string',
             'content' => 'nullable|string',
+
+            // files
             'files' => 'nullable|array',        // if multiple
             'files.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480', // max 20MB per file
             'materials' => 'nullable|array',
@@ -49,12 +48,10 @@ class LessonRequest extends FormRequest
     public function messages()
     {
         return [
-            // 'course_id.required' => 'Course ID is required.',
-            // 'course_id.numeric' => 'Course ID must be a valid number.',
             'title.required' => 'Lesson title is required.',
             'title.string' => 'Lesson title must be a string.',
             'content_type.required' => 'Content type is required.',
-            'content_type.in' => 'Content type must be one of: video, text, file, quiz.',
+            'content_type.in' => 'Content type must be one of: ' . implode(', ', array_values(Lesson::CONTENT_TYPES)),
             'content_url.string' => 'Content URL must be a string.',
             'sort_order.integer' => 'Sort order must be a number.',
             'sort_order.min' => 'Sort order cannot be negative.',

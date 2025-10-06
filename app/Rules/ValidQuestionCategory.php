@@ -2,10 +2,10 @@
 
 namespace App\Rules;
 
-use App\Models\Option;
+use App\Models\QuestionCategory;
 use Illuminate\Contracts\Validation\Rule;
 
-class ValidOption implements Rule
+class ValidQuestionCategory implements Rule
 {
     /**
      * Create a new rule instance.
@@ -26,7 +26,7 @@ class ValidOption implements Rule
      */
     public function passes($attribute, $value)
     {
-        return Option::where('id', $value)->exists();
+        return QuestionCategory::where('id', $value)->exists();
     }
 
     /**

@@ -9,6 +9,14 @@ class Lesson extends Model
 {
     use HasFactory;
 
+    public const CONTENT_TYPES = [
+        'VIDEO' => 'video',
+        'TEXT' => 'text',
+        'PDF' => 'pdf',
+        'AUDIO' => 'audio',
+        'FILE' => 'file',
+    ];
+
     protected $fillable = [
         'course_id',
         'title',
@@ -38,42 +46,42 @@ class Lesson extends Model
         'materials' => 'array',
     ];
 
-    
-   public function getFilesAttribute($value)
-{
-    // Decode only if it’s a string
-    $files = is_string($value) ? json_decode($value, true) : ($value ?? []);
 
-    // Ensure it's always an array
-    $files = array_filter($files ?? []);
+    public function getFilesAttribute($value)
+    {
+        // Decode only if it’s a string
+        $files = is_string($value) ? json_decode($value, true) : ($value ?? []);
 
-    return array_map(function ($filename) {
-        $folder_path = "business_1/lesson_{$this->id}";
-        return asset("storage/{$folder_path}/{$filename}");
-    }, $files);
-}
+        // Ensure it's always an array
+        $files = array_filter($files ?? []);
 
-  public function getMaterialsAttribute($value)
-{
-    // Decode only if it’s a string
-    $materials = is_string($value) ? json_decode($value, true) : ($value ?? []);
+        return array_map(function ($filename) {
+            $folder_path = "business_1/lesson_{$this->id}";
+            return asset("storage/{$folder_path}/{$filename}");
+        }, $files);
+    }
 
-    // Ensure it's always an array
-    $materials = array_filter($files ?? []);
+    public function getMaterialsAttribute($value)
+    {
+        // Decode only if it’s a string
+        $materials = is_string($value) ? json_decode($value, true) : ($value ?? []);
 
-    return array_map(function ($filename) {
-        $folder_path = "business_1/lesson_{$this->id}";
-        return asset("storage/{$folder_path}/{$filename}");
-    }, $materials);
-}
+        // Ensure it's always an array
+        $materials = array_filter($files ?? []);
 
-    
+        return array_map(function ($filename) {
+            $folder_path = "business_1/lesson_{$this->id}";
+            return asset("storage/{$folder_path}/{$filename}");
+        }, $materials);
+    }
+
+
     public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
-   
+
     public function sections()
     {
         return $this->morphToMany(Section::class, 'sectionable');

@@ -9,7 +9,7 @@ class CourseNotice extends Model
 {
     use HasFactory;
 
-      protected $fillable = [
+    protected $fillable = [
         'course_id',
         'title',
         'content',
@@ -19,5 +19,4 @@ class CourseNotice extends Model
     {
         return $this->belongsTo(Course::class);
     }
-
 }

@@ -5,7 +5,8 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LessonTimeRequest extends FormRequest
-{  public function authorize(): bool
+{
+    public function authorize(): bool
     {
         // Keep true for now; add policies/enrollment checks if needed.
         return true;
