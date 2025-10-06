@@ -10,10 +10,87 @@ use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Stripe\WebhookEndpoint;
 
+/**
+ * @OA\Tag(
+ *     name="Payments",
+ *     description="Endpoints for handling course payments via Stripe"
+ * )
+ */
 class StripePaymentController extends Controller
 {
     use BasicUtil;
     
+       /**
+     * @OA\Post(
+     *     path="/v1.0/payments/intent",
+     *     operationId="createPaymentIntent",
+     *     tags={"Payments"},
+     *     summary="Create a Stripe Payment Intent for a course",
+     *     description="Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"course_id"},
+     *             @OA\Property(property="course_id", type="integer", example=101, description="The ID of the course being purchased")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment intent created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="clientSecret", type="string", example="pi_3OzFKa2LqWcU...secret_123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request payload.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Stripe not enabled or settings missing",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Stripe is not enabled.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Course not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The course_id field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="course_id", type="array",
+     *                     @OA\Items(type="string", example="The course_id field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred while creating the payment intent.")
+     *         )
+     *     )
+     * )
+     */
    public function createPaymentIntent(Request $request)
 {
     // Retrieve course

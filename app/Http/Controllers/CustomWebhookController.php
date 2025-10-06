@@ -20,13 +20,28 @@ class CustomWebhookController extends Controller
         $payload = $request->all();
 
         // Log the entire payload for debugging purposes
-        Log::info('Webhook Payload: ' . json_encode($payload));
+
+        log_message([
+            'level' => 'info',
+            'message' => 'Stripe Webhook received',
+            'context' => ['payload' => $payload],
+        ],
+        'stripe_webhooks.log'
+    );
+      
 
         // Extract the event type
         $eventType = $payload['type'] ?? null;
 
-        // Log the event type
-        Log::info('Event Type: ' . $eventType);
+
+
+ 
+        log_message([
+            'level' => 'info',
+            'message' => 'Event Type: ' . $eventType,
+        ],
+        'stripe_webhooks.log'
+    );
 
         // Handle the event based on its type
         if ($eventType === 'checkout.session.completed') {

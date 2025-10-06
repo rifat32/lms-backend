@@ -19,6 +19,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StripePaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -87,6 +88,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
+Route::group(['prefix' => '/v1.0/payments'], function () {
+    Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
+});
 
     // quiz attempt
     Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
