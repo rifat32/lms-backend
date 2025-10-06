@@ -10,15 +10,29 @@ class Course extends Model
 {
     use HasFactory;
 
-    public const STATUS = ['draft', 'published', 'archived'];
+    public const STATUS = [
+        'DRAFT' => 'draft',
+        'PUBLISHED' => 'published',
+        'ARCHIVED' => 'archived',
+    ];
 
     public const PREVIEW_VIDEO_SOURCE_TYPE = [
-        'HTML',
-        'YouTube',
-        'Vimeo',
-        'External Link',
-        'Embed',
+        'HTML' => 'HTML',
+        'YOUTUBE' => 'YouTube',
+        'VIMEO' => 'Vimeo',
+        'EXTERNAL' => 'External Link',
+        'EMBED' => 'Embed',
     ];
+
+    // public const STATUS = ['draft', 'published', 'archived'];
+
+    // public const PREVIEW_VIDEO_SOURCE_TYPE = [
+    //     'HTML',
+    //     'YouTube',
+    //     'Vimeo',
+    //     'External Link',
+    //     'Embed',
+    // ];
 
     protected $fillable = [
         'title',

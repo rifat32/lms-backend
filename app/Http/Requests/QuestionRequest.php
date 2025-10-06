@@ -30,7 +30,7 @@ class QuestionRequest extends FormRequest
     {
         $rules = [
             'question_text' => 'required|string|max:255',
-            'question_type' => ['required', 'in:' . implode(',', Question::TYPES)],
+            'question_type' => ['required', 'in:' . implode(',', array_values(Question::TYPES))],
             'points' => 'required|integer|min:1',
             'time_limit' => 'nullable|integer|min:0',
             'is_required' => 'required|boolean',
@@ -63,7 +63,7 @@ class QuestionRequest extends FormRequest
     {
         return [
             'question_type.required' => 'Please select a question type.',
-            'question_type.in' => 'The selected question type is invalid. Allowed types are: ' . implode(', ', Question::TYPES),
+            'question_type.in' => 'The selected question type is invalid. Allowed types are: ' . implode(', ', array_values(Question::TYPES)),
         ];
     }
 }

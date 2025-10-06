@@ -9,7 +9,7 @@ class Certificate extends Model
 {
     use HasFactory;
 
-      protected $fillable = [
+    protected $fillable = [
         'enrollment_id',
         'certificate_code',
         'issued_at',
@@ -17,7 +17,7 @@ class Certificate extends Model
     ];
 
     public function enrollment()
-{
-    return $this->belongsTo(Enrollment::class, 'enrollment_id', 'id');
-}
+    {
+        return $this->belongsTo(Enrollment::class, 'enrollment_id', 'id');
+    }
 }

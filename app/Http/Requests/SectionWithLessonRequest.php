@@ -31,9 +31,9 @@ class SectionWithLessonRequest extends FormRequest
             'title' => 'required|string|max:255',
             'course_id' => ['required', 'numeric', new ValidCourse()],
             "order" => "required|integer",
-            'sectionable' => 'array|required',
+            'sectionable' => 'array|nullable',
             'sectionable.*.id' => 'required|integer',
-            'sectionable.*.type' => ['required', 'string', Rule::in(Section::SECTIONABLE_TYPES)],
+            'sectionable.*.type' => ['required', 'string', Rule::in(array_values(Section::SECTIONABLE_TYPES))],
             'sectionable.*.order' => 'nullable|integer',
         ];
 
@@ -46,7 +46,7 @@ class SectionWithLessonRequest extends FormRequest
     {
         return [
             'sectionable.*.type.required' => 'Section type is required.',
-            'sectionable.*.type.in' => 'Section type must be one of: ' . implode(', ', Section::SECTIONABLE_TYPES) . '.',
+            'sectionable.*.type.in' => 'Section type must be one of: ' . implode(', ', array_values(Section::SECTIONABLE_TYPES)) . '.',
         ];
     }
 }

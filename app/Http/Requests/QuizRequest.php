@@ -21,8 +21,8 @@ class QuizRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'time_limit' => 'nullable|integer|min:1',
-            'time_unit' => ['nullable', Rule::in(Quiz::TIME_UNITS)],
-            'style' => ['nullable', Rule::in(Quiz::STYLES)],
+            'time_unit' => ['nullable', Rule::in(array_values(Quiz::TIME_UNITS))],
+            'style' => ['nullable', Rule::in(array_values(Quiz::STYLES))],
             'is_randomized' => 'nullable|boolean',
             'show_correct_answer' => 'nullable|boolean',
             'allow_retake_after_pass' => 'nullable|boolean',
@@ -44,8 +44,8 @@ class QuizRequest extends FormRequest
     public function messages()
     {
         return [
-            'time_unit.in' => 'The time unit must be one of : ' . implode(',', Quiz::TIME_UNITS),
-            'style.in' => 'The style must be one of ' . implode(',', Quiz::STYLES),
+            'time_unit.in' => 'The time unit must be one of : ' . implode(',', array_values(Quiz::TIME_UNITS)),
+            'style.in' => 'The style must be one of ' . implode(',', array_values(Quiz::STYLES)),
         ];
     }
 }

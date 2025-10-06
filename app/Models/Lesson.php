@@ -10,11 +10,11 @@ class Lesson extends Model
     use HasFactory;
 
     public const CONTENT_TYPES = [
-        'video',
-        'text',
-        'pdf',
-        'audio',
-        'file',
+        'VIDEO' => 'video',
+        'TEXT' => 'text',
+        'PDF' => 'pdf',
+        'AUDIO' => 'audio',
+        'FILE' => 'file',
     ];
 
     protected $fillable = [

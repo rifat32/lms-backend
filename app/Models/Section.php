@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Section extends Model
 {
     use HasFactory;
+
+
     public const SECTIONABLE_TYPES = [
-        'lesson',
-        'quiz',
+        'LESSON' => 'lesson',
+        'QUIZ' => 'quiz',
     ];
 
     protected $fillable = [

@@ -14,7 +14,15 @@ class Question extends Model
 {
     use HasFactory;
 
-    const TYPES =  ['true_false', 'single', 'multiple', 'matching', 'file_matching', 'keywords', 'fill_in_the_blanks'];
+    const TYPES =  [
+        'TRUE_FALSE' => 'true_false',
+        'SINGLE' => 'single',
+        'MULTIPLE' => 'multiple',
+        'MATCHING' => 'matching',
+        'FILE_MATCHING' => 'file_matching',
+        'KEYWORDS' => 'keywords',
+        'FILL_IN_THE_BLANKS' => 'fill_in_the_blanks'
+    ];
 
     protected $fillable = [
         'question_text',
@@ -43,6 +51,6 @@ class Question extends Model
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(QuestionCategory::class, 'question_category_question', 'question_id', 'category_id');
+        return $this->belongsToMany(QuestionCategory::class, 'question_category_questions', 'question_id', 'category_id');
     }
 }

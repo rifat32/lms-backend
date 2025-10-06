@@ -9,7 +9,7 @@ class QuizAttempt extends Model
 {
     use HasFactory;
 
-      protected $fillable = [
+    protected $fillable = [
         'quiz_id',
         'user_id',
         'score',
@@ -20,12 +20,12 @@ class QuizAttempt extends Model
     ];
 
     public function quiz()
-{
-    return $this->belongsTo(Quiz::class, 'quiz_id', 'id');
-}
+    {
+        return $this->belongsTo(Quiz::class, 'quiz_id', 'id');
+    }
 
-public function user()
-{
-    return $this->belongsTo(User::class, 'user_id', 'id');
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LessonProgress extends Model
 {
     use HasFactory;
-   protected $fillable = [
+    protected $fillable = [
         'user_id',
         'lesson_id',
         'total_time_spent',
@@ -36,5 +36,4 @@ class LessonProgress extends Model
     {
         return $this->hasMany(LessonSession::class);
     }
-    
 }

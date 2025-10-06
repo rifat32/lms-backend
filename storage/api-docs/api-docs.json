@@ -2736,7 +2736,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                        "example": 49.99
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -2815,6 +2815,288 @@
                                         "message": {
                                             "type": "string",
                                             "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/courses/{id}": {
+            "get": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Get a single course by ID",
+                "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
+                "operationId": "getCourseByIdClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Programming"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A beginner course on programming"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson 1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "faqs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question": {
+                                                                "type": "string",
+                                                                "example": "What is a variable?"
+                                                            },
+                                                            "answer": {
+                                                                "type": "string",
+                                                                "example": "A variable is..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "notices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Exam Notice"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Exam will be held on..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/courses/secure/{id}": {
+            "get": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Get a single course by ID",
+                "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
+                "operationId": "getCourseByIdSecureClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Programming"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A beginner course on programming"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson 1"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "faqs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "question": {
+                                                                "type": "string",
+                                                                "example": "What is a variable?"
+                                                            },
+                                                            "answer": {
+                                                                "type": "string",
+                                                                "example": "A variable is..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "notices": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Exam Notice"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Exam will be held on..."
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found"
                                         }
                                     },
                                     "type": "object"
@@ -2915,7 +3197,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                        "example": 49.99
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3040,12 +3322,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99000000000000198951966012828052043914794921875
+                                        "example": 49.99
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.989999999999998436805981327779591083526611328125
+                                        "example": 29.99
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -3175,12 +3457,12 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99000000000000198951966012828052043914794921875
+                                            "example": 49.99
                                         },
                                         "sale_price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 29.989999999999998436805981327779591083526611328125
+                                            "example": 29.99
                                         },
                                         "price_start_date": {
                                             "type": "string",
@@ -3432,12 +3714,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99000000000000198951966012828052043914794921875
+                                        "example": 49.99
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.989999999999998436805981327779591083526611328125
+                                        "example": 29.99
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -3567,7 +3849,7 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99000000000000198951966012828052043914794921875
+                                            "example": 49.99
                                         },
                                         "is_free": {
                                             "type": "boolean",
@@ -4773,7 +5055,7 @@
                                                             },
                                                             "price": {
                                                                 "type": "number",
-                                                                "example": 49.99000000000000198951966012828052043914794921875
+                                                                "example": 49.99
                                                             }
                                                         },
                                                         "type": "object"
@@ -4908,7 +5190,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                        "example": 49.99
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -9410,6 +9692,10 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
+                                                "order": {
+                                                    "type": "string",
+                                                    "example": "1"
+                                                },
                                                 "title": {
                                                     "type": "string",
                                                     "example": "Introduction to Laravel"
@@ -9730,6 +10016,341 @@
                                     },
                                     "type": "object"
                                 }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-settingss": {
+            "put": {
+                "tags": [
+                    "setting"
+                ],
+                "summary": "This method is to update busuness setting",
+                "description": "This method is to update busuness setting",
+                "operationId": "updateBusinessSettings",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "allow_receptionist_user_discount": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
+                                    },
+                                    "discount_percentage_limit": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": ""
+                                    },
+                                    "STRIPE_KEY": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "STRIPE_KEY"
+                                    },
+                                    "STRIPE_SECRET": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "STRIPE_SECRET"
+                                    },
+                                    "stripe_enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_expert_price": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allow_pay_after_service": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allow_expert_booking": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allow_expert_self_busy": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allow_expert_booking_cancel": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allow_expert_take_payment": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allow_expert_view_revenue": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "allow_expert_view_customer_details": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "allow_receptionist_add_question": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "default_currency": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "USD"
+                                    },
+                                    "default_language": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "en"
+                                    },
+                                    "vat_enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "vat_percentage": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15
+                                    },
+                                    "vat_number": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/business-settings": {
+            "get": {
+                "tags": [
+                    "setting"
+                ],
+                "summary": "This method is to get busuness _setting",
+                "description": "This method is to get busuness setting",
+                "operationId": "getBusinessSettings",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/business-settings": {
+            "get": {
+                "tags": [
+                    "setting"
+                ],
+                "summary": "This method is to get Business_setting",
+                "description": "This method is to get Business_setting",
+                "operationId": "getBusinessSettingsClient",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "per_page",
+                        "required": true,
+                        "example": "6"
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "start_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "end_date",
+                        "required": true,
+                        "example": "2019-06-29"
+                    },
+                    {
+                        "name": "search_key",
+                        "in": "query",
+                        "description": "search_key",
+                        "required": true,
+                        "example": "search_key"
+                    },
+                    {
+                        "name": "business_tier_id",
+                        "in": "query",
+                        "description": "business_tier_id",
+                        "required": true,
+                        "example": "1"
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "order_by",
+                        "required": true,
+                        "example": "ASC"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
                             }
                         }
                     }
@@ -10430,6 +11051,10 @@
         {
             "name": "section",
             "description": "section"
+        },
+        {
+            "name": "setting",
+            "description": "setting"
         },
         {
             "name": "user_management",

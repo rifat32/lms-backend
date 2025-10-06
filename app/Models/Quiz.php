@@ -10,8 +10,14 @@ class Quiz extends Model
 {
     use HasFactory;
 
-    public const TIME_UNITS = ['Hours', 'Minutes'];
-    public const STYLES = ['pagination', 'all-in-one'];
+    public const TIME_UNITS = [
+        'HOURS' => 'Hours',
+        'MINUTES' => 'Minutes'
+    ];
+    public const STYLES = [
+        'pagination',
+        'all-in-one'
+    ];
 
     protected $fillable = [
         'title',

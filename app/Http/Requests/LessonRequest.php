@@ -19,7 +19,7 @@ class LessonRequest extends FormRequest
     {
         $rules = [
             'title' => 'required|string|max:255',
-            'content_type' => ['required', Rule::in(Lesson::CONTENT_TYPES)],
+            'content_type' => ['required', Rule::in(array_values(Lesson::CONTENT_TYPES))],
             'content_url' => 'nullable|string|max:2048',
             'sort_order' => 'nullable|integer|min:0',
             'duration' => 'nullable|integer|min:1',
@@ -51,7 +51,7 @@ class LessonRequest extends FormRequest
             'title.required' => 'Lesson title is required.',
             'title.string' => 'Lesson title must be a string.',
             'content_type.required' => 'Content type is required.',
-            'content_type.in' => 'Content type must be one of: ' . implode(', ', Lesson::CONTENT_TYPES) . '.',
+            'content_type.in' => 'Content type must be one of: ' . implode(', ', array_values(Lesson::CONTENT_TYPES)),
             'content_url.string' => 'Content URL must be a string.',
             'sort_order.integer' => 'Sort order must be a number.',
             'sort_order.min' => 'Sort order cannot be negative.',

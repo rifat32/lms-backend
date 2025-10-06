@@ -10,10 +10,12 @@ class LessonSession extends Model
     use HasFactory;
 
     public const EVENTS = [
-        'start',
-        'stop',
-        'heartbeat',
+        'START' => 'start',
+        'STOP' => 'stop',
+        'HEARTBEAT' => 'heartbeat',
     ];
+
+
     protected $fillable = [
         'user_id',
         'lesson_id',

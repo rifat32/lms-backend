@@ -39,8 +39,8 @@ class CourseRequest extends FormRequest
             'price_end_date' => 'nullable|date|after_or_equal:price_start_date',
             'is_free' => 'nullable|boolean',
 
-            'status' => ['required', Rule::in(Course::STATUS)],
-            'preview_video_source_type' => ['nullable', Rule::in(Course::PREVIEW_VIDEO_SOURCE_TYPE)],
+            'status' => ['required', Rule::in(array_values(Course::STATUS))],
+            'preview_video_source_type' => ['nullable', Rule::in(array_values(Course::PREVIEW_VIDEO_SOURCE_TYPE))],
 
             'status_start_date' => 'nullable|date',
             'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
@@ -90,8 +90,8 @@ class CourseRequest extends FormRequest
 
             'is_free.boolean' => 'The is_free field must be true or false.',
 
-            'status.in' => 'Status must be one of: ' . implode(', ', Course::STATUS) . '.',
-            'preview_video_source_type.in' => 'Video source type must be one of: ' . implode(', ', Course::PREVIEW_VIDEO_SOURCE_TYPE) . '.',
+            'status.in' => 'Status must be one of: ' . implode(', ', array_values(Course::STATUS)) . '.',
+            'preview_video_source_type.in' => 'Video source type must be one of: ' . implode(', ', array_values(Course::PREVIEW_VIDEO_SOURCE_TYPE)) . '.',
 
             'url.string' => 'The URL must be a string.',
             'level.string' => 'The level must be a string.',
