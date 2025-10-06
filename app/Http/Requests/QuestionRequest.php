@@ -35,7 +35,7 @@ class QuestionRequest extends FormRequest
             'time_limit' => 'nullable|integer|min:0',
             'is_required' => 'required|boolean',
 
-            'category_ids' => 'required|array|min:1',
+            'category_ids' => 'present|array',
             'category_ids.*' => ['required', 'integer', new ValidQuestionCategory()],
 
             // Options array must be present

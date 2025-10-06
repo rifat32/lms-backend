@@ -31,7 +31,7 @@ class SectionWithLessonRequest extends FormRequest
             'title' => 'required|string|max:255',
             'course_id' => ['required', 'numeric', new ValidCourse()],
             "order" => "required|integer",
-            'sectionable' => 'array|nullable',
+            'sectionable' => 'present|array',
             'sectionable.*.id' => 'required|integer',
             'sectionable.*.type' => ['required', 'string', Rule::in(array_values(Section::SECTIONABLE_TYPES))],
             'sectionable.*.order' => 'nullable|integer',
