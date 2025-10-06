@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Quiz;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class QuizRequest extends FormRequest
 {
@@ -17,8 +19,8 @@ class QuizRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'time_limit' => 'nullable|integer|min:1',
-            'time_unit' => 'nullable|in:Hours,Minutes',
-            'style' => 'nullable|in:pagination,all-in-one',
+            'time_unit' => ['nullable', Rule::in(Quiz::TIME_UNITS)],
+            'style' => ['nullable', Rule::in(Quiz::STYLES)],
             'is_randomized' => 'nullable|boolean',
             'show_correct_answer' => 'nullable|boolean',
             'allow_retake_after_pass' => 'nullable|boolean',
@@ -35,5 +37,13 @@ class QuizRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'time_unit.in' => 'The time unit must be one of : ' . implode(',', Quiz::TIME_UNITS),
+            'style.in' => 'The style must be one of ' . implode(',', Quiz::STYLES),
+        ];
     }
 }
