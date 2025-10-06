@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Section extends Model
 {
     use HasFactory;
+    public const SECTIONABLE_TYPES = [
+        'lesson',
+        'quiz',
+    ];
 
     protected $fillable = [
         'title',
@@ -20,14 +24,14 @@ class Section extends Model
 
 
 
- 
+
 
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-       public function sectionables()
+    public function sectionables()
     {
         return $this->hasMany(Sectionable::class);
     }
@@ -41,7 +45,4 @@ class Section extends Model
     {
         return $this->morphedByMany(Quiz::class, 'sectionable', 'sectionables');
     }
-
-
-
 }

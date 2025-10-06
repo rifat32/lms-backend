@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Section;
 use App\Rules\ValidCourse;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SectionWithLessonRequest extends FormRequest
 {
@@ -31,12 +33,20 @@ class SectionWithLessonRequest extends FormRequest
             "order" => "required|integer",
             'sectionable' => 'array|required',
             'sectionable.*.id' => 'required|integer',
-            'sectionable.*.type' => 'required|string|in:lesson,quiz',
+            'sectionable.*.type' => ['required', 'string', Rule::in(Section::SECTIONABLE_TYPES)],
             'sectionable.*.order' => 'nullable|integer',
         ];
 
 
 
         return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'sectionable.*.type.required' => 'Section type is required.',
+            'sectionable.*.type.in' => 'Section type must be one of: ' . implode(', ', Section::SECTIONABLE_TYPES) . '.',
+        ];
     }
 }

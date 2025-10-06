@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Quiz;
 use App\Rules\ValidQuestion;
+use App\Rules\ValidQuiz;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -34,7 +35,7 @@ class QuizRequest extends FormRequest
         ];
 
         if ($this->isMethod('patch') || $this->isMethod('put')) {
-            $rules['id'] = 'required|integer|exists:quizzes,id';
+            $rules['id'] = ['required', 'integer', new ValidQuiz()];
         }
 
         return $rules;

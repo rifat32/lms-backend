@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\Question;
+use App\Rules\ValidOption;
 use App\Rules\ValidQuestion;
+use App\Rules\ValidQuestionCategory;
 use App\Rules\ValidQuiz;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,14 +35,14 @@ class QuestionRequest extends FormRequest
             'time_limit' => 'nullable|integer|min:0',
             'is_required' => 'required|boolean',
 
-            'category_ids' => 'present|array',
-            'category_ids.*' => 'integer|exists:question_categories,id',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => ['required', 'integer', new ValidQuestionCategory()],
 
             // Options array must be present
             'options' => 'required|array|min:1',
 
             // Each option field
-            'options.*.id' => 'nullable|integer|exists:options,id', // optional ID for update
+            'options.*.id' => ['nullable', 'integer', new ValidOption()], // optional ID for update
             'options.*.option_text' => 'nullable|string|max:255',
             'options.*.is_correct' => 'required|boolean',
             'options.*.explanation' => 'nullable|string',

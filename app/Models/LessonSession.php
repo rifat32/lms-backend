@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class LessonSession extends Model
 {
     use HasFactory;
-      protected $fillable = [
+
+    public const EVENTS = [
+        'start',
+        'stop',
+        'heartbeat',
+    ];
+    protected $fillable = [
         'user_id',
         'lesson_id',
         'start_time',
