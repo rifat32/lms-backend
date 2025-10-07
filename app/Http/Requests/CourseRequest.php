@@ -29,7 +29,7 @@ class CourseRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'cover' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
+            'cover' => 'nullable',
 
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
