@@ -173,25 +173,18 @@ class QuizController extends Controller
      *     summary="Get quiz details with questions and options",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Quiz ID",
-     *         @OA\Schema(type="integer", example=1)
-     *     ),
-     *     @OA\Parameter(
      *         name="is_randomized",
      *         in="query",
      *         required=false,
      *         description="Whether to randomize the quiz questions",
-     *         @OA\Schema(type="boolean", example=true)
+     *         @OA\Schema(type="boolean", example="")
      *     ),
      *     @OA\Parameter(
      *         name="question_limit",
      *         in="query",
      *         required=false,
      *         description="The maximum number of questions to include in the quiz",
-     *         @OA\Schema(type="integer", example=10)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -379,16 +372,16 @@ class QuizController extends Controller
         }
 
 
-        Sectionable::where('sectionable_id', $quiz->id)
-            ->where('sectionable_type', Quiz::class)
-            ->delete();
-        foreach ($request_payload['section_ids'] as $section_id) {
-            Sectionable::create([
-                'section_id' => $section_id,
-                'sectionable_id' => $quiz->id,
-                'sectionable_type' => Quiz::class,
-            ]);
-        }
+        // Sectionable::where('sectionable_id', $quiz->id)
+        //     ->where('sectionable_type', Quiz::class)
+        //     ->delete();
+        // foreach ($request_payload['section_ids'] as $section_id) {
+        //     Sectionable::create([
+        //         'section_id' => $section_id,
+        //         'sectionable_id' => $quiz->id,
+        //         'sectionable_type' => Quiz::class,
+        //     ]);
+        // }
 
         return response()->json([
             'success' => true,

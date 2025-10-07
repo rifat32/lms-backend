@@ -109,10 +109,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
 
-     Route::put('/v1.0/sections-add-lessons', [SectionController::class, 'updateSectionAddLessons']);
+    Route::put('/v1.0/sections-add-lessons', [SectionController::class, 'updateSectionAddLessons']);
 
-     Route::put('/v1.0/sections-remove-lessons', [SectionController::class, 'updateSectionRemoveLessons']);
-     
+    Route::put('/v1.0/sections-remove-lessons', [SectionController::class, 'updateSectionRemoveLessons']);
+
 
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
@@ -157,12 +157,12 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Get quiz with questions
-    Route::prefix('v1.0')->group(function () {
-        Route::get('/v1.0/quizzes', [QuizController::class, 'getQuizWithQuestions']);
-        Route::get('/v1.0/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
-        Route::post('quizzes', [QuizController::class, 'store']);
-        Route::put('quizzes/{id}', [QuizController::class, 'update']);
-        Route::delete('quizzes/{id}', [QuizController::class, 'destroy']);
+    Route::prefix('/v1.0/quizzes')->group(function () {
+        Route::get('/', [QuizController::class, 'getQuizWithQuestions']);
+        Route::get('/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
+        Route::post('/', [QuizController::class, 'store']);
+        Route::put('/{id}', [QuizController::class, 'update']);
+        Route::delete('/{id}', [QuizController::class, 'destroy']);
     });
 
 

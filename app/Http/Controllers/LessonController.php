@@ -437,16 +437,16 @@ class LessonController extends Controller
             $lesson->update($request_payload);
 
 
-            Sectionable::where('sectionable_id', $lesson->id)
-                ->where('sectionable_type', Lesson::class)
-                ->delete();
-            foreach ($request_payload['section_ids'] as $section_id) {
-                Sectionable::create([
-                    'section_id' => $section_id,
-                    'sectionable_id' => $lesson->id,
-                    'sectionable_type' => Lesson::class,
-                ]);
-            }
+            // Sectionable::where('sectionable_id', $lesson->id)
+            //     ->where('sectionable_type', Lesson::class)
+            //     ->delete();
+            // foreach ($request_payload['section_ids'] as $section_id) {
+            //     Sectionable::create([
+            //         'section_id' => $section_id,
+            //         'sectionable_id' => $lesson->id,
+            //         'sectionable_type' => Lesson::class,
+            //     ]);
+            // }
 
             DB::commit();
 
