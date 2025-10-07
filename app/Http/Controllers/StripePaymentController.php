@@ -92,7 +92,7 @@ class StripePaymentController extends Controller
      *     )
      * )
      */
- public function createPaymentIntent(Request $request)
+public function createPaymentIntent(Request $request)
 {
     // Retrieve multiple courses
     $course_ids = $request->course_ids; // array of IDs
@@ -113,21 +113,51 @@ class StripePaymentController extends Controller
 
     $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
 
+    // -------------------------------
+    // Ensure webhook endpoint exists
+    // -------------------------------
+    try {
+        $webhookEndpoints = $stripe->webhookEndpoints->all();
+        $existingEndpoint = collect($webhookEndpoints->data)
+            ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
+
+        if (!$existingEndpoint) {
+            $stripe->webhookEndpoints->create([
+                'url' => route('stripe.webhook'),
+                'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
+            ]);
+        }
+    } catch (\Exception $e) {
+       log_message([
+           'level' =>  $e->getMessage(),
+       ],"hook.txt");
+    }
+
+    // -------------------------------
     // Calculate total amount
+    // -------------------------------
     $total_amount = $courses->sum(fn($course) => $course->sale_price + ($course->vat_amount ?? 0));
 
-    // Prepare metadata with all course IDs
-    $metadata = ['course_ids' => implode(',', $courses->pluck('id')->toArray()), 'webhook_url' => route('stripe.webhook')];
+    // Prepare metadata with all course IDs and webhook URL
+    $metadata = [
+        'course_ids' => implode(',', $courses->pluck('id')->toArray()),
+        'webhook_url' => route('stripe.webhook'),
+        'user_id' => auth()->user()->id,
+    ];
 
-    // Create payment intent
+    // -------------------------------
+    // Create PaymentIntent
+    // -------------------------------
     $payment_intent = $stripe->paymentIntents->create([
-        'amount' => $total_amount * 100,
+        'amount' => $total_amount * 100, // Stripe uses smallest currency unit
         'currency' => 'usd',
         'payment_method_types' => ['card'],
         'metadata' => $metadata,
     ]);
 
+    // -------------------------------
     // Save payment for each course
+    // -------------------------------
     foreach ($courses as $course) {
         Payment::create([
             'user_id' => auth()->user()->id,
@@ -144,12 +174,16 @@ class StripePaymentController extends Controller
         ]);
     }
 
+    // -------------------------------
+    // Return client secret and info
+    // -------------------------------
     return response()->json([
         'clientSecret' => $payment_intent->client_secret,
         'totalAmount' => $total_amount,
         'courses' => $courses->pluck('title'),
     ]);
 }
+
 
     public function createRefund(Request $request)
     {

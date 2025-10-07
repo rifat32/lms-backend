@@ -403,6 +403,13 @@ class CourseController extends Controller
      *         description="Filter by category ID",
      *         @OA\Schema(type="integer", example="")
      *     ),
+     *    *    *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+     *         @OA\Schema(type="string", default="", example="")
+     *     ),
      *     @OA\Parameter(
      *         name="searchKey",
      *         in="query",
