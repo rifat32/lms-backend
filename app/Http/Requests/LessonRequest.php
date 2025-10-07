@@ -18,6 +18,7 @@ class LessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
+            "section_ids" => ['present', 'numeric'],
             'title' => 'required|string|max:255',
             'content_type' => ['required', Rule::in(array_values(Lesson::CONTENT_TYPES))],
             'content_url' => 'nullable|string|max:2048',

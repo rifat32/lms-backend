@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonRequest;
 use App\Models\Lesson;
+use App\Models\Section;
+use App\Models\Sectionable;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -132,6 +134,7 @@ class LessonController extends Controller
      *         @OA\JsonContent(
      *             required={"title","content_type"},
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
+     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *             @OA\Property(property="sort_order", type="integer", example=1),
@@ -163,6 +166,7 @@ class LessonController extends Controller
      *             @OA\Property(property="message", type="string", example="Lesson created successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="section_ids", type="string", example="1,2,3"),
      *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
      *                 @OA\Property(property="duration", type="integer", example=45),
      *                 @OA\Property(property="is_preview", type="boolean", example=true),
@@ -246,6 +250,22 @@ public function createLesson(LessonRequest $request)
         } 
         
 
+
+        foreach($request_payload['section_ids'] as $section_id) {
+            Sectionable::create([
+                'section_id' => $section_id,
+                'sectionable_id' => $lesson->id,
+                'sectionable_type' => Lesson::class,
+            ]);
+            
+        }
+        
+
+
+
+
+
+
         log_message("Lesson file data saved. Committing transaction.", "lesson.txt");
       
         DB::commit();
@@ -285,7 +305,7 @@ public function createLesson(LessonRequest $request)
 
     /**
      * @OA\Put(
-     *     path="/v1.0/lessons/{id}",
+     *     path="/v1.0/lessons",
      *     tags={"Lessons"},
      *     summary="Update an existing lesson (Admin only)",
      *     security={{"bearerAuth":{}}},
@@ -335,6 +355,7 @@ public function createLesson(LessonRequest $request)
      *             @OA\Property(property="message", type="string", example="Lesson updated successfully"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=10),
+     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
 
      *                 @OA\Property(property="title", type="string", example="Updated Lesson Title"),
      *                 @OA\Property(property="duration", type="integer", example=50),
@@ -412,6 +433,18 @@ public function createLesson(LessonRequest $request)
 
 
             $lesson->update($request_payload);
+
+
+            Sectionable::where('sectionable_id', $lesson->id)
+                ->where('sectionable_type', Lesson::class)
+                ->delete();
+             foreach($request_payload['section_ids'] as $section_id) {
+            Sectionable::create([
+                'section_id' => $section_id,
+                'sectionable_id' => $lesson->id,
+                'sectionable_type' => Lesson::class,
+            ]);
+        }
 
             DB::commit();
 

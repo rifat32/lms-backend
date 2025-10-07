@@ -18,6 +18,7 @@ class QuizRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            "section_ids" => ['present', 'numeric'],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'time_limit' => 'nullable|integer|min:1',

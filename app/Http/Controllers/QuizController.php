@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuizRequest;
 use App\Models\Quiz;
+use App\Models\Sectionable;
 use Illuminate\Http\Request;
 
 
@@ -294,6 +295,7 @@ class QuizController extends Controller
      *         @OA\JsonContent(
      *             required={"title"},
      *             @OA\Property(property="title", type="string", example="Laravel Basics Quiz"),
+     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
      *             @OA\Property(property="description", type="string", example="Short description of the quiz"),
      *             @OA\Property(property="time_limit", type="integer", example=2),
      *             @OA\Property(property="time_unit", type="string", example="Hours"),
@@ -313,11 +315,21 @@ class QuizController extends Controller
      */
     public function store(QuizRequest $request)
     {
-        $quizData = $request->validated();
-        $quiz = Quiz::create($quizData);
+        $request_payload = $request->validated();
+        $quiz = Quiz::create($request_payload);
 
-        if (!empty($quizData['question_ids'])) {
-            $quiz->questions()->attach($quizData['question_ids']);
+        if (!empty($request_payload['question_ids'])) {
+            $quiz->questions()->attach($request_payload['question_ids']);
+        }
+
+
+          
+             foreach($request_payload['section_ids'] as $section_id) {
+            Sectionable::create([
+                'section_id' => $section_id,
+                'sectionable_id' => $quiz->id,
+                'sectionable_type' => Quiz::class,
+            ]);
         }
 
         return response()->json([
@@ -339,6 +351,7 @@ class QuizController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="title", type="string", example="Updated Quiz Title"),
+     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
      *             @OA\Property(property="description", type="string", example="Updated description"),
      *             @OA\Property(property="question_ids", type="array", @OA\Items(type="integer", example=2))
      *         )
@@ -349,12 +362,24 @@ class QuizController extends Controller
     public function update(QuizRequest $request, $id): JsonResponse
     {
         $quiz = Quiz::findOrFail($id);
-        $quizData = $request->validated();
+        $request_payload = $request->validated();
 
-        $quiz->update($quizData);
+        $quiz->update($request_payload);
 
-        if (isset($quizData['question_ids'])) {
-            $quiz->questions()->sync($quizData['question_ids']); // sync instead of attach
+        if (isset($request_payload['question_ids'])) {
+            $quiz->questions()->sync($request_payload['question_ids']); // sync instead of attach
+        }
+
+
+        Sectionable::where('sectionable_id', $quiz->id)
+            ->where('sectionable_type', Quiz::class)
+            ->delete();
+          foreach($request_payload['section_ids'] as $section_id) {
+            Sectionable::create([
+                'section_id' => $section_id,
+                'sectionable_id' => $quiz->id,
+                'sectionable_type' => Quiz::class,
+            ]);
         }
 
         return response()->json([

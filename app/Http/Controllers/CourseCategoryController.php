@@ -94,7 +94,14 @@ class CourseCategoryController extends Controller
     public function getCourseCategory(Request $request)
     {
         // 
-        $query = CourseCategory::withCount(['courses as total_courses'])->filters();
+        $query = CourseCategory::
+        with([
+            'parent' => function ($q) {
+                $q->select('course_categories.id', 'course_categories.name');
+            }
+            
+            ])
+        ->withCount(['courses as total_courses'])->filters();
 
         // 
         $courses = retrieve_data($query, 'created_at', 'course_categories');

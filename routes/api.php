@@ -106,7 +106,14 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
+
     Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
+
+     Route::put('/v1.0/sections-add-lessons', [SectionController::class, 'updateSectionAddLessons']);
+
+     Route::put('/v1.0/sections-remove-lessons', [SectionController::class, 'updateSectionRemoveLessons']);
+     
+
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
