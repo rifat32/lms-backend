@@ -322,6 +322,7 @@ class SectionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
+     *  @OA\Property(property="order", type="integer", example=1)
      *             @OA\Property(
      *                 property="sectionable",
      *                 type="array",
@@ -448,20 +449,20 @@ class SectionController extends Controller
             }
 
             // delete old sectionables
-            $section->sectionables()->delete();
+            // $section->sectionables()->delete();
 
             // attach new sectionables
-            foreach ($request_payload['sectionable'] as $item) {
-                $modelClass = $item['type'] === 'lesson'
-                    ? \App\Models\Lesson::class
-                    : \App\Models\Quiz::class;
+            // foreach ($request_payload['sectionable'] as $item) {
+            //     $modelClass = $item['type'] === Section::SECTIONABLE_TYPES['LESSON']
+            //         ? Section::SECTIONABLE_TYPES['LESSON']
+            //         : Section::SECTIONABLE_TYPES['QUIZ'];
 
-                $section->sectionables()->create([
-                    'sectionable_id' => $item['id'],
-                    'sectionable_type' => $modelClass,
-                    'order' => $item['order'] ?? null,
-                ]);
-            }
+            //     $section->sectionables()->create([
+            //         'sectionable_id' => $item['id'],
+            //         'sectionable_type' => $modelClass,
+            //         'order' => $item['order'] ?? null,
+            //     ]);
+            // }
 
             DB::commit();
 
@@ -477,7 +478,7 @@ class SectionController extends Controller
     }
 
 
-  /**
+    /**
      * @OA\Put(
      *     path="/v1.0/sections-add-lessons",
      *     operationId="updateSectionAddLessons",
@@ -491,6 +492,7 @@ class SectionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
+     *             @OA\Property(property="order", type="integer", example=1)
      *             @OA\Property(
      *                 property="sectionable",
      *                 type="array",
@@ -616,13 +618,13 @@ class SectionController extends Controller
                 $section->update($request_payload);
             }
 
-          
+
 
             // attach new sectionables
             foreach ($request_payload['sectionable'] as $item) {
-                $modelClass = $item['type'] === 'lesson'
-                    ? \App\Models\Lesson::class
-                    : \App\Models\Quiz::class;
+                $modelClass = $item['type'] === Section::SECTIONABLE_TYPES['LESSON']
+                    ? Section::SECTIONABLE_TYPES['LESSON']
+                    : Section::SECTIONABLE_TYPES['QUIZ'];
 
                 $section->sectionables()->create([
                     'sectionable_id' => $item['id'],
@@ -644,7 +646,7 @@ class SectionController extends Controller
         }
     }
 
- /**
+    /**
      * @OA\Put(
      *     path="/v1.0/sections-remove-lessons",
      *     operationId="updateSectionRemoveLessons",
@@ -665,6 +667,8 @@ class SectionController extends Controller
      *                     type="object",
      *                     required={"id","type"},
      *                     @OA\Property(property="id", type="integer", example=10),
+     *                     @OA\Property(property="type", type="string", enum={"lesson","quiz"}, example="lesson"),
+     *                     @OA\Property(property="order", type="integer", example=1)
   
      *                 )
      *             )
@@ -784,10 +788,10 @@ class SectionController extends Controller
 
             // delete old sectionables
             $section->sectionables()
-            ->whereIn('sectionable_id', collect($request_payload['sectionable'])->pluck('id'))
-            ->delete();
+                ->whereIn('sectionable_id', collect($request_payload['sectionable'])->pluck('id'))
+                ->delete();
 
-         
+
             DB::commit();
 
             return response()->json([

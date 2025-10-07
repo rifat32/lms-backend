@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\Section;
 use App\Rules\ValidCourse;
+use App\Rules\ValidSection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,7 +28,7 @@ class SectionWithLessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            "id" => "nullable|integer|exists:sections,id",
+            "id" => ["nullable", "integer", new ValidSection()],
             'title' => 'required|string|max:255',
             'course_id' => ['required', 'numeric', new ValidCourse()],
             "order" => "required|integer",
