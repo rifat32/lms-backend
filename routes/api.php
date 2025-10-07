@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseFaqController;
 use App\Http\Controllers\CourseReviewController;
+use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
@@ -75,6 +76,7 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
         Route::put('/', [CourseController::class, 'updateCourse']);
+        Route::patch('/', [CourseController::class, 'updatePartialCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);
         Route::delete('/{ids}', [CourseController::class, 'deleteCourse']);
