@@ -88,9 +88,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
-Route::group(['prefix' => '/v1.0/payments'], function () {
-    Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
-});
+    Route::group(['prefix' => '/v1.0/payments'], function () {
+        Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
+    });
 
     // quiz attempt
     Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);

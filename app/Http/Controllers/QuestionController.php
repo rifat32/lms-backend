@@ -249,7 +249,7 @@ class QuestionController extends Controller
             $request_payload = $request->validated();
 
             // FIND & UPDATE QUESTION
-            $question = Question::findOrFail($id);
+            $question = Question::findOrFail($request_payload['id']);
             $question->update($request_payload);
 
             $question->categories()->sync($request_payload["category_ids"]);
@@ -264,6 +264,7 @@ class QuestionController extends Controller
                             'option_text' => $optData['option_text'] ?? null,
                             'is_correct' => $optData['is_correct'],
                             'explanation' => $optData['explanation'] ?? null,
+                            'matching_pair_text' => $optData['matching_pair_text'] ?? null,
                         ]
                     );
 
@@ -387,7 +388,7 @@ class QuestionController extends Controller
     public function getAllQuestions(Request $request)
     {
         // GET ALL QUESTIONS
-        $query = Question::with(['options',"categories"]);
+        $query = Question::with(['options', "categories"]);
 
         $questions = retrieve_data($query, 'created_at', 'questions');
 
@@ -484,7 +485,7 @@ class QuestionController extends Controller
     public function getQuestionById(Request $request, $id)
     {
         // GET QUESTION BY ID
-        $question = Question::with('options',"categories")->findOrFail($id);
+        $question = Question::with('options', "categories")->findOrFail($id);
 
         // SEND RESPONSE
         return response()->json([

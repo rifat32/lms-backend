@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\Payment;
 use App\Utils\BasicUtil;
+use Exception;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -19,8 +20,8 @@ use Stripe\WebhookEndpoint;
 class StripePaymentController extends Controller
 {
     use BasicUtil;
-    
-       /**
+
+    /**
      * @OA\Post(
      *     path="/v1.0/payments/intent",
      *     operationId="createPaymentIntent",
@@ -91,95 +92,95 @@ class StripePaymentController extends Controller
      *     )
      * )
      */
-   public function createPaymentIntent(Request $request)
-{
-    // Retrieve course
-    $course_id = $request->course_id;
-    $course = Course::findOrFail($course_id);
+    public function createPaymentIntent(Request $request)
+    {
+        // Retrieve course
+        $course_id = $request->course_id;
+        $course = Course::findOrFail($course_id);
 
-    // Stripe settings retrieval based on business or garage ID
-    $stripe_setting = $this->get_business_setting();
+        // Stripe settings retrieval based on business or garage ID
+        $stripe_setting = $this->get_business_setting();
 
-    if (empty($stripe_setting)) {
-        throw new Exception("No stripe setting found", 403);
-    }
+        if (empty($stripe_setting)) {
+            throw new Exception("No stripe setting found", 403);
+        }
 
-    if (empty($stripe_setting->stripe_enabled)) {
-        throw new Exception("Stripe is not enabled", 403);
-    }
+        if (empty($stripe_setting->stripe_enabled)) {
+            throw new Exception("Stripe is not enabled", 403);
+        }
 
-    // Initialize Stripe client
-    $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
+        // Initialize Stripe client
+        $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
 
-    // -------------------------------
-    // Commented out discount/coupon logic
-    // -------------------------------
-    // $discount = $this->canculate_discount_amount($course->price, $course->discount_type, $course->discount_amount);
-    // $coupon_discount = $this->canculate_discount_amount($course->price, $course->coupon_discount_type, $course->coupon_discount_amount);
-    // $total_discount = $discount + $coupon_discount;
+        // -------------------------------
+        // Commented out discount/coupon logic
+        // -------------------------------
+        // $discount = $this->canculate_discount_amount($course->price, $course->discount_type, $course->discount_amount);
+        // $coupon_discount = $this->canculate_discount_amount($course->price, $course->coupon_discount_type, $course->coupon_discount_amount);
+        // $total_discount = $discount + $coupon_discount;
 
-    // -------------------------------
-    // Commented out tip logic (if not used)
-    // -------------------------------
-    // $totalTip = $this->canculate_discount_amount(
-    //     $course->price,
-    //     $course->tip_type,
-    //     $course->tip_amount
-    // );
+        // -------------------------------
+        // Commented out tip logic (if not used)
+        // -------------------------------
+        // $totalTip = $this->canculate_discount_amount(
+        //     $course->price,
+        //     $course->tip_type,
+        //     $course->tip_amount
+        // );
 
-    // Prepare payment intent data
-    $payment_intent_data = [
-        'amount' => ($course->sale_price + ($course->vat_amount ?? 0)) * 100, // Stripe uses smallest currency unit (e.g., cents)
-        'currency' => 'usd',
-        'payment_method_types' => ['card'],
-        'metadata' => [
+        // Prepare payment intent data
+        $payment_intent_data = [
+            'amount' => ($course->sale_price + ($course->vat_amount ?? 0)) * 100, // Stripe uses smallest currency unit (e.g., cents)
+            'currency' => 'usd',
+            'payment_method_types' => ['card'],
+            'metadata' => [
+                'course_id' => $course->id,
+                'webhook_url' => route('stripe.webhook'),
+            ],
+        ];
+
+        // -------------------------------
+        // Commented out discount handling
+        // -------------------------------
+        // if ($total_discount > 0) {
+        //     $coupon = $stripe->coupons->create([
+        //         'amount_off' => $total_discount * 100,
+        //         'currency' => 'usd',
+        //         'duration' => 'once',
+        //         'name' => 'Discount',
+        //     ]);
+        //
+        //     $payment_intent_data['discounts'] = [
+        //         [
+        //             'coupon' => $coupon->id,
+        //         ],
+        //     ];
+        // }
+
+        // Create Stripe payment intent
+        $payment_intent = $stripe->paymentIntents->create($payment_intent_data);
+
+        // Save to CoursePayment model
+        Payment::create([
+            'user_id' => auth()->user()->id ?? 1,
             'course_id' => $course->id,
-            'webhook_url' => route('stripe.webhook'),
-        ],
-    ];
+            'amount' => $course->sale_price,
+            'method' => 'stripe',
+            'status' => 'pending',
+            'payment_intent_id' => $payment_intent->id,
 
-    // -------------------------------
-    // Commented out discount handling
-    // -------------------------------
-    // if ($total_discount > 0) {
-    //     $coupon = $stripe->coupons->create([
-    //         'amount_off' => $total_discount * 100,
-    //         'currency' => 'usd',
-    //         'duration' => 'once',
-    //         'name' => 'Discount',
-    //     ]);
-    //
-    //     $payment_intent_data['discounts'] = [
-    //         [
-    //             'coupon' => $coupon->id,
-    //         ],
-    //     ];
-    // }
+        ]);
 
-    // Create Stripe payment intent
-    $payment_intent = $stripe->paymentIntents->create($payment_intent_data);
+        // Optionally update course or related booking
+        $course->update([
+            'payment_status' => 'pending',
+            'payment_method' => 'stripe',
+        ]);
 
-    // Save to CoursePayment model
-       Payment::create([
-        'user_id' => auth()->user()->id,
-        'course_id' => $course->id,
-        'amount' => $course->sale_price,
-        'method' => 'stripe',
-        'status' => 'pending',
-        'payment_intent_id' => $payment_intent->id,
-
-    ]);
-
-    // Optionally update course or related booking
-    $course->update([
-        'payment_status' => 'pending',
-        'payment_method' => 'stripe',
-    ]);
-
-    return response()->json([
-        'clientSecret' => $payment_intent->client_secret
-    ]);
-}
+        return response()->json([
+            'clientSecret' => $payment_intent->client_secret
+        ]);
+    }
 
     public function createRefund(Request $request)
     {
@@ -233,5 +234,4 @@ class StripePaymentController extends Controller
             ], 500);
         }
     }
-
 }

@@ -15,14 +15,14 @@ class CreateQuestionCategoriesTable extends Migration
     {
         Schema::create('question_categories', function (Blueprint $table) {
             $table->id();
-              $table->string('title');
+            $table->string('title');
             $table->text('description')->nullable();
             $table->string('slug')->unique();
             $table->unsignedBigInteger('parent_question_category_id')->nullable();
             $table->foreign('parent_question_category_id')
-                  ->references('id')
-                  ->on('question_categories')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('question_categories')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
