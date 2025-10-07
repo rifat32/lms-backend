@@ -69,6 +69,12 @@ class SetupController extends Controller
         return "migrated";
     }
 
+    public function storageLink(Request $request)
+    {
+        Artisan::call('storage:link');
+        return "storage linked";
+    }
+
 
     // ROLE REFRESH
     public function roleRefresh(Request $request)

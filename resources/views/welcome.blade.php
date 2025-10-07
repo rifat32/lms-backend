@@ -31,6 +31,9 @@
 
             <x-link-button :link="env('APP_URL') . '/roleRefresh'" label="Role Refresh" type="danger" />
 
+
+            <x-link-button :link="env('APP_URL') . '/storage-link'" label="Storage Link" type="danger" />
+
             {{-- <x-link-button :link="env('APP_URL') . '/module-update'" label="Module Update" type="danger" /> --}}
 
         </div>
