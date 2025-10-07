@@ -322,7 +322,7 @@ class SectionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
-     *  @OA\Property(property="order", type="integer", example=1)
+     *  @OA\Property(property="order", type="integer", example=1),
      *             @OA\Property(
      *                 property="sectionable",
      *                 type="array",
@@ -492,7 +492,7 @@ class SectionController extends Controller
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="course_id", type="integer", example=1),
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
-     *             @OA\Property(property="order", type="integer", example=1)
+     *             @OA\Property(property="order", type="integer", example=1),
      *             @OA\Property(
      *                 property="sectionable",
      *                 type="array",
