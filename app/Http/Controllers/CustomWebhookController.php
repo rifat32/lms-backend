@@ -81,33 +81,62 @@ class CustomWebhookController extends Controller
      * @param  array  $paymentCharge
      * @return void
      */
-    protected function handleChargeSucceeded($data)
-    {
+   protected function handleChargeSucceeded($data)
+{
+    // Amount paid in Stripe (divide by 100 for USD)
+    $amount = $data['amount_total'] ? ($data['amount_total'] / 100) : 0;
 
-        // Extract required data from payment charge
-        $amount = $data['amount_total'] ? ($data['amount_total'] / 100) :  0;
+    $metadata = $data['metadata'] ?? [];
 
-        $metadata = $data["metadata"] ?? [];
-        // Add more fields as needed
-
-        if(!empty($metadata["webhook_url"]) && $metadata["webhook_url"] != route('stripe.webhook')){
-               return;
-        }
-
-
-        $payment = Payment::where('payment_intent_id', $data['payment_intent'])->first();
-        $payment->status = 'complete';
-        $payment->amount = $amount;
-        $payment->save();
-
-
-        Enrollment::create([
-            'user_id' => $payment->user_id,
-            'course_id' => $payment->course_id,
-            'enrolled_at' => now(),
-        ]);
-
+    // Ensure webhook URL matches (security check)
+    if (!empty($metadata["webhook_url"]) && $metadata["webhook_url"] != route('stripe.webhook')) {
+        return;
     }
+
+    // Retrieve all payments linked to this payment_intent
+    $payments = Payment::where('payment_intent_id', $data['payment_intent'])->get();
+
+    if ($payments->isEmpty()) {
+        // Fallback: handle multiple courses from metadata if payments not yet created
+        $course_ids = isset($metadata['course_ids']) ? explode(',', $metadata['course_ids']) : [];
+        $user_id = auth()->id() ?? null; // If user ID is stored in metadata, you can use that instead
+
+        foreach ($course_ids as $course_id) {
+            // Save Payment record if not already
+            $payment = Payment::firstOrCreate([
+                'payment_intent_id' => $data['payment_intent'],
+                'course_id' => $course_id,
+                'user_id' => $user_id,
+            ], [
+                'status' => 'complete',
+                'amount' => $amount / count($course_ids), // approximate split
+                'method' => 'stripe',
+            ]);
+
+            // Create Enrollment
+            Enrollment::firstOrCreate([
+                'user_id' => $user_id,
+                'course_id' => $course_id,
+            ], [
+                'enrolled_at' => now(),
+            ]);
+        }
+    } else {
+        // Update existing payment(s) and enroll
+        foreach ($payments as $payment) {
+            $payment->status = 'complete';
+            $payment->amount = $amount / $payments->count(); // approximate split
+            $payment->save();
+
+            Enrollment::firstOrCreate([
+                'user_id' => $payment->user_id,
+                'course_id' => $payment->course_id,
+            ], [
+                'enrolled_at' => now(),
+            ]);
+        }
+    }
+}
 
 
 }
