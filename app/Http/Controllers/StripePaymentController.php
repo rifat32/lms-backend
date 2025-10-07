@@ -162,7 +162,7 @@ class StripePaymentController extends Controller
 
         // Save to CoursePayment model
         Payment::create([
-            'user_id' => auth()->user()->id ?? 1,
+            'user_id' => auth()->user()->id,
             'course_id' => $course->id,
             'amount' => $course->sale_price,
             'method' => 'stripe',
