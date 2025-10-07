@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonRequest;
 use App\Models\Lesson;
-use App\Models\Section;
 use App\Models\Sectionable;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +21,7 @@ class LessonController extends Controller
 {
 
 
-  /**
+    /**
      * @OA\Get(
      *     path="/v1.0/lessons",
      *     tags={"Lessons"},
@@ -33,28 +33,28 @@ class LessonController extends Controller
      *         in="query",
      *         required=false,
      *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Parameter(
-     *         name="searchKey",
+     *         name="search_key",
      *         in="query",
      *         required=false,
      *         description="Search by keyword in title or description",
-     *         @OA\Schema(type="string", example="Laravel")
+     *         @OA\Schema(type="string", example="")
      *     ),
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         required=false,
      *         description="Page number for pagination",
-     *         @OA\Schema(type="integer", default=1, example=1)
+     *         @OA\Schema(type="integer", default="", example="")
      *     ),
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         required=false,
      *         description="Number of items per page",
-     *         @OA\Schema(type="integer", default=10, example=10)
+     *         @OA\Schema(type="integer", default="", example="")
      *     ),
      * 
      *     @OA\Response(
@@ -119,7 +119,6 @@ class LessonController extends Controller
             'meta' => $lessons['meta'],
             'data' => $lessons['data'],
         ], 200);
-
     }
 
 
@@ -134,7 +133,6 @@ class LessonController extends Controller
      *         @OA\JsonContent(
      *             required={"title","content_type"},
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
-     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
      *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *             @OA\Property(property="sort_order", type="integer", example=1),
@@ -147,14 +145,22 @@ class LessonController extends Controller
      *             @OA\Property(property="description", type="string", example="This lesson introduces Laravel basics."),
      *             @OA\Property(property="content", type="string", example="Lesson detailed text content here..."),
      *             @OA\Property(
+     *                 property="section_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 example={}
+     *             ),
+     *             @OA\Property(
      *                 property="files",
      *                 type="array",
-     *                 @OA\Items(type="string", format="binary")
+     *                 @OA\Items(type="string", format="binary"),
+     *                 example={}
      *             ),
      *   @OA\Property(
      *                 property="materials",
      *                 type="array",
-     *                 @OA\Items(type="string", format="binary")
+     *                 @OA\Items(type="string", format="binary"),
+     *                  example={}
      *             )
      *         )
      *     ),
@@ -177,7 +183,7 @@ class LessonController extends Controller
      *                 @OA\Property(property="description", type="string", example="This lesson introduces Laravel basics."),
      *                 @OA\Property(property="content", type="string", example="Lesson detailed text content here..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
-          *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
+     *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
      * 
      *                 @OA\Property(property="content_type", type="string", example="video"),
      *                 @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
@@ -192,112 +198,110 @@ class LessonController extends Controller
 
 
 
-public function createLesson(LessonRequest $request)
-{
+    public function createLesson(LessonRequest $request)
+    {
 
-  
-    try {
-       
-        DB::beginTransaction();
 
-        $request_payload = $request->validated();
-      
+        try {
 
-        $lesson = Lesson::create($request_payload); // create first to get ID
-     
-        
-        // Handle file uploads
-        if ($request->hasFile('files')) {
-         
-            $uploaded_files = [];
-            foreach ($request->file('files') as $file) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = uniqid() . '_' . time() . '.' . $extension; 
-                $folder_path = "business_1/lesson_{$lesson->id}";
-                
-              
-                
-                // This line is a common point of failure (permissions or path)
-                $file->storeAs($folder_path, $filename, 'public');
-                
-                $uploaded_files[] = $filename; // save only filename in DB
+            DB::beginTransaction();
+
+            $request_payload = $request->validated();
+
+
+            $lesson = Lesson::create($request_payload); // create first to get ID
+
+
+            // Handle file uploads
+            if ($request->hasFile('files')) {
+
+                $uploaded_files = [];
+                foreach ($request->file('files') as $file) {
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = uniqid() . '_' . time() . '.' . $extension;
+                    $folder_path = "business_1/lesson_{$lesson->id}";
+
+
+
+                    // This line is a common point of failure (permissions or path)
+                    $file->storeAs($folder_path, $filename, 'public');
+
+                    $uploaded_files[] = $filename; // save only filename in DB
+                }
+
+                $lesson->files = $uploaded_files;
+                $lesson->save();
             }
-         
-            $lesson->files = $uploaded_files;
-            $lesson->save();
-        } 
-  // Handle file uploads
-        if ($request->hasFile('materials')) {
+            // Handle file uploads
+            if ($request->hasFile('materials')) {
 
-            $uploaded_files = [];
-            foreach ($request->file('materials') as $file) {
-                $extension = $file->getClientOriginalExtension();
-                $filename = uniqid() . '_' . time() . '.' . $extension; 
-                $folder_path = "business_1/lesson_{$lesson->id}";
-                
-           
-                
-                // This line is a common point of failure (permissions or path)
-                $file->storeAs($folder_path, $filename, 'public');
-                
-                $uploaded_files[] = $filename; // save only filename in DB
+                $uploaded_files = [];
+                foreach ($request->file('materials') as $file) {
+                    $extension = $file->getClientOriginalExtension();
+                    $filename = uniqid() . '_' . time() . '.' . $extension;
+                    $folder_path = "business_1/lesson_{$lesson->id}";
+
+
+
+                    // This line is a common point of failure (permissions or path)
+                    $file->storeAs($folder_path, $filename, 'public');
+
+                    $uploaded_files[] = $filename; // save only filename in DB
+                }
+
+
+                $lesson->materials = $uploaded_files;
+                $lesson->save();
             }
-     
-            
-            $lesson->materials = $uploaded_files;
-            $lesson->save();
-        } 
-        
 
 
-        foreach($request_payload['section_ids'] as $section_id) {
-            Sectionable::create([
-                'section_id' => $section_id,
-                'sectionable_id' => $lesson->id,
-                'sectionable_type' => Lesson::class,
-            ]);
-            
+
+            foreach ($request_payload['section_ids'] as $section_id) {
+                Sectionable::create([
+                    'section_id' => $section_id,
+                    'sectionable_id' => $lesson->id,
+                    'sectionable_type' => Lesson::class,
+                ]);
+            }
+
+
+
+
+
+
+
+
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lesson created successfully',
+                'data' => $lesson
+            ], 201);
+        } catch (\Exception $e) {
+            // Rollback on any failure
+            DB::rollBack();
+
+            // 🚨 CRITICAL FIX: Explicitly log the exception details for full context 
+            $exception_details = [
+                'error_message' => $e->getMessage(),
+                'file'          => $e->getFile(),
+                'line'          => $e->getLine(),
+                'trace'         => $e->getTraceAsString(), // This is what you need!
+            ];
+
+
+
+
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create lesson',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-
-
-
-
-
-
- 
-      
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson created successfully',
-            'data' => $lesson
-        ], 201);
-
-    } catch (\Exception $e) {
-        // Rollback on any failure
-        DB::rollBack();
-
-        // 🚨 CRITICAL FIX: Explicitly log the exception details for full context 
-        $exception_details = [
-            'error_message' => $e->getMessage(),
-            'file'          => $e->getFile(),
-            'line'          => $e->getLine(),
-            'trace'         => $e->getTraceAsString(), // This is what you need!
-        ];
-        
-        
-
-     
-       
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to create lesson',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
 
     /**
@@ -306,13 +310,6 @@ public function createLesson(LessonRequest $request)
      *     tags={"Lessons"},
      *     summary="Update an existing lesson (Admin only)",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Lesson ID",
-     *         @OA\Schema(type="integer", example=10)
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -331,14 +328,22 @@ public function createLesson(LessonRequest $request)
      *             @OA\Property(property="description", type="string", example="Updated lesson description."),
      *             @OA\Property(property="content", type="string", example="Updated detailed content..."),
      *             @OA\Property(
+     *                 property="section_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 example={}
+     *             ),
+     *             @OA\Property(
      *                 property="files",
      *                 type="array",
-     *                 @OA\Items(type="string", format="binary")
+     *                 @OA\Items(type="string", format="binary"),
+     *                  example={}
      *             ),
-     *   *             @OA\Property(
+     *            @OA\Property(
      *                 property="materials",
      *                 type="array",
-     *                 @OA\Items(type="string", format="binary")
+     *                 @OA\Items(type="string", format="binary"),
+     *                 example={}
      *             )
      * 
      * 
@@ -364,7 +369,7 @@ public function createLesson(LessonRequest $request)
      *                 @OA\Property(property="description", type="string", example="Updated lesson description."),
      *                 @OA\Property(property="content", type="string", example="Updated detailed content..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
-        *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
+     *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
      * 
      * 
      *                 @OA\Property(property="content_type", type="string", example="video"),
@@ -379,14 +384,14 @@ public function createLesson(LessonRequest $request)
      */
 
 
-    public function updateLesson(LessonRequest $request, $id)
+    public function updateLesson(LessonRequest $request)
     {
         try {
             DB::beginTransaction();
 
             $request_payload = $request->validated();
 
-            $lesson = Lesson::find($id);
+            $lesson = Lesson::find($request_payload['id']);
 
             if (empty($lesson)) {
                 return response()->json([
@@ -395,38 +400,38 @@ public function createLesson(LessonRequest $request)
                 ], 404);
             }
 
-  
-      if ($request->hasFile('files')) {
-    // Get existing files
-    $raw_files = $lesson->getRawOriginal('files');
-    $existing_files = $raw_files ? json_decode($raw_files, true) : [];
 
-    $uploaded_files = $existing_files; // start with existing
+            if ($request->hasFile('files')) {
+                // Get existing files
+                $raw_files = $lesson->getRawOriginal('files');
+                $existing_files = $raw_files ? json_decode($raw_files, true) : [];
 
-    // Upload new files
-    foreach ($request->file('files') as $file) {
-        $path = $file->store('lessons/files', 'public');
-        $uploaded_files[] = $path; // append
-    }
+                $uploaded_files = $existing_files; // start with existing
 
-    $request_payload['files'] = json_encode($uploaded_files);
-}
+                // Upload new files
+                foreach ($request->file('files') as $file) {
+                    $path = $file->store('lessons/files', 'public');
+                    $uploaded_files[] = $path; // append
+                }
 
- if ($request->hasFile('materials')) {
-    // Get existing files
-    $raw_files = $lesson->getRawOriginal('files');
-    $existing_files = $raw_files ? json_decode($raw_files, true) : [];
+                $request_payload['files'] = json_encode($uploaded_files);
+            }
 
-    $uploaded_files = $existing_files; // start with existing
+            if ($request->hasFile('materials')) {
+                // Get existing files
+                $raw_files = $lesson->getRawOriginal('files');
+                $existing_files = $raw_files ? json_decode($raw_files, true) : [];
 
-    // Upload new files
-    foreach ($request->file('materials') as $file) {
-        $path = $file->store('lessons/files', 'public');
-        $uploaded_files[] = $path; // append
-    }
+                $uploaded_files = $existing_files; // start with existing
 
-    $request_payload['materials'] = json_encode($uploaded_files);
-}
+                // Upload new files
+                foreach ($request->file('materials') as $file) {
+                    $path = $file->store('lessons/files', 'public');
+                    $uploaded_files[] = $path; // append
+                }
+
+                $request_payload['materials'] = json_encode($uploaded_files);
+            }
 
 
             $lesson->update($request_payload);
@@ -435,13 +440,13 @@ public function createLesson(LessonRequest $request)
             Sectionable::where('sectionable_id', $lesson->id)
                 ->where('sectionable_type', Lesson::class)
                 ->delete();
-             foreach($request_payload['section_ids'] as $section_id) {
-            Sectionable::create([
-                'section_id' => $section_id,
-                'sectionable_id' => $lesson->id,
-                'sectionable_type' => Lesson::class,
-            ]);
-        }
+            foreach ($request_payload['section_ids'] as $section_id) {
+                Sectionable::create([
+                    'section_id' => $section_id,
+                    'sectionable_id' => $lesson->id,
+                    'sectionable_type' => Lesson::class,
+                ]);
+            }
 
             DB::commit();
 
@@ -467,8 +472,8 @@ public function createLesson(LessonRequest $request)
      *         name="ids",
      *         in="path",
      *         required=true,
-     *         description="Lesson ID (comma-separated for multiple)",
-     *         @OA\Schema(type="string", example="1,2,3")
+     *         description="Lesson ID (comma-separated for multiple like 1,2,3)",
+     *         @OA\Schema(type="string", example="")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -488,86 +493,74 @@ public function createLesson(LessonRequest $request)
      *     )
      * )
      */
-public function deleteLesson($ids)
-{
-    try {
-        DB::beginTransaction();
+    public function deleteLesson($ids)
+    {
+        try {
+            DB::beginTransaction();
 
-        // Convert comma-separated IDs to array
-        $idsArray = array_map('intval', explode(',', $ids));
+            // Convert comma-separated IDs to array
+            $idsArray = array_map('intval', explode(',', $ids));
 
-        // Fetch lessons
-        $lessons = Lesson::whereIn('id', $idsArray)->get();
+            // Fetch lessons
+            $lessons = Lesson::whereIn('id', $idsArray)->get();
 
-        $existingIds = $lessons->pluck('id')->toArray();
+            $existingIds = $lessons->pluck('id')->toArray();
 
-        if (count($existingIds) !== count($idsArray)) {
-            $missingIds = array_diff($idsArray, $existingIds);
+            if (count($existingIds) !== count($idsArray)) {
+                $missingIds = array_diff($idsArray, $existingIds);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lesson(s) not found',
+                    'data' => [
+                        'missing_ids' => array_values($missingIds)
+                    ]
+                ], 404);
+            }
+
+            // Delete lesson files (use raw DB value, not accessor!)
+            foreach ($lessons as $lesson) {
+                $raw_files = $lesson->getRawOriginal('files'); // raw JSON string from DB
+                $files = $raw_files ? json_decode($raw_files, true) : [];
+
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        $path = "business_1/lesson_{$lesson->id}/$file";
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                }
+
+                $raw_materials = $lesson->getRawOriginal('materials'); // raw JSON string from DB
+                $materials = $raw_materials ? json_decode($raw_materials, true) : [];
+
+                if (is_array($materials)) {
+                    foreach ($materials as $material) {
+                        $path = "business_1/lesson_{$lesson->id}/$material";
+                        if (Storage::disk('public')->exists($path)) {
+                            Storage::disk('public')->delete($path);
+                        }
+                    }
+                }
+            }
+
+
+
+
+            // Delete lessons
+            Lesson::whereIn('id', $existingIds)->delete();
+
+            DB::commit();
 
             return response()->json([
-                'success' => false,
-                'message' => 'Lesson(s) not found',
-                'data' => [
-                    'missing_ids' => array_values($missingIds)
-                ]
-            ], 404);
+                'success' => true,
+                'message' => 'Lesson deleted successfully',
+                'data' => $existingIds
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        // Delete lesson files (use raw DB value, not accessor!)
-        foreach ($lessons as $lesson) {
-            $raw_files = $lesson->getRawOriginal('files'); // raw JSON string from DB
-            $files = $raw_files ? json_decode($raw_files, true) : [];
-
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    $path = "business_1/lesson_{$lesson->id}/$file";
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
-                    }
-                }
-            }
-
-            $raw_materials = $lesson->getRawOriginal('materials'); // raw JSON string from DB
-            $materials = $raw_materials ? json_decode($raw_materials, true) : [];
-
-            if (is_array($materials)) {
-                foreach ($materials as $material) {
-                    $path = "business_1/lesson_{$lesson->id}/$material";
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
-                    }
-                }
-            }
-        }
-
-       
-        
-
-        // Delete lessons
-        Lesson::whereIn('id', $existingIds)->delete();
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson deleted successfully',
-            'data' => $existingIds
-        ], 200);
-
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        throw $th;
     }
-}
-
-
-
-
-
-
-
-
-
-
-
 }

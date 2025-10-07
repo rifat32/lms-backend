@@ -87,6 +87,12 @@ class Lesson extends Model
         return $this->morphToMany(Section::class, 'sectionable');
     }
 
-
-    
+    public function scopeFilters($query)
+    {
+        return $query->when(request('course_id'), function ($q, $course_id) {
+            return $q->where('course_id', $course_id);
+        })->when(request()->filled('search_key'), function ($q) {
+            $q->where('title', 'like', '%' . request('search_key') . '%');
+        });
+    }
 }
