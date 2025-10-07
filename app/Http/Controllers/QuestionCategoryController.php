@@ -19,7 +19,7 @@ class QuestionCategoryController extends Controller
      * @OA\Post(
      *     path="/v1.0/question-categories",
      *     operationId="createQuestionCategory",
-     *     tags={"question_management.category"},
+     *     tags={"question_management.question_category"},
      *     summary="Create a new question category",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -159,35 +159,35 @@ class QuestionCategoryController extends Controller
     }
 
 
-   /**
- * @OA\Get(
- *     path="/v1.0/question-categories",
- *     operationId="getQuestionCategories",
- *     tags={"question_management.category"},
- *     summary="Get all question categories",
- *     description="Fetches all question categories in the system.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Response(
- *         response=200,
- *         description="Successful operation",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Question categories fetched successfully"),
- *             @OA\Property(
- *                 property="data",
- *                 type="array",
- *                 @OA\Items(
- *                     @OA\Property(property="id", type="integer", example=1),
- *                     @OA\Property(property="name", type="string", example="Mathematics"),
- *                     @OA\Property(property="created_at", type="string", example="2025-10-04T15:23:01.000000Z"),
- *                     @OA\Property(property="updated_at", type="string", example="2025-10-04T15:23:01.000000Z")
- *                 )
- *             )
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Get(
+     *     path="/v1.0/question-categories",
+     *     operationId="getQuestionCategories",
+     *     tags={"question_management.question_category"},
+     *     summary="Get all question categories",
+     *     description="Fetches all question categories in the system.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Question categories fetched successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Mathematics"),
+     *                     @OA\Property(property="created_at", type="string", example="2025-10-04T15:23:01.000000Z"),
+     *                     @OA\Property(property="updated_at", type="string", example="2025-10-04T15:23:01.000000Z")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
 
     public function getQuestionCategories(Request $request)
     {
@@ -203,46 +203,43 @@ class QuestionCategoryController extends Controller
             'meta' => $categories['meta'],
             'data' => $categories['data'],
         ], 200);
-
-
-
     }
 
-   /**
- * @OA\Delete(
- *     path="/v1.0/question-categories/{id}",
- *     operationId="deleteQuestionCategory",
- *     tags={"question_management.category"},
- *     summary="Delete a question category",
- *     description="Deletes a question category by its ID.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         required=true,
- *         description="ID of the question category to delete",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Category deleted successfully",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Question category deleted successfully")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Category not found",
- *         @OA\JsonContent(
- *             type="object",
- *             @OA\Property(property="success", type="boolean", example=false),
- *             @OA\Property(property="message", type="string", example="Question category not found")
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Delete(
+     *     path="/v1.0/question-categories/{id}",
+     *     operationId="deleteQuestionCategory",
+     *     tags={"question_management.question_category"},
+     *     summary="Delete a question category",
+     *     description="Deletes a question category by its ID.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the question category to delete",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category deleted successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Question category deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Category not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Question category not found")
+     *         )
+     *     )
+     * )
+     */
 
     public function deleteQuestionCategory($id)
     {

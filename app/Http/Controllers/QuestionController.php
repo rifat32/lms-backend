@@ -19,46 +19,59 @@ class QuestionController extends Controller
      *     summary="Create or update a question",
      *     description="Creates a new question or updates existing options for a specific quiz.",
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             required={ "question_text", "question_type", "points", "options"},
- 
-     *             @OA\Property(property="question_text", type="string", maxLength=255, example="What is the capital of France?", description="The text of the question"),
+     *             required={"question_text", "question_type", "points", "options"},
+     *
+     *             @OA\Property(
+     *                 property="question_text",
+     *                 type="string",
+     *                 maxLength=255,
+     *                 example="What is the capital of France?",
+     *                 description="The text of the question"
+     *             ),
+     *
      *             @OA\Property(
      *                 property="question_type",
      *                 type="string",
-     *                 example="true_false",
      *                 enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"},
+     *                 example="true_false",
      *                 description="Type of the question"
      *             ),
-     *             @OA\Property(property="points", type="integer", minimum=1, example=5, description="Number of points awarded for the question"),
-     *             @OA\Property(property="time_limit", type="integer", nullable=true, minimum=0, example=30, description="Time limit for the question in seconds (nullable)"),
+     *
+     *             @OA\Property(property="points", type="integer", minimum=1, example=5, description="Number of points for the question"),
+     *             @OA\Property(property="time_limit", type="integer", nullable=true, minimum=0, example=30, description="Time limit in seconds (nullable)"),
+     *
+     *             @OA\Property(
+     *                 property="category_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 description="Array of category IDs for this question"
+     *             ),
+     *
      *             @OA\Property(property="is_required", type="boolean", example=true),
+     *
      *             @OA\Property(
      *                 property="options",
      *                 type="array",
      *                 description="List of options for the question",
      *                 @OA\Items(
      *                     type="object",
-     *                     @OA\Property(property="id", type="integer", nullable=true, example=null, description="Optional ID if updating an existing option"),
-     *                     @OA\Property(property="option_text", type="string", nullable=true, example="Paris", description="Text of the option"),
-     *                     @OA\Property(property="is_correct", type="boolean", example=true, description="Whether this option is correct"),
+     *                     @OA\Property(property="id", type="integer", nullable=true, example=null, description="ID when updating an option"),
+     *                     @OA\Property(property="option_text", type="string", nullable=true, example="Paris", description="Option text"),
+     *                     @OA\Property(property="is_correct", type="boolean", example=true, description="Whether the option is correct"),
      *                     @OA\Property(property="explanation", type="string", nullable=true, example="Paris is the capital of France", description="Explanation for the option"),
-     *                     @OA\Property(property="image", type="string", nullable=true, example="https://example.com/image.png", description="Image URL or uploaded file path"),
-     *                     @OA\Property(property="matching_pair_text", type="string", nullable=true, example="France", description="Matching pair text for matching questions"),
-     *                     @OA\Property(property="matching_pair_image", type="string", nullable=true, example="https://example.com/pair-image.png", description="Matching pair image URL or uploaded file"),
-     *  * *         @OA\Property(
-     *             property="category_ids",
-     *             type="array",
-     *             @OA\Items(type="integer", example=1),
-     *             description="Array of category IDs for this course"
-     *         )
+     *                     @OA\Property(property="image", type="string", nullable=true, example="https://example.com/image.png", description="Image URL or file path"),
+     *                     @OA\Property(property="matching_pair_text", type="string", nullable=true, example="France", description="Matching pair text"),
+     *                     @OA\Property(property="matching_pair_image", type="string", nullable=true, example="https://example.com/pair-image.png", description="Matching pair image URL or file path")
      *                 )
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Question created successfully",
@@ -69,13 +82,15 @@ class QuestionController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="question_text", type="string", example="What is the capital of France?"),
-     *                 @OA\Property(property="question_type", type="string", example="single", enum={"true_false", "single", "multiple", "matching", "file_matching", "keywords", "fill_in_the_blanks"}),
+     *                 @OA\Property(property="question_type", type="string", example="single"),
      *                 @OA\Property(property="points", type="integer", example=5),
      *                 @OA\Property(property="time_limit", type="integer", example=30, nullable=true),
      *                 @OA\Property(property="is_required", type="boolean", example=true),
      *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
      *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-28T12:00:00Z"),
-     *                 @OA\Property(property="options", type="array",
+     *                 @OA\Property(
+     *                     property="options",
+     *                     type="array",
      *                     @OA\Items(
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="option_text", type="string", example="Paris"),
@@ -89,6 +104,7 @@ class QuestionController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=400, description="Bad Request"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=403, description="Forbidden"),
@@ -187,21 +203,20 @@ class QuestionController extends Controller
      *     summary="Update an existing question with options",
      *     description="Updates a question and its options by question ID.",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the question to update",
-     *         @OA\Schema(type="integer", example=10)
-     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             type="object",
-     *             required={"question_text", "question_type", "points", "options"},
-
+     *             required={"id","question_text", "question_type", "points", "options"},
+     *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="question_text", type="string", maxLength=255, example="Updated question text"),
      *             @OA\Property(property="question_type", type="string", example="single", enum={"true_false","single","multiple","matching","file_matching","keywords","fill_in_the_blanks"}),
+     *             @OA\Property(
+     *                 property="category_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 description="Array of category IDs for this course"
+     *             ),
      *             @OA\Property(property="points", type="integer", example=5, minimum=1),
      *             @OA\Property(property="time_limit", type="integer", nullable=true, example=30, minimum=0),
      *             @OA\Property(property="is_required", type="boolean", example=true),
@@ -217,13 +232,7 @@ class QuestionController extends Controller
      *                     @OA\Property(property="explanation", type="string", nullable=true, example="Paris is the capital of France"),
      *                     @OA\Property(property="image", type="string", nullable=true, example="https://example.com/image.png"),
      *                     @OA\Property(property="matching_pair_text", type="string", nullable=true, example="France"),
-     *                     @OA\Property(property="matching_pair_image", type="string", nullable=true, example="https://example.com/pair-image.png"),
-     *  * *         @OA\Property(
-     *             property="category_ids",
-     *             type="array",
-     *             @OA\Items(type="integer", example=1),
-     *             description="Array of category IDs for this course"
-     *         )
+     *                     @OA\Property(property="matching_pair_image", type="string", nullable=true, example="https://example.com/pair-image.png")
      *                 )
      *             )
      *         )
@@ -238,6 +247,7 @@ class QuestionController extends Controller
      *     @OA\Response(response=500, description="Internal server error")
      * )
      */
+
 
 
     public function updateQuestion(QuestionRequest $request)
@@ -508,8 +518,8 @@ class QuestionController extends Controller
      *         name="ids",
      *         in="path",
      *         required=true,
-     *         description="Comma-separated list of question IDs to delete",
-     *         @OA\Schema(type="string", example="1,2,3")
+     *         description="Comma-separated list of question IDs to delete like 1,2,3",
+     *         @OA\Schema(type="string", example="")
      *     ),
      *
      *     @OA\Response(
