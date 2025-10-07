@@ -17,7 +17,7 @@ class QuestionCategoryRequest extends FormRequest
         $rules = [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'slug' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:question_categories,slug' . $this->id,
             'parent_question_category_id' => ['nullable', 'integer', new ValidQuestionCategory()],
         ];
 
@@ -26,5 +26,12 @@ class QuestionCategoryRequest extends FormRequest
             $rules['id'] = ['required', 'integer', new ValidQuestionCategory()];
         }
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'slug.unique' => 'The slug must be unique.',
+        ];
     }
 }
