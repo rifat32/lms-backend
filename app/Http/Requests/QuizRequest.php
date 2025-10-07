@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Quiz;
 use App\Rules\ValidQuestion;
 use App\Rules\ValidQuiz;
+use App\Rules\ValidSection;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,8 @@ class QuizRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            "section_ids" => ['present', 'numeric'],
+            "section_ids" => 'present|array',
+            'section_ids.*' => ['required', 'integer', new ValidSection()],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'time_limit' => 'nullable|integer|min:1',

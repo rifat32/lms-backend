@@ -165,7 +165,7 @@ class QuizController extends Controller
             'data' => $result
         ], 200);
     }
-/**
+    /**
      * @OA\Get(
      *     path="/v1.0/quizzes",
      *     operationId="getQuizWithQuestions",
@@ -278,8 +278,6 @@ class QuizController extends Controller
             'meta' => $quizzes['meta'],
             'data' => $quizzes['data'],
         ], 200);
-
-
     }
 
 
@@ -295,7 +293,12 @@ class QuizController extends Controller
      *         @OA\JsonContent(
      *             required={"title"},
      *             @OA\Property(property="title", type="string", example="Laravel Basics Quiz"),
-     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
+     *             @OA\Property(
+     *                 property="section_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 example={}
+     *             ),
      *             @OA\Property(property="description", type="string", example="Short description of the quiz"),
      *             @OA\Property(property="time_limit", type="integer", example=2),
      *             @OA\Property(property="time_unit", type="string", example="Hours"),
@@ -323,8 +326,8 @@ class QuizController extends Controller
         }
 
 
-          
-             foreach($request_payload['section_ids'] as $section_id) {
+
+        foreach ($request_payload['section_ids'] as $section_id) {
             Sectionable::create([
                 'section_id' => $section_id,
                 'sectionable_id' => $quiz->id,
@@ -351,7 +354,12 @@ class QuizController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="title", type="string", example="Updated Quiz Title"),
-     *     *                @OA\Property(property="section_ids", type="string", example="1,2,3"),
+     *             @OA\Property(
+     *                 property="section_ids",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=1),
+     *                 example={}
+     *             ),
      *             @OA\Property(property="description", type="string", example="Updated description"),
      *             @OA\Property(property="question_ids", type="array", @OA\Items(type="integer", example=2))
      *         )
@@ -359,7 +367,7 @@ class QuizController extends Controller
      *     @OA\Response(response=200, description="Quiz updated successfully")
      * )
      */
-    public function update(QuizRequest $request, $id): JsonResponse
+    public function update(QuizRequest $request, $id)
     {
         $quiz = Quiz::findOrFail($id);
         $request_payload = $request->validated();
@@ -374,7 +382,7 @@ class QuizController extends Controller
         Sectionable::where('sectionable_id', $quiz->id)
             ->where('sectionable_type', Quiz::class)
             ->delete();
-          foreach($request_payload['section_ids'] as $section_id) {
+        foreach ($request_payload['section_ids'] as $section_id) {
             Sectionable::create([
                 'section_id' => $section_id,
                 'sectionable_id' => $quiz->id,
@@ -400,7 +408,7 @@ class QuizController extends Controller
      *     @OA\Response(response=200, description="Quiz deleted successfully")
      * )
      */
-    public function destroy($id): JsonResponse
+    public function destroy($id)
     {
         $quiz = Quiz::findOrFail($id);
 
