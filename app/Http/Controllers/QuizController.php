@@ -337,12 +337,11 @@ class QuizController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/v1.0/quizzes/{id}",
+     *     path="/v1.0/quizzes",
      *     operationId="updateQuiz",
      *     tags={"Quizzes"},
      *     summary="Update a quiz and sync questions",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -360,10 +359,10 @@ class QuizController extends Controller
      *     @OA\Response(response=200, description="Quiz updated successfully")
      * )
      */
-    public function update(QuizRequest $request, $id)
+    public function update(QuizRequest $request)
     {
-        $quiz = Quiz::findOrFail($id);
         $request_payload = $request->validated();
+        $quiz = Quiz::findOrFail($request_payload['id']);
 
         $quiz->update($request_payload);
 

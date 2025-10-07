@@ -161,7 +161,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [QuizController::class, 'getQuizWithQuestions']);
         Route::get('/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
         Route::post('/', [QuizController::class, 'store']);
-        Route::put('/{id}', [QuizController::class, 'update']);
+        Route::put('/', [QuizController::class, 'update']);
         Route::delete('/{id}', [QuizController::class, 'destroy']);
     });
 
