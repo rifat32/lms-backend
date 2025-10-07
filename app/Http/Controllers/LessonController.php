@@ -191,59 +191,58 @@ class LessonController extends Controller
      */
 
 
+
 public function createLesson(LessonRequest $request)
 {
-    // Log start of request immediately
-    log_message("Request received to create lesson.", "lesson.txt");
+
   
     try {
-        log_message("Attempting to start database transaction.", "lesson.txt");
+       
         DB::beginTransaction();
 
         $request_payload = $request->validated();
-        log_message("Request validated. Payload: " . json_encode($request_payload), "lesson.txt");
+      
 
         $lesson = Lesson::create($request_payload); // create first to get ID
-        log_message("Lesson record created with ID: {$lesson->id}", "lesson.txt");
+     
         
         // Handle file uploads
         if ($request->hasFile('files')) {
-            log_message("Files detected. Starting upload process.", "lesson.txt");
+         
             $uploaded_files = [];
             foreach ($request->file('files') as $file) {
                 $extension = $file->getClientOriginalExtension();
                 $filename = uniqid() . '_' . time() . '.' . $extension; 
                 $folder_path = "business_1/lesson_{$lesson->id}";
                 
-                log_message("Attempting to store file: {$filename} in path: {$folder_path}", "lesson.txt");
+              
                 
                 // This line is a common point of failure (permissions or path)
                 $file->storeAs($folder_path, $filename, 'public');
                 
                 $uploaded_files[] = $filename; // save only filename in DB
             }
-            log_message("Files successfully uploaded. Saving filenames to lesson record.", "lesson.txt");
-            
+         
             $lesson->files = $uploaded_files;
             $lesson->save();
         } 
   // Handle file uploads
         if ($request->hasFile('materials')) {
-            log_message("Files detected. Starting upload process.", "lesson.txt");
+
             $uploaded_files = [];
             foreach ($request->file('materials') as $file) {
                 $extension = $file->getClientOriginalExtension();
                 $filename = uniqid() . '_' . time() . '.' . $extension; 
                 $folder_path = "business_1/lesson_{$lesson->id}";
                 
-                log_message("Attempting to store file: {$filename} in path: {$folder_path}", "lesson.txt");
+           
                 
                 // This line is a common point of failure (permissions or path)
                 $file->storeAs($folder_path, $filename, 'public');
                 
                 $uploaded_files[] = $filename; // save only filename in DB
             }
-            log_message("Files successfully uploaded. Saving filenames to lesson record.", "lesson.txt");
+     
             
             $lesson->materials = $uploaded_files;
             $lesson->save();
@@ -266,7 +265,7 @@ public function createLesson(LessonRequest $request)
 
 
 
-        log_message("Lesson file data saved. Committing transaction.", "lesson.txt");
+ 
       
         DB::commit();
 
@@ -288,11 +287,9 @@ public function createLesson(LessonRequest $request)
             'trace'         => $e->getTraceAsString(), // This is what you need!
         ];
         
-        // Use your custom log_message function with the structured data
-        log_message($exception_details, "lesson.txt");
+        
 
-        // Log the end of the failed process
-        log_message("Database transaction rolled back. Lesson creation failed.", "lesson.txt");
+     
        
         return response()->json([
             'success' => false,

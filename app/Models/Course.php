@@ -124,6 +124,18 @@ class Course extends Model
             $q->where('title', 'like', '%' . request('searchKey') . '%');
         })->when(request()->filled('category_id'), function ($q) {
             $q->where('category_id', request('category_id'));
+        })
+        ->when(request()->filled('is_enrolled'), function ($q) {
+            $isEnrolled = request('is_enrolled');
+            if ($isEnrolled) {
+                $q->whereHas('enrollments', function ($enrollmentQuery) {
+                    $enrollmentQuery->where('user_id', auth()->user()->id);
+                });
+            } else {
+                $q->whereDoesntHave('enrollments', function ($enrollmentQuery) {
+                    $enrollmentQuery->where('user_id', auth()->user()->id);
+                });
+            }
         });
     }
 

@@ -65,6 +65,13 @@ class CourseController extends Controller
      *         description="Course status only: draft, published, archived",
      *         @OA\Schema(type="string", default="", example="")
      *     ),
+     *    *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+     *         @OA\Schema(type="string", default="", example="")
+     *     ),
      * 
      *     @OA\Response(
      *         response=200,
@@ -570,13 +577,22 @@ class CourseController extends Controller
     public function getCourseById($id)
     {
         // FIND BY ID
-        $course = Course::with(
-            [
-                "sections.lessons"
-
-            ]
-
-        )->find($id);
+        $course = Course::with([
+            'categories',
+            'sections' => function ($q) {
+                $q
+                    ->with([
+                        "sectionables" => function ($sq) {
+                            $sq->with([
+                                'sectionable' => function ($ssq) {
+                                    // $ssq->select('id', 'title');
+                                }
+                            ]);
+                        }
+                    ]);
+            },
+            'reviews',
+        ])->find($id);
 
         // SEND RESPONSE
         if (empty($course)) {
@@ -887,14 +903,14 @@ class CourseController extends Controller
             $course = Course::find($request_payload['id']);
 
             if ($request->hasFile('cover')) {
-                log_message("Cover file detected. Uploading...", "course.txt");
+               
 
                 $file = $request->file('cover');
                 $extension = $file->getClientOriginalExtension();
                 $filename = uniqid() . '_' . time() . '.' . $extension;
                 $folder_path = "business_1/course_{$course->id}";
 
-                log_message("Storing cover file: {$filename} in path: {$folder_path}", "course.txt");
+            
 
                 $file->storeAs($folder_path, $filename, 'public');
 
@@ -908,9 +924,7 @@ class CourseController extends Controller
 
                 $course->cover = $filename; // store only filename
                 $course->save();
-            } else {
-                log_message("No cover uploaded.", "course.txt");
-            }
+            } 
             $course->categories()->sync($request_payload["category_ids"]);
 
             // SEND RESPONSE
