@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CourseCategory extends Model
 {
@@ -13,8 +14,17 @@ class CourseCategory extends Model
   protected $fillable = [
     'name',
     'description',
+    'parent_id',
   ];
 
+
+  /**
+   * Parent category relationship
+   */
+  public function parent(): BelongsTo
+  {
+    return $this->belongsTo(CourseCategory::class, 'parent_id');
+  }
 
   // RELATIONSHIPS
   public function courses()
