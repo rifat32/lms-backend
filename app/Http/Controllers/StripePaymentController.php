@@ -156,7 +156,9 @@ class StripePaymentController extends Controller
         $payment_intent = $stripe->paymentIntents->create([
             'amount' => $total_amount * 100, // Stripe uses smallest currency unit
             'currency' => 'usd',
-            'payment_method_types' => ['card'],
+            'automatic_payment_methods' => [
+                'enabled' => true,
+            ],
             'metadata' => $metadata,
         ]);
 
