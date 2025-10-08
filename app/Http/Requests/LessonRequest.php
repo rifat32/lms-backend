@@ -34,10 +34,13 @@ class LessonRequest extends FormRequest
             'content' => 'nullable|string',
 
             // files
-            'files' => 'nullable|array',        // if multiple
-            'files.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480', // max 20MB per file
-            'materials' => 'nullable|array',
-            'materials.*' => 'file|mimes:jpg,png,pdf,docx,mp4|max:20480' // max 20MB per file
+            'files' => 'nullable|array',
+    'files.*' => 'nullable',
+    'materials' => 'nullable|array',
+    'materials.*' => 'nullable'
+
+
+
         ];
 
         if ($this->isMethod('put') || $this->isMethod('patch')) {

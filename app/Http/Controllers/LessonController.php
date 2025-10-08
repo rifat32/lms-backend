@@ -212,50 +212,53 @@ class LessonController extends Controller
             $lesson = Lesson::create($request_payload); // create first to get ID
 
 
-            // Handle file uploads
-            if ($request->hasFile('files')) {
+          // Helper function to handle upload logic
+function processFiles($input_array, $lesson_id, $folder_prefix = 'business_1') {
+    $final = [];
 
-                $uploaded_files = [];
-                foreach ($request->file('files') as $file) {
-                    $extension = $file->getClientOriginalExtension();
-                    $filename = uniqid() . '_' . time() . '.' . $extension;
-                    $folder_path = "business_1/lesson_{$lesson->id}";
+    if (!is_array($input_array)) {
+        return $final;
+    }
+
+    foreach ($input_array as $item) {
+        // Case 1: It's a file upload
+        if ($item instanceof \Illuminate\Http\UploadedFile) {
+            $extension = $item->getClientOriginalExtension();
+            $filename = uniqid() . '_' . time() . '.' . $extension;
+            $folder_path = "{$folder_prefix}/lesson_{$lesson_id}";
+            $item->storeAs($folder_path, $filename, 'public');
+            $final[] = $filename;
+        }
+        // Case 2: It's a string (existing file link)
+        elseif (is_string($item)) {
+            // Extract the last part after "/"
+            $filename = basename($item);
+            $final[] = $filename;
+        }
+    }
+
+    return $final;
+}
+
+// Process 'files'
+if ($request->has('files')) {
+    $processed_files = processFiles($request->input('files'), $lesson->id);
+    $lesson->files = $processed_files;
+    $lesson->save();
+}
+
+// Process 'materials'
+if ($request->has('materials')) {
+    $processed_materials = processFiles($request->input('materials'), $lesson->id);
+    $lesson->materials = $processed_materials;
+    $lesson->save();
+}
 
 
 
-                    // This line is a common point of failure (permissions or path)
-                    $file->storeAs($folder_path, $filename, 'public');
-
-                    $uploaded_files[] = $filename; // save only filename in DB
-                }
-
-                $lesson->files = $uploaded_files;
-                $lesson->save();
-            }
-            // Handle file uploads
-            if ($request->hasFile('materials')) {
-
-                $uploaded_files = [];
-                foreach ($request->file('materials') as $file) {
-                    $extension = $file->getClientOriginalExtension();
-                    $filename = uniqid() . '_' . time() . '.' . $extension;
-                    $folder_path = "business_1/lesson_{$lesson->id}";
 
 
-
-                    // This line is a common point of failure (permissions or path)
-                    $file->storeAs($folder_path, $filename, 'public');
-
-                    $uploaded_files[] = $filename; // save only filename in DB
-                }
-
-
-                $lesson->materials = $uploaded_files;
-                $lesson->save();
-            }
-
-
-
+            // Sync sections
             foreach ($request_payload['section_ids'] as $section_id) {
                 Sectionable::create([
                     'section_id' => $section_id,
