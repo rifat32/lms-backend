@@ -261,17 +261,6 @@ class CourseController extends Controller
                 'message' => 'Course not found by'
             ], 404);
         }
-// ✅ Now eager-load questions only for quizzes (manually)
-$course->sections->each(function ($section) {
-    $section->sectionables->each(function ($sectionable) {
-        if ($sectionable->sectionable_type == Quiz::class) {
-            $sectionable->sectionable->load('questions');
-        } else {
-            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
-        }
-    });
-});
-
 
 
         
@@ -369,13 +358,7 @@ $course->sections->each(function ($section) {
                         ->with([
                             "sectionables" => function ($sq) {
                                 $sq->with([
-                                    'sectionable' => function ($ssq) {
-                                        $ssq
-                                        ->with([
-                                            "questions"
-                                        ])
-                                        ->select('id', 'title');
-                                    }
+                                    'sectionable'
                                 ]);
                             }
                         ]);
@@ -388,13 +371,26 @@ $course->sections->each(function ($section) {
 
             ->find($id);
 
-        // SEND RESPONSE
+    
+
+    // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course not found by'
             ], 404);
         }
+// ✅ Now eager-load questions only for quizzes (manually)
+$course->sections->each(function ($section) {
+    $section->sectionables->each(function ($sectionable) {
+        if ($sectionable->sectionable_type == Quiz::class) {
+            $sectionable->sectionable->load('questions');
+        } else {
+            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+        }
+    });
+});
+
 
         return response()->json([
             'success' => true,
@@ -724,31 +720,38 @@ $course->sections->each(function ($section) {
 
     public function getCourseById($id)
     {
-        // FIND BY ID
-        $course = Course::with([
-            'categories',
-            'sections' => function ($q) {
-                $q
-                    ->with([
-                        "sectionables" => function ($sq) {
-                            $sq->with([
-                                'sectionable' => function ($ssq) {
-                                    // $ssq->select('id', 'title');
-                                }
-                            ]);
-                        }
-                    ]);
+         $course = Course::with([
+    'categories',
+    'sections' => function ($q) {
+        $q->with([
+            'sectionables' => function ($sq) {
+                $sq->with([
+                    'sectionable'
+                ]);
             },
-            'reviews',
-        ])->find($id);
+        ]);
+    },
+    'reviews',
+])->find($id);
 
-        // SEND RESPONSE
+    // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course not found by'
             ], 404);
         }
+// ✅ Now eager-load questions only for quizzes (manually)
+$course->sections->each(function ($section) {
+    $section->sectionables->each(function ($sectionable) {
+        if ($sectionable->sectionable_type == Quiz::class) {
+            $sectionable->sectionable->load('questions');
+        } else {
+            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+        }
+    });
+});
+
 
         return response()->json([
             'success' => true,
