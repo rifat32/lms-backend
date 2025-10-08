@@ -47,4 +47,6 @@ class Section extends Model
     {
         return $this->morphedByMany(Quiz::class, 'sectionable', 'sectionables');
     }
+
+    
 }
