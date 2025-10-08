@@ -75,6 +75,7 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
         Route::put('/', [CourseController::class, 'updateCourse']);
+        Route::patch('/', [CourseController::class, 'updatePartialCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);
         Route::delete('/{ids}', [CourseController::class, 'deleteCourse']);
@@ -203,11 +204,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
 
-     Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
-
-
-
-
+    Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
 });
 
 // Get all reviews (auth optional)

@@ -236,25 +236,25 @@ class CourseController extends Controller
 
     public function getCourseByIdClient($id)
     {
-      
 
-   $course = Course::with([
-    'categories',
-    'sections' => function ($q) {
-        $q->with([
-            'sectionables' => function ($sq) {
-                $sq->with([
-                    'sectionable' => function ($ssq) {
-                        $ssq->select('id', 'title');
+
+        $course = Course::with([
+            'categories',
+            'sections' => function ($q) {
+                $q->with([
+                    'sectionables' => function ($sq) {
+                        $sq->with([
+                            'sectionable' => function ($ssq) {
+                                $ssq->select('id', 'title');
+                            },
+                        ]);
                     },
                 ]);
             },
-        ]);
-    },
-    'reviews',
-])->find($id);
+            'reviews',
+        ])->find($id);
 
-    // SEND RESPONSE
+        // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
@@ -263,9 +263,9 @@ class CourseController extends Controller
         }
 
 
-        
 
-    
+
+
 
         return response()->json([
             'success' => true,
@@ -371,25 +371,25 @@ class CourseController extends Controller
 
             ->find($id);
 
-    
 
-    // SEND RESPONSE
+
+        // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course not found by'
             ], 404);
         }
-// ✅ Now eager-load questions only for quizzes (manually)
-$course->sections->each(function ($section) {
-    $section->sectionables->each(function ($sectionable) {
-        if ($sectionable->sectionable_type == Quiz::class) {
-            $sectionable->sectionable->load('questions');
-        } else {
-            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
-        }
-    });
-});
+        // ✅ Now eager-load questions only for quizzes (manually)
+        $course->sections->each(function ($section) {
+            $section->sectionables->each(function ($sectionable) {
+                if ($sectionable->sectionable_type == Quiz::class) {
+                    $sectionable->sectionable->load('questions');
+                } else {
+                    $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+                }
+            });
+        });
 
 
         return response()->json([
@@ -399,7 +399,7 @@ $course->sections->each(function ($section) {
         ], 200);
     }
 
-   /**
+    /**
      * @OA\Get(
      *     path="/v1.0/client/courses/secure",
      *     tags={"course_management.course"},
@@ -503,10 +503,10 @@ $course->sections->each(function ($section) {
         $query = Course::with(['categories' => function ($q) {
             $q->select('course_categories.id', 'course_categories.name');
         }])
-        ->whereHas('enrollments', function ($enrollmentQuery) {
-                    $enrollmentQuery->where('user_id', auth()->user()->id);
-        })
-        ->filters();
+            ->whereHas('enrollments', function ($enrollmentQuery) {
+                $enrollmentQuery->where('user_id', auth()->user()->id);
+            })
+            ->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
 
@@ -720,37 +720,37 @@ $course->sections->each(function ($section) {
 
     public function getCourseById($id)
     {
-         $course = Course::with([
-    'categories',
-    'sections' => function ($q) {
-        $q->with([
-            'sectionables' => function ($sq) {
-                $sq->with([
-                    'sectionable'
+        $course = Course::with([
+            'categories',
+            'sections' => function ($q) {
+                $q->with([
+                    'sectionables' => function ($sq) {
+                        $sq->with([
+                            'sectionable'
+                        ]);
+                    },
                 ]);
             },
-        ]);
-    },
-    'reviews',
-])->find($id);
+            'reviews',
+        ])->find($id);
 
-    // SEND RESPONSE
+        // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course not found by'
             ], 404);
         }
-// ✅ Now eager-load questions only for quizzes (manually)
-$course->sections->each(function ($section) {
-    $section->sectionables->each(function ($sectionable) {
-        if ($sectionable->sectionable_type == Quiz::class) {
-            $sectionable->sectionable->load('questions');
-        } else {
-            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
-        }
-    });
-});
+        // ✅ Now eager-load questions only for quizzes (manually)
+        $course->sections->each(function ($section) {
+            $section->sectionables->each(function ($sectionable) {
+                if ($sectionable->sectionable_type == Quiz::class) {
+                    $sectionable->sectionable->load('questions');
+                } else {
+                    $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+                }
+            });
+        });
 
 
         return response()->json([
@@ -1261,8 +1261,7 @@ $course->sections->each(function ($section) {
                 $course->cover = $filename; // store only filename
                 $course->save();
             }
-            if ($request_payload["category_ids"]) {
-
+            if (isset($request_payload["category_ids"])) {
                 $course->categories()->sync($request_payload["category_ids"]);
             }
 
