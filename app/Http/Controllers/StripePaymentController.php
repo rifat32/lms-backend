@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Stripe\WebhookEndpoint;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 /**
  * @OA\Tag(
@@ -92,97 +93,101 @@ class StripePaymentController extends Controller
      *     )
      * )
      */
-public function createPaymentIntent(Request $request)
-{
-    // Retrieve multiple courses
-    $course_ids = $request->course_ids; // array of IDs
-    if (empty($course_ids) || !is_array($course_ids)) {
-        return response()->json(['error' => 'No courses selected'], 400);
-    }
+    public function createPaymentIntent(Request $request)
+    {
+        // Retrieve multiple courses
+        $course_ids = $request->course_ids; // array of IDs
+        if (empty($course_ids) || !is_array($course_ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No courses selected',
+                'error' => 'No courses selected'
+            ], 400);
+        }
 
-    $courses = Course::whereIn('id', $course_ids)->get();
-    if ($courses->isEmpty()) {
-        return response()->json(['error' => 'Courses not found'], 404);
-    }
+        $courses = Course::whereIn('id', $course_ids)->get();
+        if ($courses->isEmpty()) {
+            return response()->json(['error' => 'Courses not found'], 404);
+        }
 
-    // Stripe settings
-    $stripe_setting = $this->get_business_setting();
-    if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
-        return response()->json(['error' => 'Stripe not enabled'], 403);
-    }
+        // Stripe settings
+        $stripe_setting = $this->get_business_setting();
+        if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
+            return response()->json(['error' => 'Stripe not enabled'], 403);
+        }
 
-    $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
+        $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
 
-    // -------------------------------
-    // Ensure webhook endpoint exists
-    // -------------------------------
-    try {
-        $webhookEndpoints = $stripe->webhookEndpoints->all();
-        $existingEndpoint = collect($webhookEndpoints->data)
-            ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
+        // -------------------------------
+        // Ensure webhook endpoint exists
+        // -------------------------------
+        try {
+            $webhookEndpoints = $stripe->webhookEndpoints->all();
+            $existingEndpoint = collect($webhookEndpoints->data)
+                ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
 
-        if (!$existingEndpoint) {
-            $stripe->webhookEndpoints->create([
-                'url' => route('stripe.webhook'),
-                'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
+            if (!$existingEndpoint) {
+                $stripe->webhookEndpoints->create([
+                    'url' => route('stripe.webhook'),
+                    'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
+                ]);
+            }
+        } catch (\Exception $e) {
+            log_message([
+                'level' =>  $e->getMessage(),
+            ], "hook.txt");
+        }
+
+        // -------------------------------
+        // Calculate total amount
+        // -------------------------------
+        $total_amount = $courses->sum(fn($course) => $course->sale_price + ($course->vat_amount ?? 0));
+
+        // Prepare metadata with all course IDs and webhook URL
+        $metadata = [
+            'course_ids' => implode(',', $courses->pluck('id')->toArray()),
+            'webhook_url' => route('stripe.webhook'),
+            'user_id' => auth()->user()->id,
+        ];
+
+        // -------------------------------
+        // Create PaymentIntent
+        // -------------------------------
+        $payment_intent = $stripe->paymentIntents->create([
+            'amount' => $total_amount * 100, // Stripe uses smallest currency unit
+            'currency' => 'usd',
+            'payment_method_types' => ['card'],
+            'metadata' => $metadata,
+        ]);
+
+        // -------------------------------
+        // Save payment for each course
+        // -------------------------------
+        foreach ($courses as $course) {
+            Payment::create([
+                'user_id' => auth()->user()->id,
+                'course_id' => $course->id,
+                'amount' => $course->sale_price,
+                'method' => 'stripe',
+                'status' => 'pending',
+                'payment_intent_id' => $payment_intent->id,
+            ]);
+
+            $course->update([
+                'payment_status' => 'pending',
+                'payment_method' => 'stripe',
             ]);
         }
-    } catch (\Exception $e) {
-       log_message([
-           'level' =>  $e->getMessage(),
-       ],"hook.txt");
-    }
 
-    // -------------------------------
-    // Calculate total amount
-    // -------------------------------
-    $total_amount = $courses->sum(fn($course) => $course->sale_price + ($course->vat_amount ?? 0));
-
-    // Prepare metadata with all course IDs and webhook URL
-    $metadata = [
-        'course_ids' => implode(',', $courses->pluck('id')->toArray()),
-        'webhook_url' => route('stripe.webhook'),
-        'user_id' => auth()->user()->id,
-    ];
-
-    // -------------------------------
-    // Create PaymentIntent
-    // -------------------------------
-    $payment_intent = $stripe->paymentIntents->create([
-        'amount' => $total_amount * 100, // Stripe uses smallest currency unit
-        'currency' => 'usd',
-        'payment_method_types' => ['card'],
-        'metadata' => $metadata,
-    ]);
-
-    // -------------------------------
-    // Save payment for each course
-    // -------------------------------
-    foreach ($courses as $course) {
-        Payment::create([
-            'user_id' => auth()->user()->id,
-            'course_id' => $course->id,
-            'amount' => $course->sale_price,
-            'method' => 'stripe',
-            'status' => 'pending',
-            'payment_intent_id' => $payment_intent->id,
-        ]);
-
-        $course->update([
-            'payment_status' => 'pending',
-            'payment_method' => 'stripe',
+        // -------------------------------
+        // Return client secret and info
+        // -------------------------------
+        return response()->json([
+            'clientSecret' => $payment_intent->client_secret,
+            'totalAmount' => $total_amount,
+            'courses' => $courses->pluck('title'),
         ]);
     }
-
-    // -------------------------------
-    // Return client secret and info
-    // -------------------------------
-    return response()->json([
-        'clientSecret' => $payment_intent->client_secret,
-        'totalAmount' => $total_amount,
-        'courses' => $courses->pluck('title'),
-    ]);
-}
 
 
     public function createRefund(Request $request)

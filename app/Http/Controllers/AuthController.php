@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Utils\BasicUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class AuthController extends Controller
 {
+    use BasicUtil;
     /**
      * @OA\Post(
      *     path="/v1.0/auth/register",
@@ -88,6 +90,8 @@ class AuthController extends Controller
             // Generate Passport token
             $token = $user->createToken('API Token')->accessToken;
 
+            $business_settings = $this->get_business_setting();
+
             // Commit the transaction
             DB::commit();
             // Return success response
@@ -103,6 +107,7 @@ class AuthController extends Controller
                         'email'   => $user->email,
                         'role'    => $user->roles->pluck('name')->first(),
                         'token'   => $token,
+                        'business' => $business_settings
                     ]
                 ],
                 201
@@ -166,6 +171,7 @@ class AuthController extends Controller
             $user = Auth::user();
             $token = $user->createToken('API Token')->accessToken;
 
+            $business_settings = $this->get_business_setting();
             // Commit the transaction
             DB::commit();
             // Return success response
@@ -180,6 +186,7 @@ class AuthController extends Controller
                     'email'   => $user->email,
                     'role'    => $user->roles->pluck('name')->first(),
                     'token'   => $token,
+                    'business' => $business_settings
                 ]
             ], 200);
         } catch (\Throwable $th) {
