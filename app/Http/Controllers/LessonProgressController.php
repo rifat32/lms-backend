@@ -8,6 +8,7 @@ use App\Models\Lesson;
 use App\Models\Enrollment;
 use App\Models\LessonProgress;
 use App\Models\LessonSession;
+use App\Utils\BasicUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\DB;
  */
 class LessonProgressController extends Controller
 {
+    use BasicUtil;
     /**
      * @OA\Put(
      *     path="/v1.0/lessons/{id}/progress",
@@ -132,6 +134,7 @@ class LessonProgressController extends Controller
             $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
             $enrollment->save();
 
+              $progress = $this->recalculateCourseProgress($user->id, $lesson->course_id);
             // Commit the transaction
             DB::commit();
             // Return success response

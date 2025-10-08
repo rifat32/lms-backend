@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseFaqController;
 use App\Http\Controllers\CourseReviewController;
+use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;

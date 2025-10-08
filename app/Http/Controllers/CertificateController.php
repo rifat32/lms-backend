@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
+use App\Models\CertificateTemplate;
 use App\Models\Enrollment;
 use App\Models\Course;
 use App\Models\User;
@@ -114,55 +115,62 @@ class CertificateController extends Controller
      */
 
 
-    public function generateCertificate(Request $request, $id)
-    {
-        $request->validate([
-            'user_id' => ['required', 'integer', new ValidUser()],
-            'course_id' => ['required', 'integer', new ValidCourse()],
-        ]);
+  public function generateCertificate(Request $request, $id)
+{
+    $request->validate([
+        'user_id' => ['required', 'integer', new ValidUser()],
+        'course_id' => ['required', 'integer', new ValidCourse()],
+    ]);
 
-        $user = User::findOrFail($request->user_id);
-        $course = Course::findOrFail($request->course_id);
+    $user = User::findOrFail($request->user_id);
+    $course = Course::findOrFail($request->course_id);
 
-        // Check if user completed the course
-        $enrollment = Enrollment::where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->firstOrFail();
+    $enrollment = Enrollment::where('user_id', $user->id)
+        ->where('course_id', $course->id)
+        ->firstOrFail();
 
-        if ($enrollment->progress < 100) {
-            return response()->json(['message' => 'Course not completed yet.'], 400);
-        }
-
-        // Generate unique certificate code
-        $code = Str::upper(Str::random(10));
-
-        // Generate PDF (simplified example)
-        $pdf = PDF::loadView('certificates.template', [
-            'user' => $user,
-            'course' => $course,
-            'code' => $code,
-            'issued_at' => now(),
-        ]);
-
-        $pdf_path = storage_path("app/public/certificates/{$code}.pdf");
-        $pdf->save($pdf_path);
-
-        // Save certificate record
-        $certificate = Certificate::create([
-            'enrollment_id' => $enrollment->id,
-            'certificate_code' => $code,
-            'pdf_url' => "certificates/{$code}.pdf",
-            'issued_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Certificate generated.',
-            'data' => [
-                'certificate_id' => $certificate->id,
-            ]
-        ], 201);
+    if ($enrollment->progress < 100) {
+        return response()->json(['message' => 'Course not completed yet.'], 400);
     }
+
+    // 🧩 Get active template
+    $template = CertificateTemplate::where('is_active', true)->first();
+    if (!$template) {
+        return response()->json(['message' => 'No active certificate template found.'], 404);
+    }
+
+    // 🪄 Replace placeholders
+    $code = Str::upper(Str::random(10));
+    $issued_at = now()->format('F d, Y');
+
+    $html = str_replace(
+        ['{user_name}', '{course_name}', '{issued_date}', '{certificate_code}'],
+        [$user->name, $course->title, $issued_at, $code],
+        $template->html_content
+    );
+
+    // 🧾 Generate PDF
+    $pdf = \PDF::loadHTML($html);
+    $file_name = "{$code}.pdf";
+    $pdf_path = storage_path("app/public/certificates/{$file_name}");
+    $pdf->save($pdf_path);
+
+    // 💾 Save record
+    $certificate = Certificate::create([
+        'enrollment_id' => $enrollment->id,
+        'certificate_code' => $code,
+        'pdf_url' => "certificates/{$file_name}",
+        'issued_at' => now(),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Certificate generated.',
+        'data' => [
+            'certificate_id' => $certificate->id,
+        ]
+    ], 201);
+}
 
     /**
      * @OA\Get(

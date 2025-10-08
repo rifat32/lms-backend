@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\QuizAttempt;
 use App\Models\Question;
 use App\Rules\ValidQuestion;
+use App\Utils\BasicUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 
 /**
  * @OA\Tag(
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 class QuizAttemptController extends Controller
 {
     
+    use BasicUtil;
     /**
      * @OA\Put(
      *     path="/v1.0/quiz-attempts/{id}/grade",
@@ -275,6 +278,11 @@ class QuizAttemptController extends Controller
         $attempt->completed_at = now();
         $attempt->time_spent = $elapsed;
         $attempt->save();
+
+        if($attempt->is_passed){
+          $this->recalculateCourseProgress($user->id, $quiz->course_id);
+        }
+
 
         return response()->json([
             'success' => true,

@@ -8,135 +8,101 @@ use Illuminate\Http\Request;
 
 class CustomWebhookController extends Controller
 {
-      /**
-     * Handle a Stripe webhook call.
-     *
-     * @param  Event  $event
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
     public function handleStripeWebhook(Request $request)
     {
-        // Retrieve the event data from the request body
         $payload = $request->all();
-
-        // Log the entire payload for debugging purposes
 
         log_message([
             'level' => 'info',
             'message' => 'Stripe Webhook received',
             'context' => ['payload' => $payload],
-        ],
-        'stripe_webhooks.log'
-    );
-      
+        ], 'stripe_webhooks.log');
 
-        // Extract the event type
-        $eventType = $payload['type'] ?? null;
+        // If it's a Stripe test webhook, type may be missing in test payloads.
+        $event_type = $payload['type'] ?? 'payment_intent.succeeded';
 
-
-
- 
         log_message([
             'level' => 'info',
-            'message' => 'Event Type: ' . $eventType,
-        ],
-        'stripe_webhooks.log'
-    );
+            'message' => 'Event Type: ' . $event_type,
+        ], 'stripe_webhooks.log');
 
-        // Handle the event based on its type
-        if ($eventType === 'checkout.session.completed') {
-            // return response()->json($payload['data']['object'],409);
-            $this->handleChargeSucceeded($payload['data']['object']);
+        // Handle payment success
+        if ($event_type === 'payment_intent.succeeded') {
+            // The payload might already contain the object itself
+            $data = isset($payload['data']['object']) ? $payload['data']['object'] : ($payload['object'] ?? []);
+            $this->handleChargeSucceeded($data);
         }
 
-         // Check if it's a refund event
-    if ($eventType == 'charge.refunded') {
-        $event = $request->getContent();
-        $eventJson = json_decode($event);
-        $charge = $eventJson->data->object;
+        // Handle refunds
+        if ($event_type === 'charge.refunded') {
+            return response()->json(['status' => 'Refund handled'], 200);
+        }
 
-        // // Update your booking or order status based on the refund
-        // $booking = Booking::where('payment_intent', $charge->payment_intent)->first();
-        // if ($booking) {
-        //     $booking->payment_status = 'refunded';
-        //     $booking->save();
-
-        //     JobPayment::where([
-        //         "booking_id" => $booking->id,
-
-        //     ])
-        //     ->delete();
-        // }
-
-        return response()->json(['status' => 'Refund handled'], 200);
-    }
-
-        // Return a response to Stripe to acknowledge receipt of the webhook
         return response()->json(['message' => 'Webhook received']);
     }
 
-    /**
-     * Handle payment succeeded webhook from Stripe.
-     *
-     * @param  array  $paymentCharge
-     * @return void
-     */
-   protected function handleChargeSucceeded($data)
-{
-    // Amount paid in Stripe (divide by 100 for USD)
-    $amount = $data['amount_total'] ? ($data['amount_total'] / 100) : 0;
+    protected function handleChargeSucceeded($data)
+    {
+        // Stripe sends amount in cents (4999 → $49.99)
+        $amount = isset($data['amount']) ? $data['amount'] / 100 : 0;
 
-    $metadata = $data['metadata'] ?? [];
+        $metadata = $data['metadata'] ?? [];
 
-    // Ensure webhook URL matches (security check)
-    if (!empty($metadata["webhook_url"]) && $metadata["webhook_url"] != route('stripe.webhook')) {
-        return;
-    }
+        // Optional security: verify webhook_url
+        if (!empty($metadata["webhook_url"]) && $metadata["webhook_url"] != route('stripe.webhook')) {
+            log_message([
+                'level' => 'warning',
+                'message' => 'Webhook URL mismatch',
+                'context' => $metadata,
+            ], 'stripe_webhooks.log');
+            return;
+        }
 
-    // Retrieve all payments linked to this payment_intent
-    $payments = Payment::where('payment_intent_id', $data['payment_intent'])->get();
-
-    if ($payments->isEmpty()) {
-        // Fallback: handle multiple courses from metadata if payments not yet created
+        $user_id = $metadata['user_id'] ?? null;
         $course_ids = isset($metadata['course_ids']) ? explode(',', $metadata['course_ids']) : [];
-        $user_id = auth()->id() ?? null; // If user ID is stored in metadata, you can use that instead
+
+        if (!$user_id || empty($course_ids)) {
+            log_message([
+                'level' => 'error',
+                'message' => 'Missing user_id or course_ids in Stripe metadata',
+                'context' => $metadata,
+            ], 'stripe_webhooks.log');
+            return;
+        }
+
+        $payment_intent_id = $data['id'] ?? $data['payment_intent'] ?? null;
 
         foreach ($course_ids as $course_id) {
-            // Save Payment record if not already
-            $payment = Payment::firstOrCreate([
-                'payment_intent_id' => $data['payment_intent'],
-                'course_id' => $course_id,
-                'user_id' => $user_id,
-            ], [
-                'status' => 'complete',
-                'amount' => $amount / count($course_ids), // approximate split
-                'method' => 'stripe',
-            ]);
+            // Save Payment
+            $payment = Payment::firstOrCreate(
+                [
+                    'payment_intent_id' => $payment_intent_id,
+                    'course_id' => $course_id,
+                    'user_id' => $user_id,
+                ],
+                [
+                    'status' => 'complete',
+                    'amount' => $amount / count($course_ids),
+                    'method' => 'stripe',
+                ]
+            );
 
-            // Create Enrollment
-            Enrollment::firstOrCreate([
-                'user_id' => $user_id,
-                'course_id' => $course_id,
-            ], [
-                'enrolled_at' => now(),
-            ]);
+            // Enroll user
+            Enrollment::firstOrCreate(
+                [
+                    'user_id' => $user_id,
+                    'course_id' => $course_id,
+                ],
+                [
+                    'enrolled_at' => now(),
+                ]
+            );
         }
-    } else {
-        // Update existing payment(s) and enroll
-        foreach ($payments as $payment) {
-            $payment->status = 'complete';
-            $payment->amount = $amount / $payments->count(); // approximate split
-            $payment->save();
 
-            Enrollment::firstOrCreate([
-                'user_id' => $payment->user_id,
-                'course_id' => $payment->course_id,
-            ], [
-                'enrolled_at' => now(),
-            ]);
-        }
+        log_message([
+            'level' => 'info',
+            'message' => 'Payment processed successfully',
+            'context' => ['user_id' => $user_id, 'course_ids' => $course_ids],
+        ], 'stripe_webhooks.log');
     }
-}
-
-
 }
