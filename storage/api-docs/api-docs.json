@@ -2130,6 +2130,10 @@
                                         "type": "integer",
                                         "example": 1
                                     },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "name": {
                                         "type": "string",
                                         "example": "Data Science"
@@ -2152,6 +2156,10 @@
                                 "schema": {
                                     "properties": {
                                         "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "parent_id": {
                                             "type": "integer",
                                             "example": 1
                                         },
@@ -2292,6 +2300,10 @@
                                         "type": "string",
                                         "example": "Data Science"
                                     },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "example": ""
+                                    },
                                     "description": {
                                         "type": "string",
                                         "example": "description"
@@ -2316,6 +2328,10 @@
                                         "name": {
                                             "type": "string",
                                             "example": "Data Science"
+                                        },
+                                        "parent_id": {
+                                            "type": "integer",
+                                            "example": "1"
                                         },
                                         "description": {
                                             "type": "string",
@@ -2666,17 +2682,17 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": ""
                         }
                     },
                     {
                         "name": "searchKey",
                         "in": "query",
-                        "description": "Search by keyword in title or description",
+                        "description": "Search by keyword in title only",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": "Laravel"
+                            "example": ""
                         }
                     },
                     {
@@ -2686,8 +2702,8 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 1,
-                            "example": 1
+                            "default": "",
+                            "example": ""
                         }
                     },
                     {
@@ -2697,8 +2713,30 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 10,
-                            "example": 10
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Course status only: draft, published, archived",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
                         }
                     }
                 ],
@@ -2736,7 +2774,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3112,13 +3150,13 @@
                 ]
             }
         },
-        "/v1.0/courses": {
+        "/v1.0/client/courses/secure": {
             "get": {
                 "tags": [
                     "course_management.course"
                 ],
                 "summary": "Get all courses",
-                "operationId": "getCourses",
+                "operationId": "getCoursesClientSecure",
                 "parameters": [
                     {
                         "name": "category_id",
@@ -3127,17 +3165,28 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
                         }
                     },
                     {
                         "name": "searchKey",
                         "in": "query",
-                        "description": "Search by keyword in title or description",
+                        "description": "Search by keyword in title only",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": "Laravel"
+                            "example": ""
                         }
                     },
                     {
@@ -3147,8 +3196,8 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 1,
-                            "example": 1
+                            "default": "",
+                            "example": ""
                         }
                     },
                     {
@@ -3158,8 +3207,19 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 10,
-                            "example": 10
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Course status only: draft, published, archived",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
                         }
                     }
                 ],
@@ -3197,7 +3257,208 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-19T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid query parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/courses": {
+            "get": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Get all courses",
+                "operationId": "getCourses",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Filter by category ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "searchKey",
+                        "in": "query",
+                        "description": "Search by keyword in title only",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": "",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Course status only: draft, published, archived",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of courses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Courses retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Laravel Basics"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Learn Laravel framework"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3322,12 +3583,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.99
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -3457,12 +3718,12 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "sale_price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 29.99
+                                            "example": 29.989999999999998436805981327779591083526611328125
                                         },
                                         "price_start_date": {
                                             "type": "string",
@@ -3714,12 +3975,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.99
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -3849,7 +4110,7 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "is_free": {
                                             "type": "boolean",
@@ -3932,6 +4193,397 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Category not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A course with this title already exists."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The title field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The title field is required."
+                                                    }
+                                                },
+                                                "description": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The description field is required."
+                                                    }
+                                                },
+                                                "category_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The category id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Update a course (Admin only)",
+                "operationId": "updatePartialCourse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Laravel Basics"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "A complete Laravel course"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 49.99000000000000198951966012828052043914794921875
+                                    },
+                                    "sale_price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 29.989999999999998436805981327779591083526611328125
+                                    },
+                                    "price_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "price_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "is_free": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "published",
+                                            "archived"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "status_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "status_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "example": "https://example.com/laravel-basics"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "example": "Beginner"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "example": ""
+                                    },
+                                    "preview_video_source_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "HTML",
+                                            "YouTube",
+                                            "Vimeo",
+                                            "External Link",
+                                            "Embed"
+                                        ],
+                                        "example": "YouTube"
+                                    },
+                                    "preview_video_url": {
+                                        "type": "string",
+                                        "example": "https://youtu.be/example"
+                                    },
+                                    "preview_video_poster": {
+                                        "type": "string",
+                                        "example": "poster.jpg"
+                                    },
+                                    "preview_video_embed": {
+                                        "type": "string",
+                                        "example": "<iframe src='https://example.com/embed'></iframe>"
+                                    },
+                                    "duration": {
+                                        "type": "string",
+                                        "example": "8 hours"
+                                    },
+                                    "video_duration": {
+                                        "type": "string",
+                                        "example": "2 hours"
+                                    },
+                                    "course_preview_description": {
+                                        "type": "string",
+                                        "example": "This is a preview of the Laravel Basics course."
+                                    },
+                                    "is_featured": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_lock_lessons_in_order": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "created_by": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "category_ids": {
+                                        "description": "Array of category IDs for this course",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Laravel Basics"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "A complete Laravel course"
+                                        },
+                                        "price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 49.99000000000000198951966012828052043914794921875
+                                        },
+                                        "sale_price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 29.989999999999998436805981327779591083526611328125
+                                        },
+                                        "price_start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-10-01"
+                                        },
+                                        "price_end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-12-31"
+                                        },
+                                        "is_free": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "draft",
+                                                "published",
+                                                "archived"
+                                            ],
+                                            "example": "draft"
+                                        },
+                                        "status_start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-10-01"
+                                        },
+                                        "status_end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-12-31"
+                                        },
+                                        "url": {
+                                            "type": "string",
+                                            "example": "https://example.com/laravel-basics"
+                                        },
+                                        "level": {
+                                            "type": "string",
+                                            "example": "Beginner"
+                                        },
+                                        "cover": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "preview_video_source_type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "HTML",
+                                                "YouTube",
+                                                "Vimeo",
+                                                "External Link",
+                                                "Embed"
+                                            ],
+                                            "example": "YouTube"
+                                        },
+                                        "preview_video_url": {
+                                            "type": "string",
+                                            "example": "https://youtu.be/example"
+                                        },
+                                        "preview_video_poster": {
+                                            "type": "string",
+                                            "example": "poster.jpg"
+                                        },
+                                        "preview_video_embed": {
+                                            "type": "string",
+                                            "example": "<iframe src='https://example.com/embed'></iframe>"
+                                        },
+                                        "duration": {
+                                            "type": "string",
+                                            "example": "8 hours"
+                                        },
+                                        "video_duration": {
+                                            "type": "string",
+                                            "example": "2 hours"
+                                        },
+                                        "course_preview_description": {
+                                            "type": "string",
+                                            "example": "This is a preview of the Laravel Basics course."
+                                        },
+                                        "is_featured": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "is_lock_lessons_in_order": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "created_by": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "category_ids": {
+                                            "description": "Array of category IDs for this course",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 1
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
                                         }
                                     },
                                     "type": "object"
@@ -5055,7 +5707,7 @@
                                                             },
                                                             "price": {
                                                                 "type": "number",
-                                                                "example": 49.99
+                                                                "example": 49.99000000000000198951966012828052043914794921875
                                                             }
                                                         },
                                                         "type": "object"
@@ -5120,17 +5772,17 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": ""
                         }
                     },
                     {
-                        "name": "searchKey",
+                        "name": "search_key",
                         "in": "query",
                         "description": "Search by keyword in title or description",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": "Laravel"
+                            "example": ""
                         }
                     },
                     {
@@ -5140,8 +5792,8 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 1,
-                            "example": 1
+                            "default": "",
+                            "example": ""
                         }
                     },
                     {
@@ -5151,8 +5803,8 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "default": 10,
-                            "example": 10
+                            "default": "",
+                            "example": ""
                         }
                     }
                 ],
@@ -5190,7 +5842,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -5283,6 +5935,226 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Update an existing lesson (Admin only)",
+                "operationId": "f0193a141881c250c4879a0cead36e7c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "title",
+                                    "content_type"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Updated Lesson Title"
+                                    },
+                                    "content_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "video",
+                                            "text",
+                                            "file",
+                                            "quiz"
+                                        ],
+                                        "example": "video"
+                                    },
+                                    "content_url": {
+                                        "type": "string",
+                                        "example": "https://example.com/updated-video.mp4"
+                                    },
+                                    "sort_order": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "duration": {
+                                        "type": "integer",
+                                        "example": 50
+                                    },
+                                    "is_preview": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "is_time_locked": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-01"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:30"
+                                    },
+                                    "unlock_day_after_purchase": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated lesson description."
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Updated detailed content..."
+                                    },
+                                    "section_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "example": []
+                                    },
+                                    "files": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "example": []
+                                    },
+                                    "materials": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "example": []
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lesson updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "section_ids": {
+                                                    "type": "string",
+                                                    "example": "1,2,3"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Updated Lesson Title"
+                                                },
+                                                "duration": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "is_preview": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "is_time_locked": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-10-01"
+                                                },
+                                                "start_time": {
+                                                    "type": "string",
+                                                    "format": "time",
+                                                    "example": "09:30"
+                                                },
+                                                "unlock_day_after_purchase": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Updated lesson description."
+                                                },
+                                                "content": {
+                                                    "type": "string",
+                                                    "example": "Updated detailed content..."
+                                                },
+                                                "files": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "lessons/files/new-video.mp4"
+                                                    }
+                                                },
+                                                "materials": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "lessons/files/new-video.mp4"
+                                                    }
+                                                },
+                                                "content_type": {
+                                                    "type": "string",
+                                                    "example": "video"
+                                                },
+                                                "content_url": {
+                                                    "type": "string",
+                                                    "example": "https://example.com/updated-video.mp4"
+                                                },
+                                                "sort_order": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Lessons"
@@ -5356,19 +6228,29 @@
                                         "type": "string",
                                         "example": "Lesson detailed text content here..."
                                     },
+                                    "section_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "example": []
+                                    },
                                     "files": {
                                         "type": "array",
                                         "items": {
                                             "type": "string",
                                             "format": "binary"
-                                        }
+                                        },
+                                        "example": []
                                     },
                                     "materials": {
                                         "type": "array",
                                         "items": {
                                             "type": "string",
                                             "format": "binary"
-                                        }
+                                        },
+                                        "example": []
                                     }
                                 },
                                 "type": "object"
@@ -5396,6 +6278,10 @@
                                                 "id": {
                                                     "type": "integer",
                                                     "example": 1
+                                                },
+                                                "section_ids": {
+                                                    "type": "string",
+                                                    "example": "1,2,3"
                                                 },
                                                 "title": {
                                                     "type": "string",
@@ -5486,226 +6372,6 @@
                 ]
             }
         },
-        "/v1.0/lessons/{id}": {
-            "put": {
-                "tags": [
-                    "Lessons"
-                ],
-                "summary": "Update an existing lesson (Admin only)",
-                "operationId": "bf9504c063b08aea65b41759055463c7",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Lesson ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 10
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "id",
-                                    "title",
-                                    "content_type"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Updated Lesson Title"
-                                    },
-                                    "content_type": {
-                                        "type": "string",
-                                        "enum": [
-                                            "video",
-                                            "text",
-                                            "file",
-                                            "quiz"
-                                        ],
-                                        "example": "video"
-                                    },
-                                    "content_url": {
-                                        "type": "string",
-                                        "example": "https://example.com/updated-video.mp4"
-                                    },
-                                    "sort_order": {
-                                        "type": "integer",
-                                        "example": 2
-                                    },
-                                    "duration": {
-                                        "type": "integer",
-                                        "example": 50
-                                    },
-                                    "is_preview": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "is_time_locked": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "start_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-01"
-                                    },
-                                    "start_time": {
-                                        "type": "string",
-                                        "format": "time",
-                                        "example": "09:30"
-                                    },
-                                    "unlock_day_after_purchase": {
-                                        "type": "integer",
-                                        "example": 10
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Updated lesson description."
-                                    },
-                                    "content": {
-                                        "type": "string",
-                                        "example": "Updated detailed content..."
-                                    },
-                                    "files": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "format": "binary"
-                                        }
-                                    },
-                                    "materials": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "format": "binary"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Lesson updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Lesson updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "title": {
-                                                    "type": "string",
-                                                    "example": "Updated Lesson Title"
-                                                },
-                                                "duration": {
-                                                    "type": "integer",
-                                                    "example": 50
-                                                },
-                                                "is_preview": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "is_time_locked": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                },
-                                                "start_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-10-01"
-                                                },
-                                                "start_time": {
-                                                    "type": "string",
-                                                    "format": "time",
-                                                    "example": "09:30"
-                                                },
-                                                "unlock_day_after_purchase": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "description": {
-                                                    "type": "string",
-                                                    "example": "Updated lesson description."
-                                                },
-                                                "content": {
-                                                    "type": "string",
-                                                    "example": "Updated detailed content..."
-                                                },
-                                                "files": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "lessons/files/new-video.mp4"
-                                                    }
-                                                },
-                                                "materials": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "lessons/files/new-video.mp4"
-                                                    }
-                                                },
-                                                "content_type": {
-                                                    "type": "string",
-                                                    "example": "video"
-                                                },
-                                                "content_url": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/updated-video.mp4"
-                                                },
-                                                "sort_order": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/v1.0/lessons/{ids}": {
             "delete": {
                 "tags": [
@@ -5717,11 +6383,11 @@
                     {
                         "name": "ids",
                         "in": "path",
-                        "description": "Lesson ID (comma-separated for multiple)",
+                        "description": "Lesson ID (comma-separated for multiple like 1,2,3)",
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "example": "1,2,3"
+                            "example": ""
                         }
                     }
                 ],
@@ -6771,7 +7437,7 @@
         "/v1.0/question-categories": {
             "get": {
                 "tags": [
-                    "question_management.category"
+                    "question_management.question_category"
                 ],
                 "summary": "Get all question categories",
                 "description": "Fetches all question categories in the system.",
@@ -6975,7 +7641,7 @@
             },
             "post": {
                 "tags": [
-                    "question_management.category"
+                    "question_management.question_category"
                 ],
                 "summary": "Create a new question category",
                 "operationId": "createQuestionCategory",
@@ -7075,7 +7741,7 @@
         "/v1.0/question-categories/{id}": {
             "delete": {
                 "tags": [
-                    "question_management.category"
+                    "question_management.question_category"
                 ],
                 "summary": "Delete a question category",
                 "description": "Deletes a question category by its ID.",
@@ -7290,30 +7956,23 @@
                 "summary": "Update an existing question with options",
                 "description": "Updates a question and its options by question ID.",
                 "operationId": "updateQuestion",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID of the question to update",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 10
-                        }
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "id",
                                     "question_text",
                                     "question_type",
                                     "points",
                                     "options"
                                 ],
                                 "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "question_text": {
                                         "type": "string",
                                         "maxLength": 255,
@@ -7331,6 +7990,14 @@
                                             "fill_in_the_blanks"
                                         ],
                                         "example": "single"
+                                    },
+                                    "category_ids": {
+                                        "description": "Array of category IDs for this course",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     },
                                     "points": {
                                         "type": "integer",
@@ -7385,14 +8052,6 @@
                                                     "type": "string",
                                                     "example": "https://example.com/pair-image.png",
                                                     "nullable": true
-                                                },
-                                                "category_ids": {
-                                                    "description": "Array of category IDs for this course",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -7476,17 +8135,25 @@
                                         "example": "true_false"
                                     },
                                     "points": {
-                                        "description": "Number of points awarded for the question",
+                                        "description": "Number of points for the question",
                                         "type": "integer",
                                         "minimum": 1,
                                         "example": 5
                                     },
                                     "time_limit": {
-                                        "description": "Time limit for the question in seconds (nullable)",
+                                        "description": "Time limit in seconds (nullable)",
                                         "type": "integer",
                                         "minimum": 0,
                                         "example": 30,
                                         "nullable": true
+                                    },
+                                    "category_ids": {
+                                        "description": "Array of category IDs for this question",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     },
                                     "is_required": {
                                         "type": "boolean",
@@ -7498,19 +8165,19 @@
                                         "items": {
                                             "properties": {
                                                 "id": {
-                                                    "description": "Optional ID if updating an existing option",
+                                                    "description": "ID when updating an option",
                                                     "type": "integer",
                                                     "example": null,
                                                     "nullable": true
                                                 },
                                                 "option_text": {
-                                                    "description": "Text of the option",
+                                                    "description": "Option text",
                                                     "type": "string",
                                                     "example": "Paris",
                                                     "nullable": true
                                                 },
                                                 "is_correct": {
-                                                    "description": "Whether this option is correct",
+                                                    "description": "Whether the option is correct",
                                                     "type": "boolean",
                                                     "example": true
                                                 },
@@ -7521,30 +8188,22 @@
                                                     "nullable": true
                                                 },
                                                 "image": {
-                                                    "description": "Image URL or uploaded file path",
+                                                    "description": "Image URL or file path",
                                                     "type": "string",
                                                     "example": "https://example.com/image.png",
                                                     "nullable": true
                                                 },
                                                 "matching_pair_text": {
-                                                    "description": "Matching pair text for matching questions",
+                                                    "description": "Matching pair text",
                                                     "type": "string",
                                                     "example": "France",
                                                     "nullable": true
                                                 },
                                                 "matching_pair_image": {
-                                                    "description": "Matching pair image URL or uploaded file",
+                                                    "description": "Matching pair image URL or file path",
                                                     "type": "string",
                                                     "example": "https://example.com/pair-image.png",
                                                     "nullable": true
-                                                },
-                                                "category_ids": {
-                                                    "description": "Array of category IDs for this course",
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -7583,15 +8242,6 @@
                                                 },
                                                 "question_type": {
                                                     "type": "string",
-                                                    "enum": [
-                                                        "true_false",
-                                                        "single",
-                                                        "multiple",
-                                                        "matching",
-                                                        "file_matching",
-                                                        "keywords",
-                                                        "fill_in_the_blanks"
-                                                    ],
                                                     "example": "single"
                                                 },
                                                 "points": {
@@ -7868,11 +8518,11 @@
                     {
                         "name": "ids",
                         "in": "path",
-                        "description": "Comma-separated list of question IDs to delete",
+                        "description": "Comma-separated list of question IDs to delete like 1,2,3",
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "example": "1,2,3"
+                            "example": ""
                         }
                     }
                 ],
@@ -8448,61 +9098,6 @@
                     }
                 ]
             },
-            "put": {
-                "tags": [
-                    "Quizzes"
-                ],
-                "summary": "Update a quiz and sync questions",
-                "operationId": "updateQuiz",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Updated Quiz Title"
-                                    },
-                                    "description": {
-                                        "type": "string",
-                                        "example": "Updated description"
-                                    },
-                                    "question_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer",
-                                            "example": 2
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Quiz updated successfully"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
             "delete": {
                 "tags": [
                     "Quizzes"
@@ -8541,23 +9136,13 @@
                 "operationId": "getQuizWithQuestions",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Quiz ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
                         "name": "is_randomized",
                         "in": "query",
                         "description": "Whether to randomize the quiz questions",
                         "required": false,
                         "schema": {
                             "type": "boolean",
-                            "example": true
+                            "example": ""
                         }
                     },
                     {
@@ -8567,7 +9152,7 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 10
+                            "example": ""
                         }
                     }
                 ],
@@ -8728,6 +9313,58 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "Quizzes"
+                ],
+                "summary": "Update a quiz and sync questions",
+                "operationId": "updateQuiz",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Updated Quiz Title"
+                                    },
+                                    "section_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "example": []
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated description"
+                                    },
+                                    "question_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 2
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quiz updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Quizzes"
@@ -8746,6 +9383,14 @@
                                     "title": {
                                         "type": "string",
                                         "example": "Laravel Basics Quiz"
+                                    },
+                                    "section_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "example": []
                                     },
                                     "description": {
                                         "type": "string",
@@ -9633,6 +10278,606 @@
                                         "type": "string",
                                         "example": "Introduction to Laravel"
                                     },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sectionable": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "lesson",
+                                                        "quiz"
+                                                    ],
+                                                    "example": "lesson"
+                                                },
+                                                "order": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Section updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Section updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "order": {
+                                                    "type": "string",
+                                                    "example": "1"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Laravel"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "quizzes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Quiz One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A section with this title already exists for this course."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The title field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The title field is required."
+                                                    }
+                                                },
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                },
+                                                "sectionable": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The sectionable field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/sections-add-lessons": {
+            "put": {
+                "tags": [
+                    "section"
+                ],
+                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "operationId": "updateSectionAddLessons",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "title",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Introduction to Laravel"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sectionable": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "lesson",
+                                                        "quiz"
+                                                    ],
+                                                    "example": "lesson"
+                                                },
+                                                "order": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Section updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Section updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "order": {
+                                                    "type": "string",
+                                                    "example": "1"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Introduction to Laravel"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-09-20T12:00:00Z"
+                                                },
+                                                "lessons": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Lesson One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "quizzes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Quiz One"
+                                                            },
+                                                            "pivot": {
+                                                                "properties": {
+                                                                    "order": {
+                                                                        "type": "integer",
+                                                                        "example": 2
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "A section with this title already exists for this course."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The title field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "title": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The title field is required."
+                                                    }
+                                                },
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                },
+                                                "sectionable": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The sectionable field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/sections-remove-lessons": {
+            "put": {
+                "tags": [
+                    "section"
+                ],
+                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "operationId": "updateSectionRemoveLessons",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "title",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Introduction to Laravel"
+                                    },
                                     "sectionable": {
                                         "type": "array",
                                         "items": {
@@ -10027,110 +11272,14 @@
                 ]
             }
         },
-        "/v1.0/business-settingss": {
-            "put": {
+        "/v1.0/business-settings": {
+            "get": {
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to update busuness setting",
-                "description": "This method is to update busuness setting",
-                "operationId": "updateBusinessSettings",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "allow_receptionist_user_discount": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": ""
-                                    },
-                                    "discount_percentage_limit": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": ""
-                                    },
-                                    "STRIPE_KEY": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "STRIPE_KEY"
-                                    },
-                                    "STRIPE_SECRET": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "STRIPE_SECRET"
-                                    },
-                                    "stripe_enabled": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "is_expert_price": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "allow_pay_after_service": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "allow_expert_booking": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "allow_expert_self_busy": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "allow_expert_booking_cancel": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "allow_expert_take_payment": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "allow_expert_view_revenue": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "allow_expert_view_customer_details": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "allow_receptionist_add_question": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "default_currency": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "USD"
-                                    },
-                                    "default_language": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "en"
-                                    },
-                                    "vat_enabled": {
-                                        "type": "boolean",
-                                        "example": true
-                                    },
-                                    "vat_percentage": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 15
-                                    },
-                                    "vat_number": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 15
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "This method is to get busuness _setting",
+                "description": "This method is to get busuness setting",
+                "operationId": "getBusinessSettings",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -10186,16 +11335,40 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        },
-        "/v1.0/business-settings": {
-            "get": {
+            },
+            "put": {
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to get busuness _setting",
-                "description": "This method is to get busuness setting",
-                "operationId": "getBusinessSettings",
+                "summary": "This method is to update busuness setting",
+                "description": "This method is to update busuness setting",
+                "operationId": "updateBusinessSettings",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "STRIPE_KEY": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "STRIPE_KEY"
+                                    },
+                                    "STRIPE_SECRET": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "STRIPE_SECRET"
+                                    },
+                                    "stripe_enabled": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -10351,6 +11524,167 @@
                         "content": {
                             "application/json": {
                                 "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payments/intent": {
+            "post": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Create a Stripe Payment Intent for a course",
+                "description": "Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
+                "operationId": "createPaymentIntent",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "course_id": {
+                                        "description": "The ID of the course being purchased",
+                                        "type": "integer",
+                                        "example": 101
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment intent created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "clientSecret": {
+                                            "type": "string",
+                                            "example": "pi_3OzFKa2LqWcU...secret_123"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request payload."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Stripe not enabled or settings missing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Stripe is not enabled."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The course_id field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while creating the payment intent."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
                     }
@@ -11005,10 +12339,6 @@
             "description": "Endpoints to update lesson progress for enrolled users"
         },
         {
-            "name": "question_management.category",
-            "description": "Endpoints for managing question categories"
-        },
-        {
             "name": "QuizAttempts",
             "description": "Endpoints to attempt quizzes and grade essays (Admin)"
         },
@@ -11019,6 +12349,10 @@
         {
             "name": "Reports",
             "description": "Endpoints to fetch sales and enrollment reports (Admin only)"
+        },
+        {
+            "name": "Payments",
+            "description": "Endpoints for handling course payments via Stripe"
         },
         {
             "name": "business_management",

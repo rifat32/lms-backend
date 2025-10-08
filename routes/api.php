@@ -8,7 +8,6 @@ use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseFaqController;
 use App\Http\Controllers\CourseReviewController;
-use App\Http\Controllers\CustomWebhookController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
@@ -76,7 +75,6 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
         Route::put('/', [CourseController::class, 'updateCourse']);
-        Route::patch('/', [CourseController::class, 'updatePartialCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);
         Route::delete('/{ids}', [CourseController::class, 'deleteCourse']);
@@ -101,9 +99,6 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/sections'], function () {
         Route::post('/', [SectionController::class, 'createSection']);       // Create
         Route::put('/', [SectionController::class, 'updateSection']);    // Update by ID
-
-
-
         Route::get('/', [SectionController::class, 'getSections']);          // Get all
         Route::get('/{id}', [SectionController::class, 'getSectionById']);   // Get by ID
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
@@ -189,6 +184,7 @@ Route::middleware('auth:api')->group(function () {
     // Download user's certificate
     Route::get('/v1.0/certificates/download/{id}', [CertificateController::class, 'downloadCertificate']);
 
+    // Submit course review
     Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'submitCourseReview']);
 
     // Sales report
@@ -206,6 +202,12 @@ Route::middleware('auth:api')->group(function () {
 
 
     Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
+
+     Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
+
+
+
+
 });
 
 // Get all reviews (auth optional)

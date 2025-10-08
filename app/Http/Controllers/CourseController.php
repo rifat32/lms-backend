@@ -7,6 +7,7 @@ use App\Http\Requests\CoursePartialRequest;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseFaq;
+use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -235,35 +236,47 @@ class CourseController extends Controller
 
     public function getCourseByIdClient($id)
     {
-        // FIND BY ID
-        $course = Course::with([
-            'categories',
-            'sections' => function ($q) {
-                $q
-                    ->with([
-                        "sectionables" => function ($sq) {
-                            $sq->with([
-                                'sectionable' => function ($ssq) {
-                                    $ssq->select('id', 'title');
-                                }
-                            ]);
-                        }
-                    ]);
+      
+
+   $course = Course::with([
+    'categories',
+    'sections' => function ($q) {
+        $q->with([
+            'sectionables' => function ($sq) {
+                $sq->with([
+                    'sectionable' => function ($ssq) {
+                        $ssq->select('id', 'title');
+                    },
+                ]);
             },
-            'reviews',
-        ])
+        ]);
+    },
+    'reviews',
+])->find($id);
 
-
-
-            ->find($id);
-
-        // SEND RESPONSE
+    // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Course not found by'
             ], 404);
         }
+// ✅ Now eager-load questions only for quizzes (manually)
+$course->sections->each(function ($section) {
+    $section->sectionables->each(function ($sectionable) {
+        if ($sectionable->sectionable_type == Quiz::class) {
+            $sectionable->sectionable->load('questions');
+        } else {
+            $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+        }
+    });
+});
+
+
+
+        
+
+    
 
         return response()->json([
             'success' => true,
@@ -357,7 +370,11 @@ class CourseController extends Controller
                             "sectionables" => function ($sq) {
                                 $sq->with([
                                     'sectionable' => function ($ssq) {
-                                        $ssq->select('id', 'title');
+                                        $ssq
+                                        ->with([
+                                            "questions"
+                                        ])
+                                        ->select('id', 'title');
                                     }
                                 ]);
                             }
@@ -386,7 +403,130 @@ class CourseController extends Controller
         ], 200);
     }
 
+   /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses/secure",
+     *     tags={"course_management.course"},
+     *     operationId="getCoursesClientSecure",
+     *     summary="Get all courses",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by category ID",
+     *         @OA\Schema(type="integer", example="")
+     *     ),
+     *    *    *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+     *         @OA\Schema(type="string", default="", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by keyword in title only",
+     *         @OA\Schema(type="string", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", default="", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", default="", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Course status only: draft, published, archived",
+     *         @OA\Schema(type="string", default="", example="")
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of courses",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Courses retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                     @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *                     @OA\Property(property="price", type="number", format="float", example=49.99),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-19T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Invalid query parameters")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource.")
+     *         )
+     *     )
+     * )
+     */
 
+    public function getCoursesClientSecure(Request $request)
+    {
+
+        $query = Course::with(['categories' => function ($q) {
+            $q->select('course_categories.id', 'course_categories.name');
+        }])
+        ->whereHas('enrollments', function ($enrollmentQuery) {
+                    $enrollmentQuery->where('user_id', auth()->user()->id);
+        })
+        ->filters();
+
+        $courses = retrieve_data($query, 'created_at', 'courses');
+
+        // Remove pivot from all categories
+        $courses['data'] = $courses['data']->each(function ($course) {
+            return $course->categories->makeHidden('pivot');
+        });
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Courses retrieved successfully',
+            'meta' => $courses['meta'],
+            'data' => $courses['data'],
+        ], 200);
+    }
 
 
     /**

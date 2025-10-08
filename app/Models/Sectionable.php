@@ -20,4 +20,6 @@ class Sectionable extends Model
     {
         return $this->morphTo();
     }
+
+    
 }
