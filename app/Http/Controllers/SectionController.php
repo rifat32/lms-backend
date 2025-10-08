@@ -769,12 +769,12 @@ class SectionController extends Controller
 
 
 
-    public function updateSectionRemoveLessons(SectionWithLessonRequest $request)
+    public function updateSectionRemoveLessons(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $request_payload = $request->validated();
+            $request_payload = $request->all();
 
             $section = Section::find($request_payload['id'] ?? 0);
 

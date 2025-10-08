@@ -7,7 +7,11 @@ use App\Http\Requests\CoursePartialRequest;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseFaq;
+use App\Models\LessonProgress;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
+use App\Models\Section;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -497,33 +501,96 @@ $course->sections->each(function ($section) {
      * )
      */
 
-    public function getCoursesClientSecure(Request $request)
-    {
+   public function getCoursesClientSecure(Request $request)
+{
+    $user_id = auth()->id();
 
-        $query = Course::with(['categories' => function ($q) {
+    $query = Course::with([
+        'categories' => function ($q) {
             $q->select('course_categories.id', 'course_categories.name');
-        }])
-        ->whereHas('enrollments', function ($enrollmentQuery) {
-                    $enrollmentQuery->where('user_id', auth()->user()->id);
-        })
-        ->filters();
+        },
+        // 'sections.sectionables.sectionable',
+        'enrollments' => function ($q) use ($user_id) {
+            $q->where('user_id', $user_id);
+        },
+    ])->filters();
 
-        $courses = retrieve_data($query, 'created_at', 'courses');
+    $courses = retrieve_data($query, 'created_at', 'courses');
 
-        // Remove pivot from all categories
-        $courses['data'] = $courses['data']->each(function ($course) {
-            return $course->categories->makeHidden('pivot');
-        });
+    // Collect all lesson_ids and quiz_ids for current user to minimize queries
+    $all_lesson_ids = [];
+    $all_quiz_ids = [];
 
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Courses retrieved successfully',
-            'meta' => $courses['meta'],
-            'data' => $courses['data'],
-        ], 200);
+    
+    foreach ($courses['data'] as $course) {
+        $sections = Section::with('sectionables.sectionable')->get();
+        foreach ($sections as $section) {
+            foreach ($section->sectionables as $sectionable) {
+                $model = $sectionable->sectionable;
+                if ($model instanceof \App\Models\Lesson) {
+                    $all_lesson_ids[] = $model->id;
+                } elseif ($model instanceof \App\Models\Quiz) {
+                    $all_quiz_ids[] = $model->id;
+                }
+            }
+        }
     }
 
+    // Fetch all lesson progresses and quiz attempts for current user in bulk
+    $lesson_progresses = LessonProgress::where('user_id', $user_id)
+        ->whereIn('lesson_id', $all_lesson_ids)
+        ->pluck('is_completed', 'lesson_id')
+        ->toArray();
+
+    $quiz_attempts = QuizAttempt::where('user_id', $user_id)
+        ->whereIn('quiz_id', $all_quiz_ids)
+        ->whereNotNull('completed_at')
+        ->where('is_expired', false)
+        ->pluck('quiz_id')
+        ->toArray();
+
+    // Calculate percentage done per course and enrollment status
+    $courses['data'] = $courses['data']->each(function ($course) use ($lesson_progresses, $quiz_attempts, $user_id) {
+        // Remove pivot from categories
+        $course->categories->makeHidden('pivot');
+
+        // Check enrollment
+        $course->is_enrolled = $course->enrollments->isNotEmpty();
+
+        $total_lessons = 0;
+        $completed_lessons = 0;
+        $total_quizzes = 0;
+        $completed_quizzes = 0;
+
+
+        foreach (Section::where('course_id', $course->id)->get() as $section) {
+            foreach ($section->sectionables as $sectionable) {
+                $model = $sectionable->sectionable;
+                if ($model instanceof \App\Models\Lesson) {
+                    $total_lessons++;
+                    if (!empty($lesson_progresses[$model->id])) $completed_lessons++;
+                } elseif ($model instanceof \App\Models\Quiz) {
+                    $total_quizzes++;
+                    if (in_array($model->id, $quiz_attempts)) $completed_quizzes++;
+                }
+            }
+        }
+
+     
+        $total_items = $total_lessons + $total_quizzes;
+        $completed_items = $completed_lessons + $completed_quizzes;
+        $course->percentage_done = $total_items ? round(($completed_items / $total_items) * 100, 2) : 0;
+
+        return $course;
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Courses retrieved successfully',
+        'meta' => $courses['meta'],
+        'data' => $courses['data'],
+    ], 200);
+}
 
     /**
      * @OA\Get(
