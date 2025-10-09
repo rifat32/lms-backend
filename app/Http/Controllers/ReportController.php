@@ -18,7 +18,7 @@ class ReportController extends Controller
      *     path="/v1.0/reports/sales",
      *     operationId="sales",
      *     tags={"Reports"},
-     *     summary="Get sales report for all courses (Admin only)",
+     *     summary="Get sales report for all courses (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -64,6 +64,12 @@ class ReportController extends Controller
 
     public function sales()
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $courses = Course::with('payments')->get();
 
         $report = $courses->map(function ($course) {
@@ -90,7 +96,7 @@ class ReportController extends Controller
      *     path="/v1.0/reports/enrollments",
      *     operationId="enrollmentReport",
      *     tags={"Reports"},
-     *     summary="Get enrollment count per course (Admin only)",
+     *     summary="Get enrollment count per course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -150,6 +156,12 @@ class ReportController extends Controller
 
     public function enrollments()
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $courses = Course::with('enrollments')->get();
 
         $enrollment_courses = $courses->map(function ($course) {

@@ -16,7 +16,7 @@ class OptionController extends Controller
      *     path="/v1.0/options",
      *     operationId="createOption",
      *     tags={"question_management.options"},
-     *     summary="Create a new option",
+     *     summary="Create a new option (role: Admin only)",
      *     description="Creates a new option for a specific question.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -118,6 +118,12 @@ class OptionController extends Controller
     public function create(OptionRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
             // Validate the request
             $request_payload = $request->validated();
@@ -148,7 +154,7 @@ class OptionController extends Controller
      *     path="/v1.0/options",
      *     operationId="updateOption",
      *     tags={"question_management.options"},
-     *     summary="Update an existing option",
+     *     summary="Update an existing option (role: Admin only)",
      *     description="Updates an option's details such as text, correctness, or associated question.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -241,6 +247,12 @@ class OptionController extends Controller
     public function update(OptionRequest $request,)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -271,7 +283,7 @@ class OptionController extends Controller
      *     path="/v1.0/options",
      *     operationId="getAllOptions",
      *     tags={"question_management.options"},
-     *     summary="Get all options",
+     *     summary="Get all options (role: Admin only)",
      *     description="Returns a list of all available options.",
      *     @OA\Response(
      *         response=200,
@@ -296,6 +308,11 @@ class OptionController extends Controller
 
     public function getAllOptions(Request $request)
     {
+if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         // GET ALL options
         $query = Option::query();
@@ -317,7 +334,7 @@ class OptionController extends Controller
      *     path="/v1.0/options/{id}",
      *     operationId="getOptionById",
      *     tags={"question_management.options"},
-     *     summary="Get option by ID",
+     *     summary="Get option by ID (role: Admin only)",
      *     description="Retrieve a specific option by its unique ID.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -365,6 +382,12 @@ class OptionController extends Controller
 
     public function getOptionById(Request $request, $id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // Find the option by ID
         $option = Option::findOrFail($id);
 
@@ -381,7 +404,7 @@ class OptionController extends Controller
      *     path="/v1.0/options/{ids}",
      *     operationId="deleteOptions",
      *     tags={"question_management.options"},
-     *     summary="Delete one or more options by ID",
+     *     summary="Delete one or more options by ID (role: Admin only)",
      *     @OA\Parameter(
      *         name="ids",
      *         in="path",
@@ -403,6 +426,12 @@ class OptionController extends Controller
     public function deleteOptions(Request $request, $ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
             // Find the option by ID
             $idsArray = array_map('intval', explode(',', $ids));
@@ -447,7 +476,7 @@ class OptionController extends Controller
      *     path="/v1.0/options/question/{question_id}",
      *     operationId="getOptionByQuestionId",
      *     tags={"question_management.options"},
-     *     summary="Get options by question ID",
+     *     summary="Get options by question ID (role: Admin only)",
      *     description="Retrieve all options associated with a specific question ID.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -498,6 +527,12 @@ class OptionController extends Controller
 
     public function getOptionByQuestionId(Request $request, $question_id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // Validate the question_id
         if (!is_numeric($question_id) || $question_id <= 0) {
             return response()->json([

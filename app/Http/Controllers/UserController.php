@@ -16,7 +16,7 @@ class UserController extends Controller
      *     path="/v1.0/users/{id}",
      *     operationId="getUserById",
      *     tags={"user_management"},
-     *     summary="Get user details by ID",
+     *     summary="Get user details by ID (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -77,6 +77,12 @@ class UserController extends Controller
 
     public function getUserById($id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $query = User::find($id);
         if (empty($query)) {
             return response()->json([
@@ -107,7 +113,7 @@ class UserController extends Controller
      *     path="/v1.0/users",
      *     operationId="updateUser",
      *     tags={"user_management"},
-     *     summary="Update user profile",
+     *     summary="Update user profile (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -188,6 +194,12 @@ class UserController extends Controller
     public function updateUser(UserUpdateRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Start a database transaction 
             DB::beginTransaction();
 
@@ -236,7 +248,7 @@ class UserController extends Controller
      *     path="/v1.0/users",
      *     operationId="getAllUsers",
      *     tags={"user_management"},
-     *     summary="Get all users",
+     *     summary="Get all users (role: Admin only)",
      *     description="Retrieve a list of all users in the system",
      *     security={{"bearerAuth":{}}},
      *
@@ -310,6 +322,12 @@ class UserController extends Controller
 
     public function getAllUsers()
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $query = User::query();
 
         $users = retrieve_data($query, 'created_at', 'users');
@@ -330,7 +348,7 @@ class UserController extends Controller
      *     path="/v1.0/users/{ids}",
      *     operationId="deleteUsers",
      *     tags={"user_management"},
-     *     summary="Delete users",
+     *     summary="Delete users (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -360,6 +378,12 @@ class UserController extends Controller
     public function deleteUsers($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             // Validate and convert comma-separated IDs to an array

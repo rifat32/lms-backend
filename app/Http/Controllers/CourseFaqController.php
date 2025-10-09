@@ -15,7 +15,7 @@ class CourseFaqController extends Controller
      * @OA\Put(
      *     path="/v1.0/course-faqs",
      *     tags={"course_management.course_faq"},
-     *     summary="Add or update FAQs for a course",
+     *     summary="Add or update FAQs for a course (role: Admin only)",
      *     operationId="updateCourseFaqs",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -66,6 +66,12 @@ class CourseFaqController extends Controller
      */
     public function updateCourseFaqs(Request $request)
     {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $validated = $request->validate([
             'course_id' => 'required|integer|exists:courses,id',
             'faqs' => 'required|array|min:1',
@@ -119,7 +125,7 @@ class CourseFaqController extends Controller
      * @OA\Get(
      *     path="/v1.0/course-faqs/{course_id}",
      *     tags={"course_management.course_faq"},
-     *     summary="Get all FAQs for a specific course",
+     *     summary="Get all FAQs for a specific course (role: Any Role)",
      *     operationId="getCourseFaqs",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -151,6 +157,12 @@ class CourseFaqController extends Controller
      */
     public function getCourseFaqs($course_id)
     {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $course = Course::find($course_id);
         if (!$course) {
             return response()->json([

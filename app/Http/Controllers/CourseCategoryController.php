@@ -15,7 +15,7 @@ class CourseCategoryController extends Controller
      *     path="/v1.0/course-categories",
      *     operationId="getCourseCategory",
      *     tags={"course_management.course_category"},
-     *     summary="Get all course categories",
+     *     summary="Get all course categories (role: Admin only)",
      *     description="Retrieve a paginated list of course categories.",
      *     security={{"bearerAuth":{}}},
      *
@@ -93,7 +93,12 @@ class CourseCategoryController extends Controller
 
     public function getCourseCategory(Request $request)
     {
-        // 
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $query = CourseCategory::
         with([
             'parent' => function ($q) {
@@ -120,7 +125,7 @@ class CourseCategoryController extends Controller
      *     path="/v1.0/course-categories/{id}",
      *     operationId="getCourseCategoryById",
      *     tags={"course_management.course_category"},
-     *     summary="Get a single course category by ID",
+     *     summary="Get a single course category by ID (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -174,6 +179,12 @@ class CourseCategoryController extends Controller
 
     public function getCourseCategoryById($id)
     {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $course = CourseCategory::findOrFail($id);
         return response()->json([
             'success' => true,
@@ -187,7 +198,7 @@ class CourseCategoryController extends Controller
      *     path="/v1.0/course-categories",
      *     operationId="createCourseCategory",
      *     tags={"course_management.course_category"},
-     *     summary="Create a new course category",
+     *     summary="Create a new course category (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -256,6 +267,12 @@ class CourseCategoryController extends Controller
 
     public function createCourseCategory(CourseCategoryRequest $request)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         DB::beginTransaction();
         try {
             // VALIDATE PAYLOAD
@@ -284,7 +301,7 @@ class CourseCategoryController extends Controller
      *     path="/v1.0/course-categories",
      *     operationId="updateCourseCategory",
      *     tags={"course_management.course_category"},
-     *     summary="Update a course category",
+     *     summary="Update a course category (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -352,6 +369,12 @@ class CourseCategoryController extends Controller
 
     public function updateCourseCategory(CourseCategoryRequest $request)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         DB::beginTransaction();
         try {
             // VALIDATE PAYLOAD
@@ -390,7 +413,7 @@ class CourseCategoryController extends Controller
      *     path="/v1.0/course-categories/{ids}",
      *     operationId="deleteCourseCategory",
      *     tags={"course_management.course_category"},
-     *     summary="Delete a course category",
+     *     summary="Delete a course category (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -429,6 +452,12 @@ class CourseCategoryController extends Controller
     public function deleteCourseCategory($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $idsOfArray = array_map('intval', explode(',', $ids));

@@ -20,7 +20,7 @@ class QuestionCategoryController extends Controller
      *     path="/v1.0/question-categories",
      *     operationId="createQuestionCategory",
      *     tags={"question_management.question_category"},
-     *     summary="Create a new question category",
+     *     summary="Create a new question category (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -54,6 +54,12 @@ class QuestionCategoryController extends Controller
     public function createQuestionCategory(QuestionCategoryRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $payload = $request->validated();
@@ -79,7 +85,7 @@ class QuestionCategoryController extends Controller
      *     path="/v1.0/question-categories",
      *     tags={"question_management.question_category"},
      *     operationId="updateQuestionCategory",
-     *     summary="Update an existing question category",
+     *     summary="Update an existing question category (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -130,6 +136,12 @@ class QuestionCategoryController extends Controller
     public function updateQuestionCategory(QuestionCategoryRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $payload = $request->validated();
@@ -164,7 +176,7 @@ class QuestionCategoryController extends Controller
      *     path="/v1.0/question-categories",
      *     operationId="getQuestionCategories",
      *     tags={"question_management.question_category"},
-     *     summary="Get all question categories",
+     *     summary="Get all question categories (role: Admin only)",
      *     description="Fetches all question categories in the system.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -191,6 +203,11 @@ class QuestionCategoryController extends Controller
 
     public function getQuestionCategories(Request $request)
     {
+if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $query = QuestionCategory::query();
 
@@ -210,7 +227,7 @@ class QuestionCategoryController extends Controller
      *     path="/v1.0/question-categories/{id}",
      *     operationId="getQuestionCategoryById",
      *     tags={"question_management.question_category"},
-     *     summary="Get a single question category by ID",
+     *     summary="Get a single question category by ID (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -266,6 +283,12 @@ class QuestionCategoryController extends Controller
 
     public function getQuestionCategoryById($id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // GET QUESTION
         $question = QuestionCategory::findOrFail($id);
 
@@ -284,7 +307,7 @@ class QuestionCategoryController extends Controller
      *     path="/v1.0/question-categories/{id}",
      *     operationId="deleteQuestionCategory",
      *     tags={"question_management.question_category"},
-     *     summary="Delete a question category",
+     *     summary="Delete a question category (role: Admin only)",
      *     description="Deletes a question category by its ID.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -318,6 +341,12 @@ class QuestionCategoryController extends Controller
     public function deleteQuestionCategory($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $idsArray = array_map('intval', explode(',', $ids));

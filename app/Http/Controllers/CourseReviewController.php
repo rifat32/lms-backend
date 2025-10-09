@@ -22,7 +22,7 @@ class CourseReviewController extends Controller
      *     path="/v1.0/courses/{id}/reviews",
      *     operationId="getCourseReviews",
      *     tags={"CourseReviews"},
-     *     summary="Get all approved reviews for a course",
+     *     summary="Get all approved reviews for a course (role: Any Role)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -123,7 +123,7 @@ class CourseReviewController extends Controller
      *     path="/v1.0/courses/{id}/reviews",
      *     operationId="submitCourseReview",
      *     tags={"CourseReviews"},
-     *     summary="Submit a review for a course",
+     *     summary="Submit a review for a course (role: Any Role)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",

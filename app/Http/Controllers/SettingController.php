@@ -18,7 +18,7 @@ class SettingController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to update busuness setting",
+     *      summary="This method is to update busuness setting (role: Admin only)",
      *      description="This method is to update busuness setting",
      *
      *  @OA\RequestBody(
@@ -72,7 +72,12 @@ class SettingController extends Controller
     {
 
         try {
-   
+   if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             
             $request_data = $request->validated();
             $request_data["business_id"] = auth()->user()->business_id;
@@ -151,7 +156,7 @@ class SettingController extends Controller
      *       security={
      *           {"bearerAuth": {}}
      *       },
-     *      summary="This method is to get busuness _setting",
+     *      summary="This method is to get busuness setting (role: Admin only)",
      *      description="This method is to get busuness setting",
      *
      *      @OA\Response(
@@ -191,7 +196,12 @@ class SettingController extends Controller
     public function getBusinessSettings(Request $request)
     {
         try {
-           
+           if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
 
             $busunessSetting = BusinessSetting::first();
 
@@ -267,7 +277,7 @@ class SettingController extends Controller
      * example="ASC"
      * ),
 
-     *      summary="This method is to get Business_setting",
+     *      summary="This method is to get Business setting (role: Admin only)",
      *      description="This method is to get Business_setting",
      *
 
@@ -308,7 +318,12 @@ class SettingController extends Controller
     public function getBusinessSettingsClient(Request $request)
     {
         try {
-           
+           if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
 
             $busunessSetting = BusinessSetting::first();
 

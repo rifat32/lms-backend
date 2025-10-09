@@ -23,7 +23,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/v1.0/auth/register",
      *     tags={"Auth"},
-     *     summary="Register a new user",
+     *     summary="Register a new user (role: Any Role)",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -122,7 +122,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/v1.0/auth/login",
      *     tags={"Auth"},
-     *     summary="Login user",
+     *     summary="Login user (role: Any Role)",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(

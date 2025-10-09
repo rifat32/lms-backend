@@ -19,7 +19,7 @@ class BusinessController extends Controller
      *     path="/v1.0/register-user-with-business",
      *     operationId="registerUserWithBusiness",
      *     tags={"Auth","business_management"},
-     *     summary="Register a user and create a business",
+     *     summary="Register a user and create a business (role: Super Admin Only)",
      *     description="Create a new user and their business. Typically used by admin or self-registration depending on implementation.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -106,6 +106,13 @@ class BusinessController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+            }
+
             // if (!$request->user()->hasPermissionTo('business_create')) {
             //     return response()->json([
             //         "message" => "You can not perform this action"
@@ -158,7 +165,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses",
      *     operationId="createBusiness",
      *     tags={"business_management"},
-     *     summary="Create a new business (Admin or Owner only)",
+     *     summary="Create a new business (role: Super Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -243,6 +250,12 @@ class BusinessController extends Controller
         try {
             DB::beginTransaction();
 
+            if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+            }
+
             $business = Business::create($request->validated());
 
             DB::commit();
@@ -262,7 +275,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses",
      *     operationId="updateBusiness",
      *     tags={"business_management"},
-     *     summary="Update an existing business (Admin or Owner only)",
+     *     summary="Update an existing business (role: Super Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -348,6 +361,12 @@ class BusinessController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+            }
             // VALIDATE PAYLOAD
             $request_payload = $request->validated();
 
@@ -376,7 +395,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses/{id}",
      *     operationId="getBusinessById",
      *     tags={"business_management"},
-     *     summary="Get a single business by ID",
+     *     summary="Get a single business by ID (role: Super Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -452,6 +471,12 @@ class BusinessController extends Controller
 
     public function getBusinessById($id)
     {
+        if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+        }
+
         $business = Business::findOrFail($id);
 
         return response()->json([
@@ -466,7 +491,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses",
      *     operationId="getAllBusinesses",
      *     tags={"business_management"},
-     *     summary="Get list of all businesses",
+     *     summary="Get list of all businesses (role: Super Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -526,6 +551,12 @@ class BusinessController extends Controller
     public function getAllBusinesses(Request $request)
     {
       
+        if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+            }
+
          $query = Business::query();
 
         $businesses = retrieve_data($query, 'created_at', 'businesses');
@@ -544,7 +575,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses/{ids}",
      *     operationId="deleteBusiness",
      *     tags={"business_management"},
-     *     summary="Delete Businesses",
+     *     summary="Delete Businesses (role: Super Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -574,6 +605,14 @@ class BusinessController extends Controller
     public function deleteBusiness($ids)
     {
         try {
+            
+            if(!auth()->user()->hasRole('super_admin')) {
+              return response()->json([
+                "message" => "You can not perform this action"
+              ], 401);
+            }
+
+
             DB::beginTransaction();
 
             // Validate and convert comma-separated IDs to an array

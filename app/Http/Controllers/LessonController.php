@@ -26,7 +26,7 @@ class LessonController extends Controller
      *     path="/v1.0/lessons",
      *     tags={"Lessons"},
      *     operationId="getLessons",
-     *     summary="Get all lessons",
+     *     summary="Get all lessons (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
@@ -107,6 +107,11 @@ class LessonController extends Controller
 
     public function getLessons(Request $request)
     {
+if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $query = Lesson::filters();
 
@@ -126,7 +131,7 @@ class LessonController extends Controller
      * @OA\Post(
      *     path="/v1.0/lessons",
      *     tags={"Lessons"},
-     *     summary="Create a new lesson for a course (Admin only)",
+     *     summary="Create a new lesson for a course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -203,6 +208,11 @@ class LessonController extends Controller
 
 
         try {
+if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
             DB::beginTransaction();
 
@@ -311,7 +321,7 @@ if ($request->has('materials')) {
      * @OA\Put(
      *     path="/v1.0/lessons",
      *     tags={"Lessons"},
-     *     summary="Update an existing lesson (Admin only)",
+     *     summary="Update an existing lesson (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -390,6 +400,12 @@ if ($request->has('materials')) {
     public function updateLesson(LessonRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $request_payload = $request->validated();
@@ -469,7 +485,7 @@ if ($request->has('materials')) {
      * @OA\Delete(
      *     path="/v1.0/lessons/{ids}",
      *     tags={"Lessons"},
-     *     summary="Delete a lesson",
+     *     summary="Delete a lesson (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -499,6 +515,12 @@ if ($request->has('materials')) {
     public function deleteLesson($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             // Convert comma-separated IDs to array

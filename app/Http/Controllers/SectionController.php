@@ -19,7 +19,7 @@ class SectionController extends Controller
      *     path="/v1.0/sections/{ids}",
      *     operationId="deleteSection",
      *     tags={"section"},
-     *     summary="Delete a section and its lessons",
+     *     summary="Delete a section and its lessons (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -49,6 +49,12 @@ class SectionController extends Controller
     public function deleteSection($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $idsArray = array_map('intval', explode(',', $ids));
@@ -91,7 +97,7 @@ class SectionController extends Controller
      *     path="/v1.0/sections",
      *     operationId="createSection",
      *     tags={"section"},
-     *     summary="Create a new section for a course (Admin only)",
+     *     summary="Create a new section for a course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -171,6 +177,12 @@ class SectionController extends Controller
     public function createSection(SectionRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -200,7 +212,7 @@ class SectionController extends Controller
      *     path="/v1.0/sections",
      *     operationId="updateSection",
      *     tags={"section"},
-     *     summary="Create a new section for a course (Admin only)",
+     *     summary="Create a new section for a course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -282,6 +294,12 @@ class SectionController extends Controller
     public function updateSection(SectionRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -314,7 +332,7 @@ class SectionController extends Controller
      *     path="/v1.0/sections-with-lessons",
      *     operationId="updateSectionWithLessons",
      *     tags={"section"},
-     *     summary="Update a section with lessons and quizzes (Admin only)",
+     *     summary="Update a section with lessons and quizzes (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -435,6 +453,12 @@ class SectionController extends Controller
     public function updateSectionWithLessons(SectionWithLessonRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $request_payload = $request->validated();
@@ -484,7 +508,7 @@ class SectionController extends Controller
      *     path="/v1.0/sections-add-lessons",
      *     operationId="updateSectionAddLessons",
      *     tags={"section"},
-     *     summary="Update a section with lessons and quizzes (Admin only)",
+     *     summary="Update a section with lessons and quizzes (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -605,6 +629,12 @@ class SectionController extends Controller
     public function updateSectionAddLessons(SectionWithLessonRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $request_payload = $request->validated();
@@ -652,7 +682,7 @@ class SectionController extends Controller
  *     path="/v1.0/sections-remove-lessons",
  *     operationId="updateSectionRemoveLessons",
  *     tags={"section"},
- *     summary="Remove lessons or quizzes from a section (Admin only)",
+ *     summary="Remove lessons or quizzes from a section (role: Admin only)",
  *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,
@@ -717,6 +747,12 @@ class SectionController extends Controller
 public function updateSectionRemoveLessons(Request $request)
 {
     try {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         DB::beginTransaction();
 
         // ✅ Validation
@@ -775,7 +811,7 @@ public function updateSectionRemoveLessons(Request $request)
      *     operationId="getSections",
      *     tags={"section"},
      *     summary="Fetch all sections",
-     *     description="Retrieve a list of all sections",
+     *     description="Retrieve a list of all sections (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -815,6 +851,12 @@ public function updateSectionRemoveLessons(Request $request)
     public function getSections(Request $request)
     {
 
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $query = Section::with([
             'sectionables.sectionable',
             'course' => function ($q) {
@@ -839,7 +881,7 @@ public function updateSectionRemoveLessons(Request $request)
      *     operationId="getSectionById",
      *     tags={"section"},
      *     summary="Fetch a single section by ID",
-     *     description="Retrieve details of a specific section using its ID",
+     *     description="Retrieve details of a specific section using its ID (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -889,6 +931,12 @@ public function updateSectionRemoveLessons(Request $request)
      */
     public function getSectionById($id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $section = Section::with(['sectionables.sectionable'])->findOrFail($id);
 
         return response()->json([

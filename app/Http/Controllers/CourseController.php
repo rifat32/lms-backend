@@ -27,14 +27,12 @@ class CourseController extends Controller
 
 
 
-
-
     /**
      * @OA\Get(
      *     path="/v1.0/client/courses",
      *     tags={"course_management.course"},
      *     operationId="getCoursesClient",
-     *     summary="Get all courses",
+     *     summary="Get all courses (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
@@ -129,6 +127,11 @@ class CourseController extends Controller
 
     public function getCoursesClient(Request $request)
     {
+if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $query = Course::with([
             'categories',
@@ -171,7 +174,7 @@ class CourseController extends Controller
      *     path="/v1.0/client/courses/{id}",
      *     tags={"course_management.course"},
      *     operationId="getCourseByIdClient",
-     *     summary="Get a single course by ID",
+     *     summary="Get a single course by ID (role: Student only)",
      *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -241,6 +244,11 @@ class CourseController extends Controller
     public function getCourseByIdClient($id)
     {
 
+if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $course = Course::with([
             'categories',
@@ -284,7 +292,7 @@ class CourseController extends Controller
      *     path="/v1.0/client/courses/secure/{id}",
      *     tags={"course_management.course"},
      *     operationId="getCourseByIdSecureClient",
-     *     summary="Get a single course by ID",
+     *     summary="Get a single course by ID (role: Student only)",
      *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -353,6 +361,12 @@ class CourseController extends Controller
 
     public function getCourseByIdSecureClient($id)
     {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // FIND BY ID
         $course = Course::with(
             [
@@ -408,7 +422,7 @@ class CourseController extends Controller
      *     path="/v1.0/client/courses/secure",
      *     tags={"course_management.course"},
      *     operationId="getCoursesClientSecure",
-     *     summary="Get all courses",
+     *     summary="Get all courses (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
@@ -503,7 +517,12 @@ class CourseController extends Controller
 
     public function getCoursesClientSecure(Request $request)
     {
-        $user_id = auth()->id();
+     if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
 
         $query = Course::with([
             'categories' => function ($q) {
@@ -531,7 +550,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses",
      *     tags={"course_management.course"},
      *     operationId="getCourses",
-     *     summary="Get all courses",
+     *     summary="Get all courses (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
@@ -626,6 +645,11 @@ class CourseController extends Controller
 
     public function getCourses(Request $request)
     {
+if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $query = Course::with(['categories' => function ($q) {
             $q->select('course_categories.id', 'course_categories.name');
@@ -652,7 +676,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses/{id}",
      *     tags={"course_management.course"},
      *     operationId="getCourseById",
-     *     summary="Get a single course by ID",
+     *     summary="Get a single course by ID (role: Admin only)",
      *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -721,6 +745,12 @@ class CourseController extends Controller
 
     public function getCourseById($id)
     {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $course = Course::with([
             'categories',
             'sections' => function ($q) {
@@ -766,7 +796,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses",
      *     tags={"course_management.course"},
      *     operationId="createCourse",
-     *     summary="Create a new course (Admin only)",
+     *     summary="Create a new course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -874,6 +904,12 @@ class CourseController extends Controller
     public function createCourse(CourseRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
             // VALIDATE PAYLOAD
             $request_payload = $request->validated();
@@ -923,7 +959,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses",
      *     tags={"course_management.course"},
      *     operationId="updateCourse",
-     *     summary="Update a course (Admin only)",
+     *     summary="Update a course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -1047,6 +1083,12 @@ class CourseController extends Controller
     {
 
         try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
             // VALIDATE PAYLOAD
             $request_payload = $request->validated();
@@ -1108,7 +1150,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses",
      *     tags={"course_management.course"},
      *     operationId="updatePartialCourse",
-     *     summary="Update a course (Admin only)",
+     *     summary="Update a course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -1232,6 +1274,12 @@ class CourseController extends Controller
     {
 
         try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
             // VALIDATE PAYLOAD
             $request_payload = $request->validated();
@@ -1296,7 +1344,7 @@ class CourseController extends Controller
      *     path="/v1.0/courses/{ids}",
      *     operationId="deleteCourse",
      *     tags={"course_management.course"},
-     *     summary="Delete course",
+     *     summary="Delete course (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="ids",
@@ -1335,6 +1383,12 @@ class CourseController extends Controller
     public function deleteCourse($ids)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             $idsOfArray = array_map('intval', explode(',', $ids));

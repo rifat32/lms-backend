@@ -22,7 +22,7 @@ class QuizController extends Controller
      *     path="/v1.0/quizzes/{id}",
      *     operationId="getQuizWithQuestionsById",
      *     tags={"Quizzes"},
-     *     summary="Get quiz details with questions and options",
+     *     summary="Get quiz details with questions and options (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -117,6 +117,12 @@ class QuizController extends Controller
 
     public function getQuizWithQuestionsById($id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $quiz = Quiz::with(['questions.options'])->find($id);
 
         if (empty($quiz)) {
@@ -170,7 +176,7 @@ class QuizController extends Controller
      *     path="/v1.0/quizzes",
      *     operationId="getQuizWithQuestions",
      *     tags={"Quizzes"},
-     *     summary="Get quiz details with questions and options",
+     *     summary="Get quiz details with questions and options (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="is_randomized",
@@ -258,6 +264,11 @@ class QuizController extends Controller
 
     public function getQuizWithQuestions(Request $request)
     {
+if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
 
         $query = Quiz::with(['questions.options']);
@@ -279,7 +290,7 @@ class QuizController extends Controller
      *     path="/v1.0/quizzes",
      *     operationId="createQuiz",
      *     tags={"Quizzes"},
-     *     summary="Create a new quiz and attach questions",
+     *     summary="Create a new quiz and attach questions (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -311,6 +322,12 @@ class QuizController extends Controller
      */
     public function store(QuizRequest $request)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $request_payload = $request->validated();
         $quiz = Quiz::create($request_payload);
 
@@ -340,7 +357,7 @@ class QuizController extends Controller
      *     path="/v1.0/quizzes",
      *     operationId="updateQuiz",
      *     tags={"Quizzes"},
-     *     summary="Update a quiz and sync questions",
+     *     summary="Update a quiz and sync questions (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -361,6 +378,12 @@ class QuizController extends Controller
      */
     public function update(QuizRequest $request)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $request_payload = $request->validated();
         $quiz = Quiz::findOrFail($request_payload['id']);
 
@@ -394,7 +417,7 @@ class QuizController extends Controller
      *     path="/v1.0/quizzes/{id}",
      *     operationId="deleteQuiz",
      *     tags={"Quizzes"},
-     *     summary="Delete a quiz",
+     *     summary="Delete a quiz (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=1)),
      *     @OA\Response(response=200, description="Quiz deleted successfully")
@@ -402,6 +425,12 @@ class QuizController extends Controller
      */
     public function destroy($id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $quiz = Quiz::findOrFail($id);
 
         $quiz->delete();

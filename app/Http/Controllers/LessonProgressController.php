@@ -27,7 +27,7 @@ class LessonProgressController extends Controller
      *     path="/v1.0/lessons/{id}/progress",
      *     operationId="updateLessonProgress",
      *     tags={"LessonProgress"},
-     *     summary="Update lesson progress for authenticated user",
+     *     summary="Update lesson progress for authenticated user (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -112,6 +112,12 @@ class LessonProgressController extends Controller
     public function updateLessonProgress(Request $request, $id)
     {
         try {
+            if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -162,7 +168,7 @@ class LessonProgressController extends Controller
      *     path="/v1.0/lessons/{id}/time",
      *     operationId="trackLessonTime",
      *     tags={"LessonProgress"},
-     *     summary="Track lesson time (start / stop / heartbeat) for authenticated user",
+     *     summary="Track lesson time (start / stop / heartbeat) for authenticated user (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -308,6 +314,12 @@ class LessonProgressController extends Controller
 {
     DB::beginTransaction();
     try {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $user = Auth::user();
         $lesson = Lesson::findOrFail($id);
 

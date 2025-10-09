@@ -27,7 +27,7 @@ class StripePaymentController extends Controller
      *     path="/v1.0/payments/intent",
      *     operationId="createPaymentIntent",
      *     tags={"Payments"},
-     *     summary="Create a Stripe Payment Intent for a course",
+     *     summary="Create a Stripe Payment Intent for a course (role: Student only)",
      *     description="Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -95,6 +95,12 @@ class StripePaymentController extends Controller
      */
     public function createPaymentIntent(Request $request)
     {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // Retrieve multiple courses
         $course_ids = $request->course_ids; // array of IDs
         if (empty($course_ids) || !is_array($course_ids)) {

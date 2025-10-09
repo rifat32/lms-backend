@@ -29,7 +29,7 @@ class CertificateController extends Controller
      *     path="/v1.0/certificate-template",
      *     operationId="getCertificateTemplate",
      *     tags={"Certificates"},
-     *     summary="Get the currently active certificate template",
+     *     summary="Get the currently active certificate template (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
      *         response=200,
@@ -56,6 +56,12 @@ class CertificateController extends Controller
      */
     public function getCertificateTemplate()
     {
+       if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $template = CertificateTemplate::where('is_active', true)->first();
 
         if (!$template) {
@@ -77,7 +83,7 @@ class CertificateController extends Controller
      *     path="/v1.0/certificate-template/{id}",
      *     operationId="updateCertificateTemplate",
      *     tags={"Certificates"},
-     *     summary="Update an existing certificate template",
+     *     summary="Update an existing certificate template (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -128,6 +134,12 @@ class CertificateController extends Controller
      */
     public function updateCertificateTemplate(Request $request, $id)
     {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $request->validate([
             'name' => 'required|string|max:255',
             'html_content' => 'required|string',
@@ -162,7 +174,7 @@ class CertificateController extends Controller
  *     path="/v1.0/certificates/generate-dynamic",
  *     operationId="generateDynamicCertificate",
  *     tags={"Certificates"},
- *     summary="Generate a professional dynamic certificate PDF (no saving)",
+ *     summary="Generate a professional dynamic certificate PDF (no saving) (role: Any Role)",
  *     security={{"bearerAuth":{}}},
  *     @OA\RequestBody(
  *         required=true,

@@ -16,7 +16,7 @@ class QuestionController extends Controller
      *     path="/v1.0/questions",
      *     operationId="createQuestion",
      *     tags={"question_management.question"},
-     *     summary="Create or update a question",
+     *     summary="Create or update a question (role: Admin only)",
      *     description="Creates a new question or updates existing options for a specific quiz.",
      *     security={{"bearerAuth":{}}},
      *
@@ -121,6 +121,12 @@ class QuestionController extends Controller
     public function createQuestion(QuestionRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -200,7 +206,7 @@ class QuestionController extends Controller
      *     path="/v1.0/questions",
      *     operationId="updateQuestion",
      *     tags={"question_management.question"},
-     *     summary="Update an existing question with options",
+     *     summary="Update an existing question with options (role: Admin only)",
      *     description="Updates a question and its options by question ID.",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
@@ -253,6 +259,12 @@ class QuestionController extends Controller
     public function updateQuestion(QuestionRequest $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             DB::beginTransaction();
 
             // VALIDATE PAYLOAD
@@ -331,7 +343,7 @@ class QuestionController extends Controller
      *     path="/v1.0/questions",
      *     operationId="getAllQuestions",
      *     tags={"question_management.question"},
-     *     summary="Get all questions",
+     *     summary="Get all questions (role: Admin only)",
      *     description="Retrieve a list of all questions.",
      *     security={{"bearerAuth":{}}},
      * 
@@ -420,6 +432,12 @@ class QuestionController extends Controller
 
     public function getAllQuestions(Request $request)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // GET ALL QUESTIONS
         $query = Question::with(['options', "categories"])->filters();
 
@@ -439,7 +457,7 @@ class QuestionController extends Controller
      *     path="/v1.0/questions/{id}",
      *     operationId="getQuestionById",
      *     tags={"question_management.question"},
-     *     summary="Get question by ID",
+     *     summary="Get question by ID (role: Admin only)",
      *     description="Retrieve a specific question by its unique ID.",
      *     security={{"bearerAuth":{}}},
      *
@@ -517,6 +535,12 @@ class QuestionController extends Controller
 
     public function getQuestionById(Request $request, $id)
     {
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         // GET QUESTION BY ID
         $question = Question::with('options', "categories")->findOrFail($id);
 
@@ -533,7 +557,7 @@ class QuestionController extends Controller
      *     path="/v1.0/questions/{ids}",
      *     operationId="deleteQuestions",
      *     tags={"question_management.question"},
-     *     summary="Delete one or more questions by ID",
+     *     summary="Delete one or more questions by ID (role: Admin only)",
      *     description="Deletes one or multiple questions specified by a comma-separated list of IDs.",
      *     security={{"bearerAuth":{}}},
      *
@@ -613,6 +637,12 @@ class QuestionController extends Controller
 
     public function deleteQuestion(Request $request, $ids)
     {
+
+        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
 
         $idsArray = array_map('intval', explode(',', $ids));
 

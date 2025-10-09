@@ -24,7 +24,7 @@ class EnrollmentController extends Controller
      *     path="/v1.0/enrollments",
      *     operationId="createEnrollment",
      *     tags={"Enrollments"},
-     *     summary="Enroll authenticated user in a course",
+     *     summary="Enroll authenticated user in a course (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -103,6 +103,12 @@ class EnrollmentController extends Controller
     public function createEnrollment(Request $request)
     {
         try {
+            if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // BEGIN TRANSACTION
             DB::beginTransaction(); // Uncomment if you want to use transactions
             // VALIDATE PAYLOAD
@@ -160,7 +166,7 @@ class EnrollmentController extends Controller
      * @OA\Get(
      *     path="/v1.0/users/{id}/enrollments",
      *     tags={"Enrollments"},
-     *     summary="Get all enrollments of a specific user",
+     *     summary="Get all enrollments of a specific user (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -221,6 +227,12 @@ class EnrollmentController extends Controller
 
     public function userEnrollments($id)
     {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $user = User::find($id);
 
         if (!$user) {

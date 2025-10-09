@@ -23,7 +23,7 @@ class TrashController extends Controller
      *     path="/v1.0/courses/{id}/complete",
      *     operationId="generateCertificate",
      *     tags={"Trash"},
-     *     summary="Generate a certificate for a completed course",
+     *     summary="Generate a certificate for a completed course ",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",

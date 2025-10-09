@@ -27,7 +27,7 @@ class QuizAttemptController extends Controller
      *     path="/v1.0/quiz-attempts/{id}/grade",
      *     operationId="gradeQuizAttempt",
      *     tags={"QuizAttempts"},
-     *     summary="Manually grade a quiz attempt (Admin only)",
+     *     summary="Manually grade a quiz attempt (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -114,6 +114,12 @@ class QuizAttemptController extends Controller
     public function gradeQuizAttempt(Request $request, $id)
     {
         try {
+            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
             // Begin transaction
             DB::beginTransaction();
 
@@ -133,7 +139,7 @@ class QuizAttemptController extends Controller
             }
 
             // Add manual score to existing score
-            $quiz_attempt->score += $request->score;
+            $quiz_attempt->score = $request->score;
             $quiz_attempt->save();
 
             // Commit the transaction
@@ -162,13 +168,19 @@ class QuizAttemptController extends Controller
      *     path="/v1.0/quizzes/{id}/attempts/start",
      *     operationId="startQuizAttempt",
      *     tags={"QuizAttempts"},
-     *     summary="Start a quiz attempt for authenticated user",
+     *     summary="Start a quiz attempt for authenticated user (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(response=201, description="Quiz attempt started")
      * )
      */
     public function startQuizAttempt($id)
     {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $user = Auth::user();
         $quiz = Quiz::findOrFail($id);
 
@@ -209,13 +221,19 @@ class QuizAttemptController extends Controller
      *     path="/v1.0/quizzes/{id}/attempts/submit",
      *     operationId="submitQuizAttempt",
      *     tags={"QuizAttempts"},
-     *     summary="Submit a quiz attempt for authenticated user",
+     *     summary="Submit a quiz attempt for authenticated user (role: Student only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(response=201, description="Quiz attempt submitted")
      * )
      */
     public function submitQuizAttempt(Request $request, $id)
     {
+        if (!auth()->user()->hasAnyRole(['student'])) {
+    return response()->json([
+        "message" => "You can not perform this action"
+    ], 401);
+}
+
         $request->validate([
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:questions,id',
