@@ -206,6 +206,80 @@ class QuestionCategoryController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/v1.0/question-categories/{id}",
+     *     operationId="getQuestionCategoryById",
+     *     tags={"question_management.question_category"},
+     *     summary="Get a single question category by ID",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course Question ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Question Category retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="title", type="string", example="Web Development"),
+     *             @OA\Property(property="slug", type="string", example="web-development"),
+     *             @OA\Property(property="parent_question_category_id", type="integer", example=1),
+     *             @OA\Property(property="description", type="string", example="description"),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-18T12:00:00Z"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-18T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden: Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to view this course category")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course Category not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Course Category not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict: Resource conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Conflict occurred while retrieving this resource")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function getQuestionCategoryById($id)
+    {
+        // GET QUESTION
+        $question = QuestionCategory::findOrFail($id);
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Question category retrieved successfully',
+            'data' => $question
+        ]);
+    }
+
+
+
+    /**
      * @OA\Delete(
      *     path="/v1.0/question-categories/{id}",
      *     operationId="deleteQuestionCategory",
