@@ -288,15 +288,15 @@ class QuestionCategoryController extends Controller
      *     description="Deletes a question category by its ID.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="ids",
      *         in="path",
      *         required=true,
-     *         description="ID of the question category to delete",
-     *         @OA\Schema(type="integer", example=1)
+     *         description="ID of the question category to delete (comma-separated like 1,2,3)",
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Category deleted successfully",
+     *         description="Question Category deleted successfully",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
@@ -315,21 +315,32 @@ class QuestionCategoryController extends Controller
      * )
      */
 
-    public function deleteQuestionCategory($id)
+    public function deleteQuestionCategory($ids)
     {
         try {
             DB::beginTransaction();
 
-            $category = QuestionCategory::find($id);
-            if (!$category) {
-                return response()->json(['success' => false, 'message' => 'Question category not found'], 404);
+            $idsArray = array_map('intval', explode(',', $ids));
+
+            $existingIds = QuestionCategory::whereIn('id', $idsArray)->pluck('id')->toArray();
+            if (count($existingIds) !== count($idsArray)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Question category not found',
+                    'data' => 'Some or all of the provided IDs do not exist'
+                ], 404);
             }
 
-            $category->delete();
+            QuestionCategory::destroy($idsArray);
 
             DB::commit();
 
-            return response()->json(['success' => true, 'message' => 'Question category deleted successfully'], 200);
+            // SEND RESPONSE
+            return response()->json([
+                'success' => true,
+                'message' => 'Question category deleted successfully',
+                'data' => $existingIds
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
