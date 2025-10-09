@@ -397,88 +397,96 @@ if ($request->has('materials')) {
      */
 
 
-    public function updateLesson(LessonRequest $request)
-    {
-        try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
-
-            DB::beginTransaction();
-
-            $request_payload = $request->validated();
-
-            $lesson = Lesson::find($request_payload['id']);
-
-            if (empty($lesson)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Lesson not found',
-                ], 404);
-            }
-
-
-            if ($request->hasFile('files')) {
-                // Get existing files
-                $raw_files = $lesson->getRawOriginal('files');
-                $existing_files = $raw_files ? json_decode($raw_files, true) : [];
-
-                $uploaded_files = $existing_files; // start with existing
-
-                // Upload new files
-                foreach ($request->file('files') as $file) {
-                    $path = $file->store('lessons/files', 'public');
-                    $uploaded_files[] = $path; // append
-                }
-
-                $request_payload['files'] = json_encode($uploaded_files);
-            }
-
-            if ($request->hasFile('materials')) {
-                // Get existing files
-                $raw_files = $lesson->getRawOriginal('files');
-                $existing_files = $raw_files ? json_decode($raw_files, true) : [];
-
-                $uploaded_files = $existing_files; // start with existing
-
-                // Upload new files
-                foreach ($request->file('materials') as $file) {
-                    $path = $file->store('lessons/files', 'public');
-                    $uploaded_files[] = $path; // append
-                }
-
-                $request_payload['materials'] = json_encode($uploaded_files);
-            }
-
-
-            $lesson->update($request_payload);
-
-
-            // Sectionable::where('sectionable_id', $lesson->id)
-            //     ->where('sectionable_type', Lesson::class)
-            //     ->delete();
-            // foreach ($request_payload['section_ids'] as $section_id) {
-            //     Sectionable::create([
-            //         'section_id' => $section_id,
-            //         'sectionable_id' => $lesson->id,
-            //         'sectionable_type' => Lesson::class,
-            //     ]);
-            // }
-
-            DB::commit();
-
+public function updateLesson(LessonRequest $request)
+{
+    try {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                'success' => true,
-                'message' => 'Lesson updated successfully',
-                'data' => $lesson
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+                "message" => "You can not perform this action"
+            ], 401);
         }
+
+        DB::beginTransaction();
+
+        $request_payload = $request->validated();
+        $lesson = Lesson::find($request_payload['id']);
+
+        if (empty($lesson)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lesson not found',
+            ], 404);
+        }
+
+        // ========================
+        // HANDLE FILES
+        // ========================
+        $new_files = [];
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $new_files[] = $file->hashName(); // store only the filename
+                $file->storeAs("lessons/files", $file->hashName(), 'public');
+            }
+        }
+
+        if ($request->filled('files') && is_array($request->input('files'))) {
+            foreach ($request->input('files') as $f) {
+                if (is_string($f) && $f !== '') {
+                    // take last part after /
+                    $new_files[] = basename($f);
+                }
+            }
+        }
+
+        $request_payload['files'] = $new_files;
+
+        // ========================
+        // HANDLE MATERIALS
+        // ========================
+        $new_materials = [];
+
+        if ($request->hasFile('materials')) {
+            foreach ($request->file('materials') as $file) {
+                $new_materials[] = $file->hashName(); // store only the filename
+                $file->storeAs("lessons/materials", $file->hashName(), 'public');
+            }
+        }
+
+        if ($request->filled('materials') && is_array($request->input('materials'))) {
+            foreach ($request->input('materials') as $m) {
+                if (is_string($m) && $m !== '') {
+                    $new_materials[] = basename($m); // store only filename
+                }
+            }
+        }
+
+        $request_payload['materials'] = $new_materials;
+
+        // ========================
+        // UPDATE LESSON
+        // ========================
+        $lesson->update($request_payload);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson updated successfully',
+            'data' => $lesson
+        ], 200);
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Internal server error',
+            'data' => [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString()
+            ]
+        ], 500);
     }
+}
 
 
     /**

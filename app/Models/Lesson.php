@@ -47,33 +47,27 @@ class Lesson extends Model
     ];
 
 
-    public function getFilesAttribute($value)
-    {
-        // Decode only if it’s a string
-        $files = is_string($value) ? json_decode($value, true) : ($value ?? []);
+   // In Lesson.php (Model)
+public function getFilesAttribute($value)
+{
+    $files = is_string($value) ? json_decode($value, true) : ($value ?? []);
+    $files = is_array($files) ? array_filter($files) : [];
+    return array_map(function ($filename) {
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage/{$folder_path}/{$filename}");
+    }, $files);
+}
 
-        // Ensure it's always an array
-        $files = array_filter($files ?? []);
+public function getMaterialsAttribute($value)
+{
+    $materials = is_string($value) ? json_decode($value, true) : ($value ?? []);
+    $materials = is_array($materials) ? array_filter($materials) : [];
+    return array_map(function ($filename) {
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage/{$folder_path}/{$filename}");
+    }, $materials);
+}
 
-        return array_map(function ($filename) {
-            $folder_path = "business_1/lesson_{$this->id}";
-            return asset("storage/{$folder_path}/{$filename}");
-        }, $files);
-    }
-
-    public function getMaterialsAttribute($value)
-    {
-        // Decode only if it’s a string
-        $materials = is_string($value) ? json_decode($value, true) : ($value ?? []);
-
-        // Ensure it's always an array
-        $materials = array_filter($files ?? []);
-
-        return array_map(function ($filename) {
-            $folder_path = "business_1/lesson_{$this->id}";
-            return asset("storage/{$folder_path}/{$filename}");
-        }, $materials);
-    }
 
 
     public function course()
