@@ -1419,52 +1419,16 @@
                 ]
             }
         },
-        "/v1.0/courses/{id}/complete": {
-            "post": {
+        "/v1.0/certificate-template": {
+            "get": {
                 "tags": [
                     "Certificates"
                 ],
-                "summary": "Generate a certificate for a completed course",
-                "operationId": "generateCertificate",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Course ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 101
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "user_id",
-                                    "course_id"
-                                ],
-                                "properties": {
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "course_id": {
-                                        "type": "integer",
-                                        "example": 101
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Get the currently active certificate template",
+                "operationId": "getCertificateTemplate",
                 "responses": {
-                    "201": {
-                        "description": "Certificate generated successfully",
+                    "200": {
+                        "description": "Active certificate template retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1473,15 +1437,23 @@
                                             "type": "boolean",
                                             "example": true
                                         },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Certificate generated."
-                                        },
                                         "data": {
                                             "properties": {
-                                                "certificate_id": {
+                                                "id": {
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Default Certificate Template"
+                                                },
+                                                "html_content": {
+                                                    "type": "string",
+                                                    "example": "<div>...</div>"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
                                                 }
                                             },
                                             "type": "object"
@@ -1492,68 +1464,8 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Course not completed yet",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Course not completed yet."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to access this resource"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
                     "404": {
-                        "description": "User, course, or enrollment not found",
+                        "description": "No active certificate template found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1564,7 +1476,100 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User not found"
+                                            "example": "No active certificate template found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/certificate-template/{id}": {
+            "put": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Update an existing certificate template",
+                "operationId": "updateCertificateTemplate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Certificate Template ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Certificate Template"
+                                    },
+                                    "html_content": {
+                                        "type": "string",
+                                        "example": "<div>Updated HTML</div>"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Certificate template updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate template updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Updated Certificate Template"
+                                                },
+                                                "html_content": {
+                                                    "type": "string",
+                                                    "example": "<div>Updated HTML</div>"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1584,26 +1589,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "The user_id field is required."
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "user_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The user_id field is required."
-                                                    }
-                                                },
-                                                "course_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The course_id field is required."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
+                                            "example": "Validation failed"
                                         }
                                     },
                                     "type": "object"
@@ -1611,8 +1597,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal server error",
+                    "404": {
+                        "description": "Template not found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1623,7 +1609,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Internal server error"
+                                            "example": "Template not found"
                                         }
                                     },
                                     "type": "object"
@@ -1637,323 +1623,6 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        },
-        "/v1.0/certificates/download/{id}": {
-            "get": {
-                "tags": [
-                    "Certificates"
-                ],
-                "summary": "Download a certificate PDF",
-                "operationId": "downloadCertificate",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Certificate ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 10
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Certificate PDF download",
-                        "content": {
-                            "application/pdf": {}
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid certificate ID"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to access this resource"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "File not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "File not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Internal server error"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/v1.0/certificates/verify/{code}": {
-            "get": {
-                "tags": [
-                    "Certificates"
-                ],
-                "summary": "Verify a certificate by code",
-                "operationId": "verifyCertificate",
-                "parameters": [
-                    {
-                        "name": "code",
-                        "in": "path",
-                        "description": "Certificate code",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "example": "ABCD123XYZ"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Certificate is valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Certificate is valid"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "is_valid": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                },
-                                                "user": {
-                                                    "properties": {
-                                                        "name": {
-                                                            "type": "string",
-                                                            "example": "John Doe"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "course": {
-                                                    "properties": {
-                                                        "title": {
-                                                            "type": "string",
-                                                            "example": "Laravel Basics"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "issued_at": {
-                                                    "type": "string",
-                                                    "example": "2025-09-16 12:00:00"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid certificate code"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to access this resource"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Certificate not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Certificate not found"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "is_valid": {
-                                                    "type": "boolean",
-                                                    "example": false
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Internal server error"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/v1.0/course-categories": {
@@ -10853,7 +10522,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "summary": "Remove lessons or quizzes from a section (Admin only)",
                 "operationId": "updateSectionRemoveLessons",
                 "requestBody": {
                     "required": true,
@@ -10862,8 +10531,9 @@
                             "schema": {
                                 "required": [
                                     "id",
+                                    "course_id",
                                     "title",
-                                    "course_id"
+                                    "sectionable"
                                 ],
                                 "properties": {
                                     "id": {
@@ -10879,28 +10549,16 @@
                                         "example": "Introduction to Laravel"
                                     },
                                     "sectionable": {
+                                        "description": "Array of lesson/quiz IDs to remove from section",
                                         "type": "array",
                                         "items": {
                                             "required": [
-                                                "id",
-                                                "type"
+                                                "id"
                                             ],
                                             "properties": {
                                                 "id": {
                                                     "type": "integer",
                                                     "example": 10
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "lesson",
-                                                        "quiz"
-                                                    ],
-                                                    "example": "lesson"
-                                                },
-                                                "order": {
-                                                    "type": "integer",
-                                                    "example": 1
                                                 }
                                             },
                                             "type": "object"
@@ -10937,23 +10595,9 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "order": {
-                                                    "type": "string",
-                                                    "example": "1"
-                                                },
                                                 "title": {
                                                     "type": "string",
                                                     "example": "Introduction to Laravel"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-20T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-20T12:00:00Z"
                                                 },
                                                 "lessons": {
                                                     "type": "array",
@@ -10966,15 +10610,6 @@
                                                             "title": {
                                                                 "type": "string",
                                                                 "example": "Lesson One"
-                                                            },
-                                                            "pivot": {
-                                                                "properties": {
-                                                                    "order": {
-                                                                        "type": "integer",
-                                                                        "example": 1
-                                                                    }
-                                                                },
-                                                                "type": "object"
                                                             }
                                                         },
                                                         "type": "object"
@@ -10991,15 +10626,6 @@
                                                             "title": {
                                                                 "type": "string",
                                                                 "example": "Quiz One"
-                                                            },
-                                                            "pivot": {
-                                                                "properties": {
-                                                                    "order": {
-                                                                        "type": "integer",
-                                                                        "example": 2
-                                                                    }
-                                                                },
-                                                                "type": "object"
                                                             }
                                                         },
                                                         "type": "object"
@@ -11007,86 +10633,6 @@
                                                 }
                                             },
                                             "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to perform this action."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Course not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Course not found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "A section with this title already exists for this course."
                                         }
                                     },
                                     "type": "object"
@@ -11102,24 +10648,10 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "example": "The title field is required."
+                                            "example": "The sectionable field is required."
                                         },
                                         "errors": {
                                             "properties": {
-                                                "title": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The title field is required."
-                                                    }
-                                                },
-                                                "course_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The course_id field is required."
-                                                    }
-                                                },
                                                 "sectionable": {
                                                     "type": "array",
                                                     "items": {
@@ -11694,6 +11226,543 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/v1.0/courses/{id}/complete": {
+            "post": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Generate a certificate for a completed course",
+                "operationId": "generateCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Certificate generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate generated."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "certificate_id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Course not completed yet",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not completed yet."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User, course, or enrollment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The user_id field is required."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The user_id field is required."
+                                                    }
+                                                },
+                                                "course_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The course_id field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/certificates/download/{id}": {
+            "get": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Download a certificate PDF",
+                "operationId": "downloadCertificate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Certificate ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Certificate PDF download",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid certificate ID"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "File not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/certificates/verify/{code}": {
+            "get": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Verify a certificate by code",
+                "operationId": "verifyCertificate",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "description": "Certificate code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ABCD123XYZ"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Certificate is valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate is valid"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "course": {
+                                                    "properties": {
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Laravel Basics"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "issued_at": {
+                                                    "type": "string",
+                                                    "example": "2025-09-16 12:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid certificate code"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Certificate not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Certificate not found"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "is_valid": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/v1.0/users/{id}": {

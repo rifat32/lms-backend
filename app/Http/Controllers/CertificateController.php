@@ -22,69 +22,90 @@ use PDF; // Use barryvdh/laravel-dompdf
  */
 class CertificateController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/v1.0/courses/{id}/complete",
-     *     operationId="generateCertificate",
+
+
+        /**
+     * @OA\Get(
+     *     path="/v1.0/certificate-template",
+     *     operationId="getCertificateTemplate",
      *     tags={"Certificates"},
-     *     summary="Generate a certificate for a completed course",
+     *     summary="Get the currently active certificate template",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Active certificate template retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Default Certificate Template"),
+     *                 @OA\Property(property="html_content", type="string", example="<div>...</div>"),
+     *                 @OA\Property(property="is_active", type="boolean", example=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No active certificate template found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No active certificate template found")
+     *         )
+     *     )
+     * )
+     */
+    public function getCertificateTemplate()
+    {
+        $template = CertificateTemplate::where('is_active', true)->first();
+
+        if (!$template) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active certificate template found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $template
+        ], 200);
+    }
+
+
+        /**
+     * @OA\Put(
+     *     path="/v1.0/certificate-template/{id}",
+     *     operationId="updateCertificateTemplate",
+     *     tags={"Certificates"},
+     *     summary="Update an existing certificate template",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Course ID",
-     *         @OA\Schema(type="integer", example=101)
+     *         description="Certificate Template ID",
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"user_id","course_id"},
-     *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="course_id", type="integer", example=101)
+     *             @OA\Property(property="name", type="string", example="Updated Certificate Template"),
+     *             @OA\Property(property="html_content", type="string", example="<div>Updated HTML</div>"),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
      *         )
      *     ),
      *     @OA\Response(
-     *         response=201,
-     *         description="Certificate generated successfully",
+     *         response=200,
+     *         description="Certificate template updated successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Certificate generated."),
+     *             @OA\Property(property="message", type="string", example="Certificate template updated successfully"),
      *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="certificate_id", type="integer", example=10)
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Updated Certificate Template"),
+     *                 @OA\Property(property="html_content", type="string", example="<div>Updated HTML</div>"),
+     *                 @OA\Property(property="is_active", type="boolean", example=true)
      *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Course not completed yet",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Course not completed yet.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User, course, or enrollment not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="User not found")
      *         )
      *     ),
      *     @OA\Response(
@@ -92,34 +113,85 @@ class CertificateController extends Controller
      *         description="Validation error",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="The user_id field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="user_id", type="array",
-     *                     @OA\Items(type="string", example="The user_id field is required.")
-     *                 ),
-     *                 @OA\Property(property="course_id", type="array",
-     *                     @OA\Items(type="string", example="The course_id field is required.")
-     *                 )
-     *             )
+     *             @OA\Property(property="message", type="string", example="Validation failed")
      *         )
      *     ),
      *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
+     *         response=404,
+     *         description="Template not found",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Internal server error")
+     *             @OA\Property(property="message", type="string", example="Template not found")
      *         )
      *     )
      * )
      */
+    public function updateCertificateTemplate(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'html_content' => 'required|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $template = CertificateTemplate::find($id);
+        if (!$template) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Template not found'
+            ], 404);
+        }
+
+        // if is_active = true, deactivate others
+        if ($request->has('is_active') && $request->is_active) {
+            CertificateTemplate::where('id', '!=', $id)->update(['is_active' => false]);
+        }
+
+        $template->update($request->only(['name', 'html_content', 'is_active']));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Certificate template updated successfully',
+            'data' => $template
+        ], 200);
+    }
 
 
-  public function generateCertificate(Request $request, $id)
+    /**
+ * @OA\Put(
+ *     path="/v1.0/certificates/generate-dynamic",
+ *     operationId="generateDynamicCertificate",
+ *     tags={"Certificates"},
+ *     summary="Generate a professional dynamic certificate PDF (no saving)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"user_id", "course_id"},
+ *             @OA\Property(property="user_id", type="integer", example=1),
+ *             @OA\Property(property="course_id", type="integer", example=101)
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Returns a generated certificate PDF",
+ *         @OA\MediaType(mediaType="application/pdf")
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Course not completed yet or no template found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Course not completed yet.")
+ *         )
+ *     )
+ * )
+ */
+public function generateDynamicCertificate(Request $request)
 {
     $request->validate([
-        'user_id' => ['required', 'integer', new ValidUser()],
-        'course_id' => ['required', 'integer', new ValidCourse()],
+        'user_id' => ['required', 'integer', 'exists:users,id'],
+        'course_id' => ['required', 'integer', 'exists:courses,id'],
     ]);
 
     $user = User::findOrFail($request->user_id);
@@ -127,232 +199,47 @@ class CertificateController extends Controller
 
     $enrollment = Enrollment::where('user_id', $user->id)
         ->where('course_id', $course->id)
-        ->firstOrFail();
+        ->first();
 
-    if ($enrollment->progress < 100) {
-        return response()->json(['message' => 'Course not completed yet.'], 400);
+    if (!$enrollment || $enrollment->progress < 100) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Course not completed yet.'
+        ], 400);
     }
 
-    // 🧩 Get active template
     $template = CertificateTemplate::where('is_active', true)->first();
+
     if (!$template) {
-        return response()->json(['message' => 'No active certificate template found.'], 404);
+        return response()->json([
+            'success' => false,
+            'message' => 'No active certificate template found.'
+        ], 404);
     }
 
     // 🪄 Replace placeholders
-    $code = Str::upper(Str::random(10));
-    $issued_at = now()->format('F d, Y');
-
+    $certificate_code = strtoupper(Str::random(10));
+    $issued_date = now()->format('F d, Y');
     $html = str_replace(
         ['{user_name}', '{course_name}', '{issued_date}', '{certificate_code}'],
-        [$user->name, $course->title, $issued_at, $code],
+        [$user->name, $course->title, $issued_date, $certificate_code],
         $template->html_content
     );
 
-    // 🧾 Generate PDF
-    $pdf = \PDF::loadHTML($html);
-    $file_name = "{$code}.pdf";
-    $pdf_path = storage_path("app/public/certificates/{$file_name}");
-    $pdf->save($pdf_path);
+    // ✨ Wrap with an optional professional background and styling
+    $final_html = '
+    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f0f8ff, #ffffff); padding: 60px;">
+        <div style="max-width: 800px; margin: auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.15); border-radius: 12px;">
+            ' . $html . '
+            <p style="margin-top: 40px; font-size: 12px; color: #777;">This certificate is generated digitally and does not require a signature.</p>
+        </div>
+    </div>
+    ';
 
-    // 💾 Save record
-    $certificate = Certificate::create([
-        'enrollment_id' => $enrollment->id,
-        'certificate_code' => $code,
-        'pdf_url' => "certificates/{$file_name}",
-        'issued_at' => now(),
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Certificate generated.',
-        'data' => [
-            'certificate_id' => $certificate->id,
-        ]
-    ], 201);
+    // 🧾 Generate and stream PDF
+    $pdf = Pdf::loadHTML($final_html)->setPaper('a4', 'landscape');
+    return $pdf->stream("certificate_{$certificate_code}.pdf");
 }
 
-    /**
-     * @OA\Get(
-     *     path="/v1.0/certificates/download/{id}",
-     *     operationId="downloadCertificate",
-     *     tags={"Certificates"},
-     *     summary="Download a certificate PDF",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Certificate ID",
-     *         @OA\Schema(type="integer", example=10)
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Certificate PDF download",
-     *         @OA\MediaType(
-     *             mediaType="application/pdf"
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Invalid certificate ID")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="File not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="File not found")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Internal server error")
-     *         )
-     *     )
-     * )
-     */
 
-
-    public function downloadCertificate($id)
-    {
-        $certificate = Certificate::findOrFail($id);
-        $file_path = storage_path("app/public/{$certificate->pdf_url}");
-
-        if (!file_exists($file_path)) {
-            return response()->json(['message' => 'File not found.'], 404);
-        }
-
-        return response()->download($file_path);
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/v1.0/certificates/verify/{code}",
-     *     operationId="verifyCertificate",
-     *     tags={"Certificates"},
-     *     summary="Verify a certificate by code",
-     *     @OA\Parameter(
-     *         name="code",
-     *         in="path",
-     *         required=true,
-     *         description="Certificate code",
-     *         @OA\Schema(type="string", example="ABCD123XYZ")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Certificate is valid",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Certificate is valid"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="is_valid", type="boolean", example=true),
-     *                 @OA\Property(property="user", type="object",
-     *                     @OA\Property(property="name", type="string", example="John Doe")
-     *                 ),
-     *                 @OA\Property(property="course", type="object",
-     *                     @OA\Property(property="title", type="string", example="Laravel Basics")
-     *                 ),
-     *                 @OA\Property(property="issued_at", type="string", example="2025-09-16 12:00:00")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Invalid certificate code")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Certificate not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Certificate not found"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="is_valid", type="boolean", example=false)
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Internal server error")
-     *         )
-     *     )
-     * )
-     */
-
-    public function verifyCertificate($code)
-    {
-        $certificate = Certificate::with('enrollment.user', 'enrollment.course')
-            ->where('certificate_code', $code)
-            ->first();
-
-        if (!$certificate) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Certificate not found',
-                'data' => ['is_valid' => false]
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Certificate is valid',
-            'data' => [
-                'is_valid' => true,
-                'user' => [
-                    'name' => $certificate->enrollment->user->name
-                ],
-                'course' => [
-                    'title' => $certificate->enrollment->course->title
-                ],
-                'issued_at' => $certificate->issued_at,
-            ]
-        ]);
-    }
 }

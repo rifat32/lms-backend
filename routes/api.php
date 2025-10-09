@@ -21,6 +21,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StripePaymentController;
+use App\Http\Controllers\TrashController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -180,11 +181,18 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
+     Route::get('/v1.0/certificate-template', [CertificateController::class, 'getCertificateTemplate']);
+    Route::put('/v1.0/certificate-template/{id}', [CertificateController::class, 'updateCertificateTemplate']);
+    
+ Route::put('/v1.0/certificates/generate-dynamic', [CertificateController::class, 'generateDynamicCertificate']);
+    
+
+
     // Generate certificate after completing a course
-    Route::post('/v1.0/courses/{id}/complete', [CertificateController::class, 'generateCertificate']);
+    Route::post('/v1.0/courses/{id}/complete', [TrashController::class, 'generateCertificate']);
 
     // Download user's certificate
-    Route::get('/v1.0/certificates/download/{id}', [CertificateController::class, 'downloadCertificate']);
+    Route::get('/v1.0/certificates/download/{id}', [TrashController::class, 'downloadCertificate']);
 
     // Submit course review
     Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'submitCourseReview']);
