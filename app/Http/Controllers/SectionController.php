@@ -6,6 +6,7 @@ use App\Http\Requests\SectionRequest;
 use App\Http\Requests\SectionWithLessonRequest;
 use App\Models\Lesson;
 use App\Models\Section;
+use App\Models\Sectionable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -743,9 +744,8 @@ public function updateSectionRemoveLessons(Request $request)
         }
 
         // ✅ Delete sectionables matching given IDs
-        $section->sectionables()
-            ->whereIn('sectionable_id', collect($validated['sectionable'])->pluck('id'))
-            ->delete();
+        Sectionable::whereIn('id', collect($validated['sectionable'])->pluck('id'))->delete();
+       
 
         DB::commit();
 
