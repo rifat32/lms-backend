@@ -334,7 +334,30 @@ class QuestionController extends Controller
      *     summary="Get all questions",
      *     description="Retrieve a list of all questions.",
      *     security={{"bearerAuth":{}}},
-     *
+     * 
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination",
+     *         @OA\Schema(type="integer", example="")
+     *     ),
+     * 
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of items per page",
+     *         @OA\Schema(type="integer", example="")
+     *     ),
+     * 
+     *     @OA\Parameter(
+     *         name="question_type",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by question type",
+     *         @OA\Schema(type="string", example="")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="List of questions",
@@ -398,7 +421,7 @@ class QuestionController extends Controller
     public function getAllQuestions(Request $request)
     {
         // GET ALL QUESTIONS
-        $query = Question::with(['options', "categories"]);
+        $query = Question::with(['options', "categories"])->filters();
 
         $questions = retrieve_data($query, 'created_at', 'questions');
 

@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-
+use Illuminate\Validation\ValidationException;
 
 class Question extends Model
 {
@@ -52,5 +51,21 @@ class Question extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(QuestionCategory::class, 'question_category_questions', 'question_id', 'question_category_id');
+    }
+
+
+    public function scopeFilters($query)
+    {
+        return $query->when(request()->filled('question_type'), function ($q) {
+            $question_type = request('question_type');
+
+            if (!in_array($question_type, self::TYPES)) {
+                throw ValidationException::withMessages([
+                    'question_type' => 'Invalid question type value. Allowed values: ' . implode(', ', array_values(self::TYPES))
+                ]);
+            }
+
+            $q->where('question_type', $question_type);
+        });
     }
 }
