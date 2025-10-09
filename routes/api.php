@@ -177,15 +177,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [QuestionCategoryController::class, 'createQuestionCategory']); // Already exists
         Route::put('/', [QuestionCategoryController::class, 'updateQuestionCategory']);  // Update
         Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
-        Route::delete('/{id}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
+        Route::delete('/{ids}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
     });
 
 
-     Route::get('/v1.0/certificate-template', [CertificateController::class, 'getCertificateTemplate']);
+    Route::get('/v1.0/certificate-template', [CertificateController::class, 'getCertificateTemplate']);
     Route::put('/v1.0/certificate-template/{id}', [CertificateController::class, 'updateCertificateTemplate']);
-    
- Route::put('/v1.0/certificates/generate-dynamic', [CertificateController::class, 'generateDynamicCertificate']);
-    
+
+    Route::put('/v1.0/certificates/generate-dynamic', [CertificateController::class, 'generateDynamicCertificate']);
+
 
 
     // Generate certificate after completing a course
