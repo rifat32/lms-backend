@@ -127,11 +127,6 @@ class CourseController extends Controller
 
     public function getCoursesClient(Request $request)
     {
-if (!auth()->user()->hasAnyRole(['student'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
 
         $query = Course::with([
             'categories',
@@ -244,11 +239,7 @@ if (!auth()->user()->hasAnyRole(['student'])) {
     public function getCourseByIdClient($id)
     {
 
-if (!auth()->user()->hasAnyRole(['student'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+
 
         $course = Course::with([
             'categories',
