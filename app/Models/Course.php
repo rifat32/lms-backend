@@ -64,15 +64,15 @@ class Course extends Model
 
 
     // Relationships
-    public function getCoverAttribute($value)
-    {
-        if (!$value) {
-            return null;
-        }
-
-        $folder_path = "business_1/course_{$this->id}";
-        return asset("storage-proxy/{$folder_path}/{$value}");
+   public function getCoverAttribute($value)
+{
+    if (empty($value)) {
+        return null;
     }
+
+    $folder_path = "business_1/course_{$this->id}";
+    return asset("storage-proxy/{$folder_path}/{$value}");
+}
 
 
     public function categories()
