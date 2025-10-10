@@ -71,7 +71,7 @@ class Course extends Model
         }
 
         $folder_path = "business_1/course_{$this->id}";
-        return asset("storage/{$folder_path}/{$value}");
+        return asset("storage-proxy/{$folder_path}/{$value}");
     }
 
 

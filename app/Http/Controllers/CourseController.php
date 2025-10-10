@@ -353,10 +353,10 @@ class CourseController extends Controller
     public function getCourseByIdSecureClient($id)
     {
         if (!auth()->user()->hasAnyRole(['student'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         // FIND BY ID
         $course = Course::with(
@@ -508,11 +508,11 @@ class CourseController extends Controller
 
     public function getCoursesClientSecure(Request $request)
     {
-     if (!auth()->user()->hasAnyRole(['student'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['student'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
 
         $query = Course::with([
@@ -527,7 +527,7 @@ class CourseController extends Controller
 
         $courses = retrieve_data($query, 'created_at', 'courses');
 
-      
+
         return response()->json([
             'success' => true,
             'message' => 'Courses retrieved successfully',
@@ -636,11 +636,11 @@ class CourseController extends Controller
 
     public function getCourses(Request $request)
     {
-if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $query = Course::with(['categories' => function ($q) {
             $q->select('course_categories.id', 'course_categories.name');
@@ -737,10 +737,10 @@ if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
     public function getCourseById($id)
     {
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $course = Course::with([
             'categories',
@@ -896,10 +896,10 @@ if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
     {
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
             // VALIDATE PAYLOAD
@@ -1075,10 +1075,10 @@ if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
 
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
             // VALIDATE PAYLOAD
@@ -1266,10 +1266,10 @@ if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
 
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
             // VALIDATE PAYLOAD
@@ -1374,11 +1374,11 @@ if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
     public function deleteCourse($ids)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 

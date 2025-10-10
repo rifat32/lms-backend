@@ -54,7 +54,7 @@ public function getFilesAttribute($value)
     $files = is_array($files) ? array_filter($files) : [];
     return array_map(function ($filename) {
         $folder_path = "business_1/lesson_{$this->id}";
-        return asset("storage/{$folder_path}/{$filename}");
+        return asset("storage-proxy/{$folder_path}/{$filename}");
     }, $files);
 }
 
@@ -64,7 +64,7 @@ public function getMaterialsAttribute($value)
     $materials = is_array($materials) ? array_filter($materials) : [];
     return array_map(function ($filename) {
         $folder_path = "business_1/lesson_{$this->id}";
-        return asset("storage/{$folder_path}/{$filename}");
+        return asset("storage-proxy/{$folder_path}/{$filename}");
     }, $materials);
 }
 

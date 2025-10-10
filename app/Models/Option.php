@@ -28,6 +28,6 @@ class Option extends Model
         }
 
         $folder_path = "business_1/question_{$this->id}";
-        return asset("storage/{$folder_path}/{$value}");
+        return asset("storage-proxy/{$folder_path}/{$value}");
     }
 }
