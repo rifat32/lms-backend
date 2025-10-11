@@ -15,9 +15,10 @@ class LessonTimeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'event' => 'required|string|in:start,stop,heartbeat',
-            // optional client timestamp if you want to pass client time
-            'client_timestamp' => 'nullable|integer',
+            'lesson_id' => 'required|integer',
+            // 'event' => 'required|string|in:start,stop,heartbeat',
+            // // optional client timestamp if you want to pass client time
+            // 'client_timestamp' => 'nullable|integer',
         ];
     }
 

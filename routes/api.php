@@ -96,7 +96,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // quiz attempt
-    Route::put('/v1.0/quiz-attempts/{id}/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
+    Route::put('/v1.0/quiz-attempts/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
 
     // sections
     Route::group(['prefix' => '/v1.0/sections'], function () {
@@ -151,9 +151,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
 
     // Lesson progress
-    Route::put('/v1.0/lessons/{id}/progress', [LessonProgressController::class, 'updateLessonProgress']);
+    Route::put('/v1.0/lessons/progress', [LessonProgressController::class, 'updateLessonProgress']);
 
-    Route::put('/v1.0/lessons/{id}/time', [LessonProgressController::class, 'trackLessonTime']);
+    Route::put('/v1.0/lessons/time', [LessonProgressController::class, 'trackLessonTime']);
 
 
     // Get quiz with questions
@@ -167,9 +167,9 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Submit quiz attempt
-    Route::post('/v1.0/quizzes/{id}/attempts', [QuizAttemptController::class, 'submitQuizAttempt']);
+    Route::post('/v1.0/quizzes/attempts/submit', [QuizAttemptController::class, 'submitQuizAttempt']);
 
-    Route::post('/v1.0/quizzes/{id}/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
+    Route::post('/v1.0/quizzes/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
 
 
 
@@ -226,6 +226,7 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 
+  Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
 Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
 

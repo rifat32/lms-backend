@@ -518,11 +518,12 @@ class CourseController extends Controller
         $query = Course::with([
             'categories' => function ($q) {
                 $q->select('course_categories.id', 'course_categories.name');
-            }
+            },
+            "enrollment" 
         ])
-            ->whereHas('enrollments', function ($enrollmentQuery) {
-                $enrollmentQuery->where('user_id', auth()->user()->id);
-            })
+            // ->whereHas('enrollments', function ($enrollmentQuery) {
+            //     $enrollmentQuery->where('user_id', auth()->user()->id);
+            // })
             ->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');

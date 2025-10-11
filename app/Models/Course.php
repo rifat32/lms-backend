@@ -117,6 +117,10 @@ class Course extends Model
     {
         return $this->hasMany(Enrollment::class, 'course_id', 'id');
     }
+     public function enrollment()
+    {
+        return $this->hasOne(Enrollment::class, 'course_id', 'id')->where('user_id', auth()->user()->id);
+    }
 
     public function scopeFilters($query)
     {
