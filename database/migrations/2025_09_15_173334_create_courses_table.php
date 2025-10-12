@@ -40,8 +40,6 @@ class CreateCoursesTable extends Migration
             $table->string('preview_video_poster')->nullable();      // Poster image for the video preview
             $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
 
-
-
             $table->string('duration')->nullable();
             $table->string('video_duration')->nullable();
             $table->string('course_preview_description')->nullable();

@@ -89,6 +89,13 @@ class Lesson extends Model
         if (empty($value)) {
             return null;
         }
+
+        if($this->preview_video_source_type == 'html'){
+            return $value;
+        }
+
+
+
         $folder_path = "business_1/lesson_{$this->id}";
         return asset("storage-proxy/{$folder_path}/{$value}");
     }
