@@ -203,103 +203,125 @@ class LessonController extends Controller
 
 
 
-  public function createLesson(LessonRequest $request)
-{
-    try {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    public function createLesson(LessonRequest $request)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            DB::beginTransaction();
+
+            $request_payload = $request->validated();
+
+            // ========================
+            // CREATE LESSON
+            // ========================
+            $lesson = Lesson::create($request_payload); // create first to get ID
+
+            // ========================
+            // HANDLE FILES
+            // ========================
+            $new_files = [];
+
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $new_files[] = $file->hashName(); // store only the filename
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
+                }
+            }
+
+            if ($request->filled('files') && is_array($request->input('files'))) {
+                foreach ($request->input('files') as $f) {
+                    if (is_string($f) && $f !== '') {
+                        $new_files[] = basename($f);
+                    }
+                }
+            }
+
+            $lesson->files = $new_files;
+
+            // ========================
+            // HANDLE MATERIALS
+            // ========================
+            $new_materials = [];
+
+            if ($request->hasFile('materials')) {
+                foreach ($request->file('materials') as $file) {
+                    $new_materials[] = $file->hashName(); // store only the filename
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
+                }
+            }
+
+            if ($request->filled('materials') && is_array($request->input('materials'))) {
+                foreach ($request->input('materials') as $m) {
+                    if (is_string($m) && $m !== '') {
+                        $new_materials[] = basename($m);
+                    }
+                }
+            }
+
+            $lesson->materials = $new_materials;
+
+            // ====================
+            // HANDLE VIDEO URL
+            // =====================
+            $preview_video_url = null;
+            if ($request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']) {
+                // IF UPLOADABLE FILE
+                if ($request->hasFile('preview_video_url')) {
+                    $file = $request->file('preview_video_url');
+                    $preview_video_url_filename = $file->hasName();
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_url_filename, 'public');
+                    $preview_video_url = $preview_video_url_filename;
+                }
+
+                // IF EXISTING FILE URL
+                if ($request->filled('preview_video_url') && is_string($request->input('preview_video_url'))) {
+                    $preview_video_url = basename($request->input('preview_video_url'));
+                }
+            } else {
+                $preview_video_url = $request_payload['preview_video_url'];
+            }
+
+            $lesson->preview_video_url = $preview_video_url;
+
+            $lesson->save();
+
+            // ========================
+            // SYNC SECTIONS
+            // ========================
+            if (!empty($request_payload['section_ids']) && is_array($request_payload['section_ids'])) {
+                foreach ($request_payload['section_ids'] as $section_id) {
+                    Sectionable::create([
+                        'section_id' => $section_id,
+                        'sectionable_id' => $lesson->id,
+                        'sectionable_type' => Lesson::class,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
             return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
+                'success' => true,
+                'message' => 'Lesson created successfully',
+                'data' => $lesson
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'data' => [
+                    'error' => $th->getMessage(),
+                    'trace' => $th->getTraceAsString()
+                ]
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        $request_payload = $request->validated();
-
-        // ========================
-        // CREATE LESSON
-        // ========================
-        $lesson = Lesson::create($request_payload); // create first to get ID
-
-        // ========================
-        // HANDLE FILES
-        // ========================
-        $new_files = [];
-
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
-                $new_files[] = $file->hashName(); // store only the filename
-                $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
-            }
-        }
-
-        if ($request->filled('files') && is_array($request->input('files'))) {
-            foreach ($request->input('files') as $f) {
-                if (is_string($f) && $f !== '') {
-                    $new_files[] = basename($f);
-                }
-            }
-        }
-
-        $lesson->files = $new_files;
-
-        // ========================
-        // HANDLE MATERIALS
-        // ========================
-        $new_materials = [];
-
-        if ($request->hasFile('materials')) {
-            foreach ($request->file('materials') as $file) {
-                $new_materials[] = $file->hashName(); // store only the filename
-                $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
-            }
-        }
-
-        if ($request->filled('materials') && is_array($request->input('materials'))) {
-            foreach ($request->input('materials') as $m) {
-                if (is_string($m) && $m !== '') {
-                    $new_materials[] = basename($m);
-                }
-            }
-        }
-
-        $lesson->materials = $new_materials;
-
-        $lesson->save();
-
-        // ========================
-        // SYNC SECTIONS
-        // ========================
-        if (!empty($request_payload['section_ids']) && is_array($request_payload['section_ids'])) {
-            foreach ($request_payload['section_ids'] as $section_id) {
-                Sectionable::create([
-                    'section_id' => $section_id,
-                    'sectionable_id' => $lesson->id,
-                    'sectionable_type' => Lesson::class,
-                ]);
-            }
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lesson created successfully',
-            'data' => $lesson
-        ], 201);
-
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Internal server error',
-            'data' => [
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
-            ]
-        ], 500);
     }
-}
 
 
 
@@ -412,7 +434,7 @@ class LessonController extends Controller
             if ($request->hasFile('files')) {
                 foreach ($request->file('files') as $file) {
                     $new_files[] = $file->hashName(); // store only the filename
-$file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
                 }
             }
 
@@ -435,7 +457,7 @@ $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
             if ($request->hasFile('materials')) {
                 foreach ($request->file('materials') as $file) {
                     $new_materials[] = $file->hashName(); // store only the filename
-$file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $file->hashName(), 'public');
                 }
             }
 

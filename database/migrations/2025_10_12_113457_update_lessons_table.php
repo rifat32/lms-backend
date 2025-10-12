@@ -14,17 +14,14 @@ class UpdateLessonsTable extends Migration
     public function up()
     {
         Schema::table('lessons', function (Blueprint $table) {
-            $table->string('source_type')->nullable();
-            $table->longText('html')->nullable();
-            $table->longText('thumbnail')->nullable();
-            $table->longText('video')->nullable();
             $table->string('subtitle')->nullable();
             $table->string('video_width')->nullable();
             $table->string('required_progress')->nullable();
-            $table->string('youtube_url')->nullable();
-            $table->string('vimeo_url')->nullable();
-            $table->string('external_link_url')->nullable();
-            $table->longText('embed_iframe')->nullable();
+
+            $table->string('preview_video_source_type')->nullable(); // HTML, YouTube, Vimeo, External Link, Embed
+            $table->string('preview_video_url')->nullable();         // YouTube, Vimeo, External Link, or HTML video file
+            $table->string('preview_video_poster')->nullable();      // Poster image for the video preview
+            $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
         });
     }
 
@@ -37,17 +34,13 @@ class UpdateLessonsTable extends Migration
     {
         Schema::table('lessons', function (Blueprint $table) {
             $table->dropColumn([
-                'source_type',
-                "html",
-                "thumbnail",
-                "video",
-                "subtitle",
+                'subtitle',
                 "video_width",
                 "required_progress",
-                "youtube_url",
-                "vimeo_url",
-                "external_link_url",
-                "embed_iframe",
+                "preview_video_source_type",
+                "preview_video_url",
+                "preview_video_poster",
+                "preview_video_embed",
             ]);
         });
     }

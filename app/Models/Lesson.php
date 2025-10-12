@@ -17,7 +17,7 @@ class Lesson extends Model
         'FILE' => 'file',
     ];
 
-    public const  SOURCE_TYPES = [
+    public const  PREVIEW_VIDEO_SOURCE_TYPE = [
         'HTML' => 'html',
         'YOUTUBE' => 'youtube',
         'VIMEO' => 'vimeo',
@@ -43,17 +43,13 @@ class Lesson extends Model
         'materials',
 
         // new fields
-        'source_type',
-        "html",
-        "thumbnail",
-        "video",
         "subtitle",
         "video_width",
         "required_progress",
-        "youtube_url",
-        "vimeo_url",
-        "external_link_url",
-        "embed_iframe",
+        "preview_video_source_type",
+        "preview_video_url",
+        "preview_video_poster",
+        "preview_video_embed",
 
     ];
 
@@ -89,6 +85,14 @@ class Lesson extends Model
         }, $materials);
     }
 
+    public function getVideoUrlAttribute($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 
 
     public function course()
