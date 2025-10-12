@@ -25,6 +25,7 @@ Route::get('/setup-passport', [SetupController::class, 'setupPassport'])->name('
 Route::get('/roleRefresh', [SetupController::class, 'roleRefresh'])->name('roleRefresh');
 Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"])->name("swaggerRefresh");
 Route::get('/migrate', [SetupController::class, 'migrate'])->name('migrate');
+Route::get('/rollback-migrate', [SetupController::class, 'rollbackMigration'])->name('rollbackMigration');
 
 Route::get('/storage-link', [SetupController::class, 'storageLink'])->name('storageLink');
 
