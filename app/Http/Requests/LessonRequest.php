@@ -18,6 +18,19 @@ class LessonRequest extends FormRequest
     public function rules()
     {
         $rules = [
+            'source_type' => ['required', Rule::in(array_values(Lesson::SOURCE_TYPES))],
+            "html" => ['nullable', 'string'],
+            "thumbnail" => ['nullable', 'string'],
+            "video" => ['nullable', 'string'],
+            "subtitle" => ['nullable', 'string'],
+            "video_width" => ['nullable', 'string'],
+            "required_progress" => ['nullable', 'string'],
+            "youtube_url" => ['nullable', 'string'],
+            "vimeo_url" => ['nullable', 'string'],
+            "external_link_url" => ['nullable', 'string'],
+            "embed_iframe" => ['nullable', 'string'],
+
+
             "section_ids" => ['present'],
             "section_ids.*" => ['required', 'numeric'],
             'title' => 'required|string|max:255',
@@ -35,9 +48,9 @@ class LessonRequest extends FormRequest
 
             // files
             'files' => 'nullable|array',
-    'files.*' => 'nullable',
-    'materials' => 'nullable|array',
-    'materials.*' => 'nullable'
+            'files.*' => 'nullable',
+            'materials' => 'nullable|array',
+            'materials.*' => 'nullable'
 
 
 
