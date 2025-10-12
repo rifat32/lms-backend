@@ -26,7 +26,6 @@ class Lesson extends Model
     ];
 
     protected $fillable = [
-        'course_id',
         'title',
         'content_type',
         'content_url',
@@ -93,12 +92,23 @@ class Lesson extends Model
         $folder_path = "business_1/lesson_{$this->id}";
         return asset("storage-proxy/{$folder_path}/{$value}");
     }
-
-
-    public function course()
+    public function getPreviewVideoPosterAttribute($value)
     {
-        return $this->belongsTo(Course::class);
+        if (empty($value)) {
+            return null;
+        }
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage-proxy/{$folder_path}/{$value}");
     }
+    public function getSubtitleAttribute($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+        $folder_path = "business_1/lesson_{$this->id}";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
+
 
 
     public function sections()

@@ -352,7 +352,7 @@ class LessonController extends Controller
                 // IF UPLOADABLE FILE
                 if ($request->hasFile('preview_video_url')) {
                     $file = $request->file('preview_video_url');
-                    $preview_video_url_filename = $file->hasName();
+                    $preview_video_url_filename = $file->getClientOriginalName();
                     $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_url_filename, 'public');
                     $preview_video_url = $preview_video_url_filename;
                 }
@@ -366,6 +366,34 @@ class LessonController extends Controller
             }
 
             $lesson->preview_video_url = $preview_video_url;
+
+            // ========================================
+            // HANDLE VIDEO POSTER
+            // ========================================
+            $preview_video_poster = null;
+            if ($request->hasFile('preview_video_poster')) {
+                $file = $request->file('preview_video_poster');
+                $preview_video_poster_filename = $file->getClientOriginalName();
+                $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_poster_filename, 'public');
+                $preview_video_poster = $preview_video_poster_filename;
+            } else if ($request->filled('preview_video_poster') && is_string($request->input('preview_video_poster'))) {
+                $preview_video_poster = basename($request->input('preview_video_poster'));
+            }
+
+            $lesson->preview_video_poster = $preview_video_poster;
+
+            // =========================================
+            // HANDLE SUBTITLE
+            // =========================================
+            if ($request->hasFile('subtitle')) {
+                $file = $request->file('subtitle');
+                $subtitle_filename = $file->getClientOriginalName();
+                $file->storeAs("business_1/lesson_{$lesson->id}", $subtitle_filename, 'public');
+                $lesson->subtitle = $subtitle_filename;
+            } else if ($request->filled('subtitle') && is_string($request->input('subtitle'))) {
+                $lesson->subtitle = basename($request->input('subtitle'));
+            }
+
 
             $lesson->save();
 
