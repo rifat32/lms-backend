@@ -128,6 +128,85 @@ class LessonController extends Controller
 
 
     /**
+     * @OA\Get(
+     *     path="/v1.0/lessons/{id}",
+     *     operationId="getLessonById",
+     *     tags={"Lessons"},
+     *     summary="Get a single lesson by ID (role: Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Lesson ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="lesson retrieved successfully",
+     *         @OA\JsonContent(
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
+     *                     @OA\Property(property="description", type="string", example="Learn Laravel framework"),
+     *                     @OA\Property(property="price", type="number", format="float", example=49.99),
+     *                     @OA\Property(property="category_id", type="integer", example=1),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-19T12:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-19T12:00:00Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized access")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden: Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to view this course category")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course Category not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Course Category not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict: Resource conflict",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Conflict occurred while retrieving this resource")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function getLessonById($id)
+    {
+        // CHECK IF USER HAS PERMISSION
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
+
+        // GET LESSON
+        $lesson = Lesson::findOrFail($id);
+
+        // SEND RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Lesson retrieved successfully',
+            'data' => $lesson
+        ]);
+    }
+
+    /**
      * @OA\Post(
      *     path="/v1.0/lessons",
      *     tags={"Lessons"},

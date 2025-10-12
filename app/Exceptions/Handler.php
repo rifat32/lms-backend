@@ -33,20 +33,30 @@ class Handler extends ExceptionHandler
             if ($request->is('api/*')) {
 
                 // 404 - Resource not found
-                if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException) {
+                if ($e instanceof ModelNotFoundException) {
+                    $model = class_basename($e->getModel());
                     return response()->json([
                         'success' => false,
-                        'message' => 'Resource not found',
-                        'data' => null,
+                        'message' => "{$model} resource not found",
+                        'errors' => $e->getMessage(),
                     ], 404);
                 }
+
+                if ($e instanceof NotFoundHttpException) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Endpoint not found',
+                        'errors' => $e->getMessage(),
+                    ], 404);
+                }
+
 
                 // 401 - Unauthorized
                 if ($e instanceof AuthenticationException) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Unauthorized',
-                        'data' => null,
+                        'errors' => $e->getMessage(),
                     ], 401);
                 }
 
@@ -55,7 +65,7 @@ class Handler extends ExceptionHandler
                     return response()->json([
                         'success' => false,
                         'message' => 'Forbidden',
-                        'data' => null,
+                        'errors' => $e->getMessage(),
                     ], 403);
                 }
 
@@ -64,7 +74,7 @@ class Handler extends ExceptionHandler
                     return response()->json([
                         'success' => false,
                         'message' => 'Validation failed',
-                        'data' => $e->errors(), // Always include error data
+                        'errors' => $e->errors(), // Always include error data
                     ], 422);
                 }
 
@@ -78,23 +88,20 @@ class Handler extends ExceptionHandler
                     };
 
                     return response()->json([
+                        'status' => $status,
                         'success' => false,
                         'message' => $message,
-                        'data' => [
-                            'status' => $status,
-                            'error' => $e->getMessage() ?: null,
-                        ],
+                        'errors' => $e->getMessage() ?: null,
                     ], $status);
                 }
 
                 // 500 - Internal Server Error (catch-all)
                 return response()->json([
+                    'statusCode' => 500,
                     'success' => false,
                     'message' => 'Internal server error',
-                    'data' => [
-                        'error' => $e->getMessage(),
-                        'trace' => config('app.debug') ? $e->getTrace() : null,
-                    ],
+                    'errors' => $e->getMessage(),
+                    'trace' => config('app.debug') ? $e->getTrace() : null,
                 ], 500);
             }
         });

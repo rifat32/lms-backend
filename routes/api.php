@@ -88,6 +88,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [LessonController::class, 'createLesson']);
         Route::put('/', [LessonController::class, 'updateLesson']);
         Route::get('/', [LessonController::class, 'getLessons']);
+        Route::get('/{id}', [LessonController::class, 'getLessonById']);
         Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
@@ -226,7 +227,7 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 
-  Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
+Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
 Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
 
