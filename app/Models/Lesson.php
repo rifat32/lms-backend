@@ -90,7 +90,7 @@ class Lesson extends Model
             return null;
         }
 
-        if ($this->preview_video_source_type == 'html') {
+        if ($this->preview_video_source_type !== 'html') {
             return $value;
         }
 
