@@ -84,13 +84,13 @@ class Lesson extends Model
         }, $materials);
     }
 
-    public function getVideoUrlAttribute($value)
+    public function getPreviewVideoUrlAttribute($value)
     {
         if (empty($value)) {
             return null;
         }
 
-        if($this->preview_video_source_type != 'html'){
+        if ($this->preview_video_source_type == 'html') {
             return $value;
         }
 
