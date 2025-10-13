@@ -49,11 +49,11 @@ class SectionController extends Controller
     public function deleteSection($ids)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 
@@ -177,11 +177,11 @@ class SectionController extends Controller
     public function createSection(SectionRequest $request)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             // Begin transaction
             DB::beginTransaction();
@@ -294,11 +294,11 @@ class SectionController extends Controller
     public function updateSection(SectionRequest $request)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             // Begin transaction
             DB::beginTransaction();
@@ -453,11 +453,11 @@ class SectionController extends Controller
     public function updateSectionWithLessons(SectionWithLessonRequest $request)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 
@@ -629,11 +629,11 @@ class SectionController extends Controller
     public function updateSectionAddLessons(SectionWithLessonRequest $request)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 
@@ -654,8 +654,8 @@ class SectionController extends Controller
             // attach new sectionables
             foreach ($request_payload['sectionable'] as $item) {
                 $modelClass = $item['type'] === Section::SECTIONABLE_TYPES['LESSON']
-                    ? Section::SECTIONABLE_TYPES['LESSON']
-                    : Section::SECTIONABLE_TYPES['QUIZ'];
+                    ? \App\Models\Lesson::class
+                    : \App\Models\Quiz::class;
 
                 $section->sectionables()->create([
                     'sectionable_id' => $item['id'],
@@ -677,132 +677,130 @@ class SectionController extends Controller
         }
     }
 
-   /**
- * @OA\Put(
- *     path="/v1.0/sections-remove-lessons",
- *     operationId="updateSectionRemoveLessons",
- *     tags={"section"},
- *     summary="Remove lessons or quizzes from a section (role: Admin only)",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"id", "course_id", "title", "sectionable"},
- *             @OA\Property(property="id", type="integer", example=1),
- *             @OA\Property(property="course_id", type="integer", example=1),
- *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
- *             @OA\Property(
- *                 property="sectionable",
- *                 type="array",
- *                 description="Array of lesson/quiz IDs to remove from section",
- *                 @OA\Items(
- *                     type="object",
- *                     required={"id"},
- *                     @OA\Property(property="id", type="integer", example=10)
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Section updated successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Section updated successfully"),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="course_id", type="integer", example=1),
- *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
- *                 @OA\Property(property="lessons", type="array",
- *                     @OA\Items(
- *                         type="object",
- *                         @OA\Property(property="id", type="integer", example=10),
- *                         @OA\Property(property="title", type="string", example="Lesson One")
- *                     )
- *                 ),
- *                 @OA\Property(property="quizzes", type="array",
- *                     @OA\Items(
- *                         type="object",
- *                         @OA\Property(property="id", type="integer", example=5),
- *                         @OA\Property(property="title", type="string", example="Quiz One")
- *                     )
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The sectionable field is required."),
- *             @OA\Property(property="errors", type="object",
- *                 @OA\Property(property="sectionable", type="array",
- *                     @OA\Items(type="string", example="The sectionable field is required.")
- *                 )
- *             )
- *         )
- *     )
- * )
- */
-public function updateSectionRemoveLessons(Request $request)
-{
-    try {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+    /**
+     * @OA\Put(
+     *     path="/v1.0/sections-remove-lessons",
+     *     operationId="updateSectionRemoveLessons",
+     *     tags={"section"},
+     *     summary="Remove lessons or quizzes from a section (role: Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id", "course_id", "title", "sectionable"},
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="course_id", type="integer", example=1),
+     *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
+     *             @OA\Property(
+     *                 property="sectionable",
+     *                 type="array",
+     *                 description="Array of lesson/quiz IDs to remove from section",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"id"},
+     *                     @OA\Property(property="id", type="integer", example=10)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Section updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Section updated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="course_id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Introduction to Laravel"),
+     *                 @OA\Property(property="lessons", type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=10),
+     *                         @OA\Property(property="title", type="string", example="Lesson One")
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="quizzes", type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=5),
+     *                         @OA\Property(property="title", type="string", example="Quiz One")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The sectionable field is required."),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="sectionable", type="array",
+     *                     @OA\Items(type="string", example="The sectionable field is required.")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function updateSectionRemoveLessons(Request $request)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
-        DB::beginTransaction();
+            DB::beginTransaction();
 
-        // ✅ Validation
-        $validated = $request->validate([
-            'id' => 'required|integer|exists:sections,id',
-            'course_id' => 'required|integer|exists:courses,id',
-            'title' => 'required|string|max:255',
-            'sectionable' => 'required|array|min:1',
-            'sectionable.*.id' => 'required|integer',
-        ]);
-
-        // ✅ Find and update section
-        $section = Section::find($validated['id']);
-
-        if (!$section) {
-            $section = Section::create([
-                'course_id' => $validated['course_id'],
-                'title' => $validated['title'],
+            // ✅ Validation
+            $validated = $request->validate([
+                'id' => 'required|integer|exists:sections,id',
+                'course_id' => 'required|integer|exists:courses,id',
+                'title' => 'required|string|max:255',
+                'sectionable' => 'required|array|min:1',
+                'sectionable.*.id' => 'required|integer',
             ]);
-        } else {
-            $section->update([
-                'course_id' => $validated['course_id'],
-                'title' => $validated['title'],
-            ]);
+
+            // ✅ Find and update section
+            $section = Section::find($validated['id']);
+
+            if (!$section) {
+                $section = Section::create([
+                    'course_id' => $validated['course_id'],
+                    'title' => $validated['title'],
+                ]);
+            } else {
+                $section->update([
+                    'course_id' => $validated['course_id'],
+                    'title' => $validated['title'],
+                ]);
+            }
+
+            // ✅ Delete sectionables matching given IDs
+            Sectionable::whereIn('id', collect($validated['sectionable'])->pluck('id'))->delete();
+
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Section updated successfully',
+                'data' => $section->load(['lessons', 'quizzes'])
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        // ✅ Delete sectionables matching given IDs
-        Sectionable::whereIn('id', collect($validated['sectionable'])->pluck('id'))->delete();
-       
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Section updated successfully',
-            'data' => $section->load(['lessons', 'quizzes'])
-        ], 200);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack();
-        return response()->json([
-            'message' => 'Validation error',
-            'errors' => $e->errors()
-        ], 422);
-
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        throw $th;
     }
-}
 
 
     /**
@@ -851,11 +849,11 @@ public function updateSectionRemoveLessons(Request $request)
     public function getSections(Request $request)
     {
 
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $query = Section::with([
             'sectionables.sectionable',
@@ -931,11 +929,11 @@ public function updateSectionRemoveLessons(Request $request)
      */
     public function getSectionById($id)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $section = Section::with(['sectionables.sectionable'])->findOrFail($id);
 
