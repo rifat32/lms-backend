@@ -25,6 +25,7 @@ class LessonRequest extends FormRequest
             "preview_video_url" => ['nullable',],
             "preview_video_poster" => ['nullable',],
             "preview_video_embed" => ['nullable', 'string'],
+            "pdf_read_completion_required" => ['boolean'],
 
 
             "section_ids" => ['present'],

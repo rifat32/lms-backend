@@ -217,7 +217,7 @@ class LessonController extends Controller
      *         @OA\JsonContent(
      *             required={"title","content_type"},
      *             @OA\Property(property="title", type="string", example="Introduction to Laravel"),
-     *             @OA\Property(property="content_type", type="string", enum={"video","text","file","quiz"}, example="video"),
+     *             @OA\Property(property="content_type", type="string", enum={"video","text","file","pdf", "audio"}, example="video"),
      *             @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *             @OA\Property(property="sort_order", type="integer", example=1),
      *             @OA\Property(property="duration", type="integer", example=45, description="Duration in minutes"),
@@ -228,6 +228,7 @@ class LessonController extends Controller
      *             @OA\Property(property="unlock_day_after_purchase", type="integer", example=7),
      *             @OA\Property(property="description", type="string", example="This lesson introduces Laravel basics."),
      *             @OA\Property(property="content", type="string", example="Lesson detailed text content here..."),
+     *             @OA\Property(property="pdf_read_completion_required", type="boolean", example=""),
      *             @OA\Property(
      *                 property="section_ids",
      *                 type="array",
@@ -577,6 +578,56 @@ class LessonController extends Controller
             }
 
             $request_payload['materials'] = $new_materials;
+
+            // ====================
+            // HANDLE VIDEO URL
+            // =====================
+            $preview_video_url = null;
+            if ($request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']) {
+                // IF UPLOADABLE FILE
+                if ($request->hasFile('preview_video_url')) {
+                    $file = $request->file('preview_video_url');
+                    $preview_video_url_filename = $file->getClientOriginalName();
+                    $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_url_filename, 'public');
+                    $preview_video_url = $preview_video_url_filename;
+                }
+
+                // IF EXISTING FILE URL
+                if ($request->filled('preview_video_url') && is_string($request->input('preview_video_url'))) {
+                    $preview_video_url = basename($request->input('preview_video_url'));
+                }
+            } else {
+                $preview_video_url = $request_payload['preview_video_url'];
+            }
+
+            $request_payload['preview_video_url'] = $preview_video_url;
+
+            // ========================================
+            // HANDLE VIDEO POSTER
+            // ========================================
+            $preview_video_poster = null;
+            if ($request->hasFile('preview_video_poster')) {
+                $file = $request->file('preview_video_poster');
+                $preview_video_poster_filename = $file->getClientOriginalName();
+                $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_poster_filename, 'public');
+                $preview_video_poster = $preview_video_poster_filename;
+            } else if ($request->filled('preview_video_poster') && is_string($request->input('preview_video_poster'))) {
+                $preview_video_poster = basename($request->input('preview_video_poster'));
+            }
+
+            $request_payload['preview_video_poster'] = $preview_video_poster;
+
+            // =========================================
+            // HANDLE SUBTITLE
+            // =========================================
+            if ($request->hasFile('subtitle')) {
+                $file = $request->file('subtitle');
+                $subtitle_filename = $file->getClientOriginalName();
+                $file->storeAs("business_1/lesson_{$lesson->id}", $subtitle_filename, 'public');
+                $request_payload['subtitle'] = $subtitle_filename;
+            } else if ($request->filled('subtitle') && is_string($request->input('subtitle'))) {
+                $request_payload['subtitle'] = basename($request->input('subtitle'));
+            }
 
             // ========================
             // UPDATE LESSON

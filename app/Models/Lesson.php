@@ -49,6 +49,7 @@ class Lesson extends Model
         "preview_video_url",
         "preview_video_poster",
         "preview_video_embed",
+        "pdf_read_completion_required",
 
     ];
 

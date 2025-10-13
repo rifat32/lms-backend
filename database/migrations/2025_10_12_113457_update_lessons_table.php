@@ -22,6 +22,7 @@ class UpdateLessonsTable extends Migration
             $table->string('preview_video_url')->nullable();         // YouTube, Vimeo, External Link, or HTML video file
             $table->string('preview_video_poster')->nullable();      // Poster image for the video preview
             $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
+            $table->boolean('pdf_read_completion_required')->default(false);
         });
     }
 
@@ -41,6 +42,7 @@ class UpdateLessonsTable extends Migration
                 "preview_video_url",
                 "preview_video_poster",
                 "preview_video_embed",
+                "pdf_read_completion_required",
             ]);
         });
     }
