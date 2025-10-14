@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonRequest;
 use App\Models\Lesson;
 use App\Models\Sectionable;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

@@ -12,59 +12,60 @@ trait BasicUtil
 {
 
 
- public function get_business_setting()
+    public function get_business_setting()
     {
         return BusinessSetting::first();
     }
 
     public function recalculateCourseProgress($user_id, $course_id)
-{
-    // ✅ Collect all lessons and quizzes of the course
-    $sections = Section::where('course_id', $course_id)
-        ->with('sectionables.sectionable')
-        ->get();
+    {
+        // ✅ Collect all lessons and quizzes of the course
+        $sections = Section::where('course_id', $course_id)
+            ->with('sectionables.sectionable')
+            ->get();
 
-    $lesson_ids = [];
-    $quiz_ids = [];
+        $lesson_ids = [];
+        $quiz_ids = [];
 
-    foreach ($sections as $section) {
-        foreach ($section->sectionables as $sectionable) {
-            $model = $sectionable->sectionable;
-            if ($model instanceof \App\Models\Lesson) {
-                $lesson_ids[] = $model->id;
-            } elseif ($model instanceof \App\Models\Quiz) {
-                $quiz_ids[] = $model->id;
+        foreach ($sections as $section) {
+            foreach ($section->sectionables as $sectionable) {
+                $model = $sectionable->sectionable;
+                if ($model instanceof \App\Models\Lesson) {
+                    $lesson_ids[] = $model->id;
+                } elseif ($model instanceof \App\Models\Quiz) {
+                    $quiz_ids[] = $model->id;
+                }
             }
         }
+
+        $total_items = count($lesson_ids) + count($quiz_ids);
+
+        // ✅ Count completed lessons
+        $completed_lessons = LessonProgress::where('user_id', $user_id)
+            ->whereIn('lesson_id', $lesson_ids)
+            ->where('course_id', $course_id)
+            ->where('is_completed', true)
+            ->count();
+
+        // ✅ Count completed quizzes
+        $completed_quizzes = QuizAttempt::where('user_id', $user_id)
+            ->where("is_passed", 1)
+            ->whereIn('quiz_id', $quiz_ids)
+            ->whereNotNull('completed_at')
+            ->where('is_expired', false)
+            ->count();
+
+        $completed_items = $completed_lessons + $completed_quizzes;
+
+        $percentage = $total_items > 0 ? round(($completed_items / $total_items) * 100, 2) : 0;
+
+        // ✅ Update enrollment progress
+        Enrollment::where('user_id', $user_id)
+            ->where('course_id', $course_id)
+            ->update(['progress' => $percentage]);
+
+        return $percentage;
     }
-
-    $total_items = count($lesson_ids) + count($quiz_ids);
-
-    // ✅ Count completed lessons
-    $completed_lessons = LessonProgress::where('user_id', $user_id)
-        ->whereIn('lesson_id', $lesson_ids)
-        ->where('is_completed', true)
-        ->count();
-
-    // ✅ Count completed quizzes
-    $completed_quizzes = QuizAttempt::where('user_id', $user_id)
-        ->where("is_passed", 1)
-        ->whereIn('quiz_id', $quiz_ids)
-        ->whereNotNull('completed_at')
-        ->where('is_expired', false)
-        ->count();
-
-    $completed_items = $completed_lessons + $completed_quizzes;
-
-    $percentage = $total_items > 0 ? round(($completed_items / $total_items) * 100, 2) : 0;
-
-    // ✅ Update enrollment progress
-    Enrollment::where('user_id', $user_id)
-        ->where('course_id', $course_id)
-        ->update(['progress' => $percentage]);
-
-    return $percentage;
-}
 
 
 

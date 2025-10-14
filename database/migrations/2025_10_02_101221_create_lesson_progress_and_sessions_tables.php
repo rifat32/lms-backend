@@ -13,6 +13,7 @@ class CreateLessonProgressAndSessionsTables extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('lesson_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->integer('total_time_spent')->default(0); // seconds
             $table->boolean('is_completed')->default(false);
             $table->timestamp('last_accessed')->nullable();

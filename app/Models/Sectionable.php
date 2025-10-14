@@ -21,4 +21,14 @@ class Sectionable extends Model
     {
         return $this->morphTo();
     }
+
+    public function isLesson(): bool
+    {
+        return $this->sectionable_type === Lesson::class;
+    }
+
+    public function isQuiz(): bool
+    {
+        return $this->sectionable_type === Quiz::class;
+    }
 }

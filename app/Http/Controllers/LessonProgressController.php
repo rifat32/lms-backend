@@ -40,19 +40,19 @@ class LessonProgressController extends Controller
      *             @OA\Property(
      *                 property="course_id",
      *                 type="integer",
-     *                 example=1,
+     *                 example="",
      *                 description="Course ID to update progress for"
      *             ),
      *             @OA\Property(
      *                 property="lesson_id",
      *                 type="integer",
-     *                 example=1,
+     *                 example="",
      *                 description="Lesson ID to update progress for"
      *             ),
      *             @OA\Property(
      *                 property="is_completed",
      *                 type="boolean",
-     *                 example=true,
+     *                 example="",
      *                 description="Mark lesson as completed or not"
      *             )
      *         )
@@ -69,6 +69,7 @@ class LessonProgressController extends Controller
      *                 type="object",
      *                 @OA\Property(property="user_id", type="integer", example=1),
      *                 @OA\Property(property="lesson_id", type="integer", example=5),
+     *                 @OA\Property(property="course_id", type="integer", example=5),
      *                 @OA\Property(property="progress_status", type="string", example="completed")
      *             )
      *         )
@@ -116,15 +117,19 @@ class LessonProgressController extends Controller
      */
     public function updateLessonProgress(Request $request)
     {
+        DB::beginTransaction();
+
         try {
+
+            // CHECK PERMISSION
             if (!auth()->user()->hasAnyRole(['student'])) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-            DB::beginTransaction();
 
+            // VALIDATE REQUEST
             $request->validate([
                 'lesson_id' => ['required', 'integer', new ValidLesson()],
                 'course_id' => ['required', 'integer', new ValidCourse()],
@@ -157,6 +162,7 @@ class LessonProgressController extends Controller
                 'message' => 'Lesson progress updated',
                 'data' => [
                     'user_id' => $user->id,
+                    'course_id' => $course->id,
                     'lesson_id' => $lesson->id,
                     'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
                 ]
@@ -181,8 +187,18 @@ class LessonProgressController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"lesson_id","event"},
-     *             @OA\Property(property="lesson_id", type="integer", example=5, description="Lesson ID")
+     *             required={"course_id", "lesson_id","event"},
+     *             @OA\Property(
+     *                 property="course_id",
+     *                 type="integer",
+     *                 example="",
+     *                 description="Course ID to update progress for"
+     *             ),
+     *             @OA\Property(
+     *                 property="lesson_id", 
+     *                 type="integer", 
+     *                 example="", 
+     *                 description="Lesson ID")
      *         )
      *     ),
      *     @OA\Response(
@@ -215,14 +231,30 @@ class LessonProgressController extends Controller
                 ], 401);
             }
 
+            // VALIDATE REQUEST
+            $request->validate([
+                'lesson_id' => ['required', 'integer', new ValidLesson()],
+                'course_id' => ['required', 'integer', new ValidCourse()],
+            ]);
 
+            // GET AUTHENTICATED USER
             $user = Auth::user();
+
+            // GET LESSON
             $lesson = Lesson::findOrFail($request->lesson_id);
+            $course = Course::findOrFail($request->course_id);
 
             // create or fetch progress row
             $progress = LessonProgress::firstOrCreate(
-                ['user_id' => $user->id, 'lesson_id' => $lesson->id],
-                ['total_time_spent' => 0, 'is_completed' => false]
+                [
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
+                    'total_time_spent' => 0,
+                    'is_completed' => false
+                ]
             );
 
             // increment 1 minute (60 seconds) on each API call
@@ -234,7 +266,7 @@ class LessonProgressController extends Controller
 
             // auto-complete if lesson duration defined (lesson->duration expected in minutes)
             $lesson_duration_seconds = ($lesson->duration ?? 0) * 60;
-            if ($lesson_duration_seconds > 0 && $progress->total_time_spent >= $lesson_duration_seconds && ! $progress->is_completed) {
+            if ($lesson_duration_seconds > 0 && $progress->total_time_spent >= $lesson_duration_seconds && !$progress->is_completed) {
                 $progress->is_completed = true;
                 $progress->save();
             }
@@ -246,6 +278,7 @@ class LessonProgressController extends Controller
                 'message' => 'Lesson time tracked',
                 'data' => [
                     'user_id' => $user->id,
+                    'course_id' => $course->id,
                     'lesson_id' => $lesson->id,
                     'total_time_spent' => $progress->total_time_spent,
                     'is_completed' => $progress->is_completed,
