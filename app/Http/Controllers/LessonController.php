@@ -372,7 +372,7 @@ class LessonController extends Controller
                     $preview_video_url = basename($request->input('preview_video_url'));
                 }
             } else {
-                $preview_video_url = $request_payload['preview_video_url'];
+                $preview_video_url = $request_payload['preview_video_url'] ?? null;
             }
 
             $lesson->preview_video_url = $preview_video_url;
@@ -609,7 +609,7 @@ class LessonController extends Controller
                     $preview_video_url = basename($request->input('preview_video_url'));
                 }
             } else {
-                $preview_video_url = $request_payload['preview_video_url'];
+                $preview_video_url = $request_payload['preview_video_url'] ?? null;
             }
 
             $request_payload['preview_video_url'] = $preview_video_url;

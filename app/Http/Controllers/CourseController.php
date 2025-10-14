@@ -247,9 +247,7 @@ class CourseController extends Controller
                 $q->with([
                     'sectionables' => function ($sq) {
                         $sq->with([
-                            'sectionable' => function ($ssq) {
-                                $ssq->select('id', 'title');
-                            },
+                            'sectionable'
                         ]);
                     },
                 ]);
