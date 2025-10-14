@@ -126,7 +126,9 @@ class QuizController extends Controller
         }
 
         // GETTING QUIZ BY ID
-        $quiz = Quiz::with(['questions.options'])->findOrFail($id);
+        $quiz = Quiz::with(['questions.options', 'sections' => function ($query) {
+            $query->select('sections.id')->pluck('id');
+        }])->findOrFail($id);
 
         // GETTING QUESTIONS
         $questions = $quiz->questions;
@@ -161,8 +163,13 @@ class QuizController extends Controller
         //     })->values(),
         // ];
 
+
         // ADD QUESTIONS DATA
         $quiz->setRelation('questions', $questions->values());
+
+        // SEND ONLY SECTION IDS
+        $quiz->setRelation('sections', $quiz->sections->pluck('id'));
+        // $quiz->sections->pluck('id');
 
         // Return the response
         return response()->json([

@@ -196,7 +196,13 @@ class LessonController extends Controller
         }
 
         // GET LESSON
-        $lesson = Lesson::findOrFail($id);
+        $lesson = Lesson::with(['sections' => function ($query) {
+            $query->select('sections.id');
+        }])->findOrFail($id);
+
+
+        // SEND ONLY SECTION IDS
+        $lesson->setRelation('sections', $lesson->sections->pluck('id'));
 
         // SEND RESPONSE
         return response()->json([

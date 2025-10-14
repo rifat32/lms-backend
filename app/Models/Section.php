@@ -11,6 +11,8 @@ class Section extends Model
 {
     use HasFactory;
 
+    protected $hidden = ['pivot'];
+
 
     public const SECTIONABLE_TYPES = [
         'LESSON' => 'lesson',
@@ -47,6 +49,4 @@ class Section extends Model
     {
         return $this->morphedByMany(Quiz::class, 'sectionable', 'sectionables');
     }
-
-    
 }

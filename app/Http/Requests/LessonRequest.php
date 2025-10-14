@@ -21,7 +21,7 @@ class LessonRequest extends FormRequest
             "subtitle" => ['nullable'],
             "video_width" => ['nullable', 'string'],
             "required_progress" => ['nullable', 'string'],
-            'preview_video_source_type' => ['required', 'required_if:content_type,' . Lesson::CONTENT_TYPES["VIDEO"], Rule::in(array_values(Lesson::PREVIEW_VIDEO_SOURCE_TYPE))],
+            'preview_video_source_type' => ['nullable', 'required_if:content_type,' . Lesson::CONTENT_TYPES["VIDEO"], Rule::in(array_values(Lesson::PREVIEW_VIDEO_SOURCE_TYPE))],
             "preview_video_url" => ['nullable',],
             "preview_video_poster" => ['nullable',],
             "preview_video_embed" => ['nullable', 'string'],
