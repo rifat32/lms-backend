@@ -6,6 +6,9 @@ use Spatie\Permission\Models\Role as SpatieRole;
 
 class Role extends SpatieRole
 {
+    protected $hidden = ['pivot'];
+    protected $guard_name = 'api';
+
     protected $fillable = [
         'name',
         'guard_name',
@@ -15,5 +18,4 @@ class Role extends SpatieRole
         "is_default_for_business",
 
     ];
-    protected $guard_name = 'api';
 }

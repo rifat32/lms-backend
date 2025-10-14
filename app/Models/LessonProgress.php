@@ -9,8 +9,10 @@ class LessonProgress extends Model
 {
 
     use HasFactory;
-        protected $table = "lesson_progresses";
-     protected $fillable = [
+    protected $hidden = ['pivot'];
+    protected $table = "lesson_progresses";
+
+    protected $fillable = [
         'user_id',
         'lesson_id',
         'total_time_spent',

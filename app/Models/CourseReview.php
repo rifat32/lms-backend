@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CourseReview extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     protected $fillable = [
         'course_id',

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LessonSession extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     public const EVENTS = [
         'START' => 'start',

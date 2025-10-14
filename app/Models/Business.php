@@ -12,6 +12,8 @@ class Business extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $hidden = ['pivot'];
+
     protected $fillable = [
         'name',
         'email',

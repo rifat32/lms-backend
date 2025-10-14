@@ -8,18 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Sectionable extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
-     protected $fillable = [
+    protected $fillable = [
         'section_id',
         'sectionable_id',
         'sectionable_type',
         'order',
     ];
 
-      public function sectionable()
+    public function sectionable()
     {
         return $this->morphTo();
     }
-
-    
 }

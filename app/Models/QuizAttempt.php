@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class QuizAttempt extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     protected $fillable = [
         'quiz_id',

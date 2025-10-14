@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Lecturer extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
+
     protected $fillable = [
         'name',
         'designation',

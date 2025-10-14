@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Quiz extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     public const TIME_UNITS = [
         'HOURS' => 'Hours',

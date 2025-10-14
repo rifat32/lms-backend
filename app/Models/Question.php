@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 class Question extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     const TYPES =  [
         'TRUE_FALSE' => 'true_false',

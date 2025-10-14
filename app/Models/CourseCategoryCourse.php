@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class CourseCategoryCourse extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 }

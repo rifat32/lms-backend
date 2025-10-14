@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     public const CONTENT_TYPES = [
         'VIDEO' => 'video',

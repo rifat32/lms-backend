@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 class Course extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     public const STATUS = [
         'DRAFT' => 'draft',
@@ -64,15 +65,15 @@ class Course extends Model
 
 
     // Relationships
-   public function getCoverAttribute($value)
-{
-    if (empty($value)) {
-        return null;
-    }
+    public function getCoverAttribute($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
 
-    $folder_path = "business_1/course_{$this->id}";
-    return asset("storage-proxy/{$folder_path}/{$value}");
-}
+        $folder_path = "business_1/course_{$this->id}";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 
 
     public function categories()
@@ -117,7 +118,7 @@ class Course extends Model
     {
         return $this->hasMany(Enrollment::class, 'course_id', 'id');
     }
-     public function enrollment()
+    public function enrollment()
     {
         return $this->hasOne(Enrollment::class, 'course_id', 'id')->where('user_id', auth()->user()->id);
     }
@@ -129,18 +130,18 @@ class Course extends Model
         })->when(request()->filled('category_id'), function ($q) {
             $q->where('category_id', request('category_id'));
         })
-        ->when(request()->filled('is_enrolled'), function ($q) {
-            $isEnrolled = request('is_enrolled');
-            if ($isEnrolled) {
-                $q->whereHas('enrollments', function ($enrollmentQuery) {
-                    $enrollmentQuery->where('user_id', auth()->user()->id);
-                });
-            } else {
-                $q->whereDoesntHave('enrollments', function ($enrollmentQuery) {
-                    $enrollmentQuery->where('user_id', auth()->user()->id);
-                });
-            }
-        });
+            ->when(request()->filled('is_enrolled'), function ($q) {
+                $isEnrolled = request('is_enrolled');
+                if ($isEnrolled) {
+                    $q->whereHas('enrollments', function ($enrollmentQuery) {
+                        $enrollmentQuery->where('user_id', auth()->user()->id);
+                    });
+                } else {
+                    $q->whereDoesntHave('enrollments', function ($enrollmentQuery) {
+                        $enrollmentQuery->where('user_id', auth()->user()->id);
+                    });
+                }
+            });
     }
 
     public function scopeRescrictBeforeEnrollment($query)

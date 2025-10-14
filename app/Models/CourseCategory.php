@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CourseCategory extends Model
 {
   use HasFactory;
-
+  protected $hidden = ['pivot'];
   // The attributes that are mass assignable.
   protected $fillable = [
     'name',

@@ -9,6 +9,7 @@ class BusinessSetting extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'STRIPE_KEY',
         "STRIPE_SECRET",
@@ -16,6 +17,7 @@ class BusinessSetting extends Model
     ];
 
     protected $hidden = [
-        "STRIPE_SECRET"
+        "STRIPE_SECRET",
+        "pivot"
     ];
 }

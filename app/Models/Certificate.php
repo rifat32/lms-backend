@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Certificate extends Model
 {
     use HasFactory;
+    protected $hidden = ['pivot'];
 
     protected $fillable = [
         'enrollment_id',
