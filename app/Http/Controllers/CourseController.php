@@ -519,11 +519,8 @@ class CourseController extends Controller
             'categories' => function ($q) {
                 $q->select('course_categories.id', 'course_categories.name');
             },
-            "enrollment" 
-        ])
-            // ->whereHas('enrollments', function ($enrollmentQuery) {
-            //     $enrollmentQuery->where('user_id', auth()->user()->id);
-            // })
+            "enrollment"
+        ])->whereHas('enrollment')
             ->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
@@ -893,75 +890,75 @@ class CourseController extends Controller
 
 
 
-   public function createCourse(CourseRequest $request)
-{
-    try {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+    public function createCourse(CourseRequest $request)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
+
+            DB::beginTransaction();
+
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
+
+            // ADD CREATED BY
+            $request_payload['created_by'] = auth()->user()->id;
+
+            // CREATE COURSE FIRST
+            $course = Course::create($request_payload);
+
+            // ========================
+            // HANDLE COVER (SINGLE FILE)
+            // ========================
+            $cover_filename = null;
+            $folder_path = "business_1/course_{$course->id}";
+
+            // If uploaded file
+            if ($request->hasFile('cover')) {
+                $file = $request->file('cover');
+                $cover_filename = $file->hashName(); // consistent naming like lesson
+                $file->storeAs($folder_path, $cover_filename, 'public');
+            }
+
+            // If existing file path string
+            if ($request->filled('cover') && is_string($request->input('cover'))) {
+                $cover_filename = basename($request->input('cover'));
+            }
+
+            if ($cover_filename) {
+                $course->cover = $cover_filename;
+                $course->save();
+            }
+
+            // ========================
+            // SYNC CATEGORIES
+            // ========================
+            if (!empty($request_payload['category_ids']) && is_array($request_payload['category_ids'])) {
+                $course->categories()->sync($request_payload['category_ids']);
+            }
+
+            DB::commit();
+
             return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
+                'success' => true,
+                'message' => 'Course created successfully',
+                'data' => $course
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'data' => [
+                    'error' => $th->getMessage(),
+                    'trace' => $th->getTraceAsString()
+                ]
+            ], 500);
         }
-
-        DB::beginTransaction();
-
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
-
-        // ADD CREATED BY
-        $request_payload['created_by'] = auth()->user()->id;
-
-        // CREATE COURSE FIRST
-        $course = Course::create($request_payload);
-
-        // ========================
-        // HANDLE COVER (SINGLE FILE)
-        // ========================
-        $cover_filename = null;
-        $folder_path = "business_1/course_{$course->id}";
-
-        // If uploaded file
-        if ($request->hasFile('cover')) {
-            $file = $request->file('cover');
-            $cover_filename = $file->hashName(); // consistent naming like lesson
-            $file->storeAs($folder_path, $cover_filename, 'public');
-        }
-
-        // If existing file path string
-        if ($request->filled('cover') && is_string($request->input('cover'))) {
-            $cover_filename = basename($request->input('cover'));
-        }
-
-        if ($cover_filename) {
-            $course->cover = $cover_filename;
-            $course->save();
-        }
-
-        // ========================
-        // SYNC CATEGORIES
-        // ========================
-        if (!empty($request_payload['category_ids']) && is_array($request_payload['category_ids'])) {
-            $course->categories()->sync($request_payload['category_ids']);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Course created successfully',
-            'data' => $course
-        ], 201);
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Internal server error',
-            'data' => [
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
-            ]
-        ], 500);
     }
-}
 
     /**
      * @OA\Put(
@@ -1088,84 +1085,84 @@ class CourseController extends Controller
 
 
 
-  public function updateCourse(CourseRequest $request)
-{
-    try {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
-
-        DB::beginTransaction();
-
-        // VALIDATE PAYLOAD
-        $request_payload = $request->validated();
-
-        // FIND COURSE
-        $course = Course::findOrFail($request_payload['id']);
-
-        // ========================
-        // HANDLE COVER (SINGLE FILE)
-        // ========================
-        $cover_filename = $course->getRawOriginal('cover');
-        $folder_path = "business_1/course_{$course->id}";
-
-        // If uploaded file
-        if ($request->hasFile('cover')) {
-            $file = $request->file('cover');
-            $new_filename = $file->hashName();
-            $file->storeAs($folder_path, $new_filename, 'public');
-
-            // Delete old cover if exists
-            if ($cover_filename) {
-                $old_path = "{$folder_path}/{$cover_filename}";
-                if (Storage::disk('public')->exists($old_path)) {
-                    Storage::disk('public')->delete($old_path);
-                }
+    public function updateCourse(CourseRequest $request)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
             }
 
-            $cover_filename = $new_filename;
+            DB::beginTransaction();
+
+            // VALIDATE PAYLOAD
+            $request_payload = $request->validated();
+
+            // FIND COURSE
+            $course = Course::findOrFail($request_payload['id']);
+
+            // ========================
+            // HANDLE COVER (SINGLE FILE)
+            // ========================
+            $cover_filename = $course->getRawOriginal('cover');
+            $folder_path = "business_1/course_{$course->id}";
+
+            // If uploaded file
+            if ($request->hasFile('cover')) {
+                $file = $request->file('cover');
+                $new_filename = $file->hashName();
+                $file->storeAs($folder_path, $new_filename, 'public');
+
+                // Delete old cover if exists
+                if ($cover_filename) {
+                    $old_path = "{$folder_path}/{$cover_filename}";
+                    if (Storage::disk('public')->exists($old_path)) {
+                        Storage::disk('public')->delete($old_path);
+                    }
+                }
+
+                $cover_filename = $new_filename;
+            }
+
+            // If string file path provided instead of upload
+            if ($request->filled('cover') && is_string($request->input('cover'))) {
+                $cover_filename = basename($request->input('cover'));
+            }
+
+            $request_payload['cover'] = $cover_filename;
+
+            // ========================
+            // UPDATE COURSE
+            // ========================
+            $course->update($request_payload);
+
+            // ========================
+            // SYNC CATEGORIES
+            // ========================
+            if (!empty($request_payload['category_ids']) && is_array($request_payload['category_ids'])) {
+                $course->categories()->sync($request_payload['category_ids']);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course updated successfully',
+                'data' => $course
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'data' => [
+                    'error' => $th->getMessage(),
+                    'trace' => $th->getTraceAsString()
+                ]
+            ], 500);
         }
-
-        // If string file path provided instead of upload
-        if ($request->filled('cover') && is_string($request->input('cover'))) {
-            $cover_filename = basename($request->input('cover'));
-        }
-
-        $request_payload['cover'] = $cover_filename;
-
-        // ========================
-        // UPDATE COURSE
-        // ========================
-        $course->update($request_payload);
-
-        // ========================
-        // SYNC CATEGORIES
-        // ========================
-        if (!empty($request_payload['category_ids']) && is_array($request_payload['category_ids'])) {
-            $course->categories()->sync($request_payload['category_ids']);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Course updated successfully',
-            'data' => $course
-        ], 200);
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Internal server error',
-            'data' => [
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
-            ]
-        ], 500);
     }
-}
 
 
 

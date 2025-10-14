@@ -355,7 +355,10 @@ class LessonController extends Controller
             // HANDLE VIDEO URL
             // =====================
             $preview_video_url = null;
-            if ($request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']) {
+            if (
+                isset($request_payload['preview_video_source_type'])
+                && $request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']
+            ) {
                 // IF UPLOADABLE FILE
                 if ($request->hasFile('preview_video_url')) {
                     $file = $request->file('preview_video_url');
@@ -589,7 +592,10 @@ class LessonController extends Controller
             // HANDLE VIDEO URL
             // =====================
             $preview_video_url = null;
-            if ($request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']) {
+            if (
+                isset($request_payload['preview_video_source_type']) &&
+                $request_payload['preview_video_source_type'] == Lesson::PREVIEW_VIDEO_SOURCE_TYPE['HTML']
+            ) {
                 // IF UPLOADABLE FILE
                 if ($request->hasFile('preview_video_url')) {
                     $file = $request->file('preview_video_url');
