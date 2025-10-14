@@ -29,21 +29,21 @@ class QuizController extends Controller
      *         in="path",
      *         required=true,
      *         description="Quiz ID",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Parameter(
      *         name="is_randomized",
      *         in="query",
      *         required=false,
      *         description="Whether to randomize the quiz questions",
-     *         @OA\Schema(type="boolean", example=true)
+     *         @OA\Schema(type="boolean", example="")
      *     ),
      *     @OA\Parameter(
      *         name="question_limit",
      *         in="query",
      *         required=false,
      *         description="The maximum number of questions to include in the quiz",
-     *         @OA\Schema(type="integer", example=10)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -117,58 +117,58 @@ class QuizController extends Controller
 
     public function getQuizWithQuestionsById($id)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
 
-        $quiz = Quiz::with(['questions.options'])->find($id);
-
-        if (empty($quiz)) {
+        // CHECKING PERMISSION
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                'success' => false,
-                'message' => 'Quiz not found',
-            ], 404);
+                "message" => "You can not perform this action"
+            ], 401);
         }
 
+        // GETTING QUIZ BY ID
+        $quiz = Quiz::with(['questions.options'])->findOrFail($id);
+
+        // GETTING QUESTIONS
         $questions = $quiz->questions;
 
         // Handle randomization and limit
         if ($quiz->is_randomized && $quiz->question_limit > 0) {
-            // Case 3: Randomize + Limit
+            // Case 1: Randomize + Limit
             $questions = $questions->shuffle()->take($quiz->question_limit);
         } elseif ($quiz->is_randomized) {
-            // Case 1: Randomize only
+            // Case 2: Randomize only
             $questions = $questions->shuffle();
         } elseif ($quiz->question_limit > 0) {
-            // Case 2: Limit only
+            // Case 3: Limit only
             $questions = $questions->take($quiz->question_limit);
         }
 
-        $result = [
-            'id' => $quiz->id,
-            'title' => $quiz->title,
-            'questions' => $questions->map(function ($question) {
-                return [
-                    'question_id' => $question->id,
-                    'text' => $question->question_text,
-                    'type' => $question->question_type,
-                    'options' => $question->options->map(function ($option) {
-                        return [
-                            'option_id' => $option->id,
-                            'text' => $option->option_text,
-                        ];
-                    }),
-                ];
-            })->values(), // reset keys
-        ];
+        // $result = [
+        //     'id' => $quiz->id,
+        //     'title' => $quiz->title,
+        //     'questions' => $questions->map(function ($question) {
+        //         return [
+        //             'question_id' => $question->id,
+        //             'text' => $question->question_text,
+        //             'type' => $question->question_type,
+        //             'options' => $question->options->map(function ($option) {
+        //                 return [
+        //                     'option_id' => $option->id,
+        //                     'text' => $option->option_text,
+        //                 ];
+        //             }),
+        //         ];
+        //     })->values(),
+        // ];
+
+        // ADD QUESTIONS DATA
+        $quiz->setRelation('questions', $questions->values());
 
         // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',
-            'data' => $result
+            'data' => $quiz
         ], 200);
     }
     /**
@@ -264,11 +264,11 @@ class QuizController extends Controller
 
     public function getQuizWithQuestions(Request $request)
     {
-if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
 
         $query = Quiz::with(['questions.options']);
@@ -322,11 +322,11 @@ if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
      */
     public function store(QuizRequest $request)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $request_payload = $request->validated();
         $quiz = Quiz::create($request_payload);
@@ -378,11 +378,11 @@ if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
      */
     public function update(QuizRequest $request)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $request_payload = $request->validated();
         $quiz = Quiz::findOrFail($request_payload['id']);
@@ -425,11 +425,11 @@ if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
      */
     public function destroy($id)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $quiz = Quiz::findOrFail($id);
 
