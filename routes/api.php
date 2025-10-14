@@ -151,13 +151,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/v1.0/enrollments', [EnrollmentController::class, 'createEnrollment']);
     Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
 
-    // Lesson progress
+    // LESSON PROGRESS API
     Route::put('/v1.0/lessons/progress', [LessonProgressController::class, 'updateLessonProgress']);
-
     Route::put('/v1.0/lessons/time', [LessonProgressController::class, 'trackLessonTime']);
 
 
-    // Get quiz with questions
+    // QUIZ API
     Route::prefix('/v1.0/quizzes')->group(function () {
         Route::get('/', [QuizController::class, 'getQuizWithQuestions']);
         Route::get('/{id}', [QuizController::class, 'getQuizWithQuestionsById']);
@@ -173,7 +172,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/v1.0/quizzes/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
 
 
-
+    // QUESTION CATEGORIES API
     Route::group(['prefix' => '/v1.0/question-categories'], function () {
         Route::post('/', [QuestionCategoryController::class, 'createQuestionCategory']); // Already exists
         Route::put('/', [QuestionCategoryController::class, 'updateQuestionCategory']);  // Update
@@ -182,9 +181,11 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
+
+    // CERTIFICATE RELATED API
     Route::get('/v1.0/certificate-template', [CertificateController::class, 'getCertificateTemplate']);
     Route::put('/v1.0/certificate-template/{id}', [CertificateController::class, 'updateCertificateTemplate']);
-
+    Route::get('/v1.0/certificate-template/{id}', [CertificateController::class, 'getCertificateTemplateById']);
     Route::put('/v1.0/certificates/generate-dynamic', [CertificateController::class, 'generateDynamicCertificate']);
 
 
@@ -206,7 +207,7 @@ Route::middleware('auth:api')->group(function () {
 
 
 
-
+    // BUSINESS SETTINGS API
     Route::put('/v1.0/business-settings', [SettingController::class, "updateBusinessSettings"]);
     Route::get('/v1.0/business-settings', [SettingController::class, "getBusinessSettings"]);
 

@@ -93,16 +93,15 @@ class CourseCategoryController extends Controller
 
     public function getCourseCategoryClient(Request $request)
     {
-       
 
-        $query = CourseCategory::
-        with([
-            'parent' => function ($q) {
-                $q->select('course_categories.id', 'course_categories.name');
-            }
-            
+
+        $query = CourseCategory::with([
+                'parent' => function ($q) {
+                    $q->select('course_categories.id', 'course_categories.name');
+                }
+
             ])
-        ->withCount(['courses as total_courses'])->filters();
+            ->withCount(['courses as total_courses'])->filters();
 
         // 
         $courses = retrieve_data($query, 'created_at', 'course_categories');
@@ -198,20 +197,19 @@ class CourseCategoryController extends Controller
 
     public function getCourseCategory(Request $request)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
-        $query = CourseCategory::
-        with([
-            'parent' => function ($q) {
-                $q->select('course_categories.id', 'course_categories.name');
-            }
-            
+        $query = CourseCategory::with([
+                'parent' => function ($q) {
+                    $q->select('course_categories.id', 'course_categories.name');
+                }
+
             ])
-        ->withCount(['courses as total_courses'])->filters();
+            ->withCount(['courses as total_courses'])->filters();
 
         // 
         $courses = retrieve_data($query, 'created_at', 'course_categories');
@@ -237,7 +235,7 @@ class CourseCategoryController extends Controller
      *         in="path",
      *         required=true,
      *         description="Course Category ID",
-     *         @OA\Schema(type="integer", example=1)
+     *         @OA\Schema(type="integer", example="")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -285,10 +283,10 @@ class CourseCategoryController extends Controller
     public function getCourseCategoryById($id)
     {
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $course = CourseCategory::findOrFail($id);
         return response()->json([
@@ -372,11 +370,11 @@ class CourseCategoryController extends Controller
 
     public function createCourseCategory(CourseCategoryRequest $request)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         DB::beginTransaction();
         try {
@@ -474,11 +472,11 @@ class CourseCategoryController extends Controller
 
     public function updateCourseCategory(CourseCategoryRequest $request)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         DB::beginTransaction();
         try {
@@ -558,10 +556,10 @@ class CourseCategoryController extends Controller
     {
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 
