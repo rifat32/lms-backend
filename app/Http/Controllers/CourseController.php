@@ -401,7 +401,9 @@ class CourseController extends Controller
 
                 // load questions only for quizzes
                 if ($sectionable->sectionable_type === Quiz::class) {
-                    $sectionable->sectionable->load('questions');
+                    $sectionable->sectionable->load([
+                        'questions.options'
+                    ]);
                 } else {
                     $sectionable->sectionable->setRelation('questions', collect());
                 }
