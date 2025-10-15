@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Lesson extends Model
 {
@@ -123,6 +124,11 @@ class Lesson extends Model
     public function sections()
     {
         return $this->morphToMany(Section::class, 'sectionable');
+    }
+
+    public function lesson_progress(): HasOne
+    {
+        return $this->hasOne(LessonProgress::class, 'lesson_id');
     }
 
     public function scopeFilters($query)

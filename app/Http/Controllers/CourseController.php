@@ -7,6 +7,7 @@ use App\Http\Requests\CoursePartialRequest;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseFaq;
+use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
@@ -373,9 +374,7 @@ class CourseController extends Controller
                 'reviews',
             ]
         )
-            ->rescrictBeforeEnrollment()
-
-
+            ->restrictBeforeEnrollment()
             ->find($id);
 
 
@@ -387,13 +386,24 @@ class CourseController extends Controller
                 'message' => 'Course not found by'
             ], 404);
         }
-        // ✅ Now eager-load questions only for quizzes (manually)
+
+
+        // ✅ Add order + eager-load quiz questions
         $course->sections->each(function ($section) {
-            $section->sectionables->each(function ($sectionable) {
-                if ($sectionable->sectionable_type == Quiz::class) {
+            $section->sectionables->each(function ($sectionable, $index) {
+                // assign manual order for response
+                $sectionable->order = $index;
+
+                // if Lesson → load lesson_progress
+                if ($sectionable->sectionable_type === Lesson::class) {
+                    $sectionable->sectionable->load('lesson_progress');
+                }
+
+                // load questions only for quizzes
+                if ($sectionable->sectionable_type === Quiz::class) {
                     $sectionable->sectionable->load('questions');
                 } else {
-                    $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+                    $sectionable->sectionable->setRelation('questions', collect());
                 }
             });
         });

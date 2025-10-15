@@ -144,7 +144,7 @@ class Course extends Model
             });
     }
 
-    public function scopeRescrictBeforeEnrollment($query)
+    public function scopeRestrictBeforeEnrollment($query)
     {
         return $query->whereHas("enrollments", function ($q) {
             $q->where("user_id", auth()->user()->id)

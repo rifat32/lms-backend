@@ -407,7 +407,7 @@ class LessonController extends Controller
             $lesson->save();
 
             // Load only section IDs directly (no need to load full models)
-            $sectionIds = $lesson->sections()->pluck('id');
+            $sectionIds = $lesson->sections()->pluck('sections.id');
 
             // Replace the relation with just IDs
             $lesson->setRelation('sections', $sectionIds);
@@ -651,10 +651,11 @@ class LessonController extends Controller
             $lesson->update($request_payload);
 
             // Load only section IDs directly (no need to load full models)
-            $sectionIds = $lesson->sections()->pluck('id');
+            $sectionIds = $lesson->sections()->pluck('sections.id');
 
             // Replace the relation with just IDs
             $lesson->setRelation('sections', $sectionIds);
+
 
             DB::commit();
 
