@@ -17,7 +17,8 @@ class QuestionCategoryRequest extends FormRequest
         $rules = [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'slug' => 'required|string|max:255|unique:question_categories,slug' . $this->id,
+            'slug' => 'required|string|max:255|unique:question_categories,slug,' . $this->id,
+
             'parent_question_category_id' => ['nullable', 'integer', new ValidQuestionCategory()],
         ];
 
