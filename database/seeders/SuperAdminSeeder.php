@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -13,9 +13,6 @@ class SuperAdminSeeder extends Seeder
 {
     public function run()
     {
-        DB::transaction(function () {
-            // Setup roles & permissions
-            Artisan::call('db:seed', ['--class' => RolePermissionSeeder::class]);
 
             // Create super admin user
             $superAdmin = User::firstOrCreate(
@@ -34,6 +31,6 @@ class SuperAdminSeeder extends Seeder
             if ($role && !$superAdmin->hasRole($role)) {
                 $superAdmin->assignRole($role);
             }
-        });
+   
     }
 }
