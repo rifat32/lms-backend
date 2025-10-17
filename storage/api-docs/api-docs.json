@@ -24,7 +24,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Register a new user",
+                "summary": "Register a new user (role: Any Role)",
                 "operationId": "b09cb081adb0967a04e8a9f34b8357c1",
                 "requestBody": {
                     "required": true,
@@ -141,7 +141,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login user",
+                "summary": "Login user (role: Any Role)",
                 "operationId": "e0debbe8127995a63b56ddd8e7051a29",
                 "requestBody": {
                     "required": true,
@@ -248,7 +248,7 @@
                     "Auth",
                     "business_management"
                 ],
-                "summary": "Register a user and create a business",
+                "summary": "Register a user and create a business (role: Super Admin Only)",
                 "description": "Create a new user and their business. Typically used by admin or self-registration depending on implementation.",
                 "operationId": "registerUserWithBusiness",
                 "requestBody": {
@@ -505,7 +505,7 @@
                 "tags": [
                     "business_management"
                 ],
-                "summary": "Get list of all businesses",
+                "summary": "Get list of all businesses (role: Super Admin only)",
                 "operationId": "getAllBusinesses",
                 "responses": {
                     "200": {
@@ -657,7 +657,7 @@
                 "tags": [
                     "business_management"
                 ],
-                "summary": "Update an existing business (Admin or Owner only)",
+                "summary": "Update an existing business (role: Super Admin only)",
                 "operationId": "updateBusiness",
                 "requestBody": {
                     "required": true,
@@ -906,7 +906,7 @@
                 "tags": [
                     "business_management"
                 ],
-                "summary": "Create a new business (Admin or Owner only)",
+                "summary": "Create a new business (role: Super Admin only)",
                 "operationId": "createBusiness",
                 "requestBody": {
                     "required": true,
@@ -1152,7 +1152,7 @@
                 "tags": [
                     "business_management"
                 ],
-                "summary": "Get a single business by ID",
+                "summary": "Get a single business by ID (role: Super Admin only)",
                 "operationId": "getBusinessById",
                 "parameters": [
                     {
@@ -1356,7 +1356,7 @@
                 "tags": [
                     "business_management"
                 ],
-                "summary": "Delete Businesses",
+                "summary": "Delete Businesses (role: Super Admin only)",
                 "operationId": "deleteBusiness",
                 "parameters": [
                     {
@@ -1424,7 +1424,7 @@
                 "tags": [
                     "Certificates"
                 ],
-                "summary": "Get the currently active certificate template",
+                "summary": "Get the currently active certificate template (role: Admin only)",
                 "operationId": "getCertificateTemplate",
                 "responses": {
                     "200": {
@@ -1493,11 +1493,94 @@
             }
         },
         "/v1.0/certificate-template/{id}": {
+            "get": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Get the currently active certificate template (role: Admin only)",
+                "operationId": "getCertificateTemplateById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Certificate ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Active certificate template retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Default Certificate Template"
+                                                },
+                                                "html_content": {
+                                                    "type": "string",
+                                                    "example": "<div>...</div>"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No active certificate template found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No active certificate template found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Certificates"
                 ],
-                "summary": "Update an existing certificate template",
+                "summary": "Update an existing certificate template (role: Admin only)",
                 "operationId": "updateCertificateTemplate",
                 "parameters": [
                     {
@@ -1625,12 +1708,233 @@
                 ]
             }
         },
+        "/v1.0/certificates/generate-dynamic": {
+            "put": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Generate a professional dynamic certificate PDF (no saving) (role: Any Role)",
+                "operationId": "generateDynamicCertificate",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "course_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns a generated certificate PDF",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Course not completed yet or no template found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not completed yet."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/course-categories": {
+            "get": {
+                "tags": [
+                    "course_management.course_category"
+                ],
+                "summary": "Get all course categories (role: Student only)",
+                "description": "Retrieve a paginated list of course categories.",
+                "operationId": "getCourseCategoryClient",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of course categories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 50
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Web Development"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-18T12:00:00Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-18T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No categories found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "No course categories found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid query parameters"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/course-categories": {
             "get": {
                 "tags": [
                     "course_management.course_category"
                 ],
-                "summary": "Get all course categories",
+                "summary": "Get all course categories (role: Admin only)",
                 "description": "Retrieve a paginated list of course categories.",
                 "operationId": "getCourseCategory",
                 "parameters": [
@@ -1783,7 +2087,7 @@
                 "tags": [
                     "course_management.course_category"
                 ],
-                "summary": "Update a course category",
+                "summary": "Update a course category (role: Admin only)",
                 "operationId": "updateCourseCategory",
                 "requestBody": {
                     "required": true,
@@ -1954,7 +2258,7 @@
                 "tags": [
                     "course_management.course_category"
                 ],
-                "summary": "Create a new course category",
+                "summary": "Create a new course category (role: Admin only)",
                 "operationId": "createCourseCategory",
                 "requestBody": {
                     "required": true,
@@ -2127,7 +2431,7 @@
                 "tags": [
                     "course_management.course_category"
                 ],
-                "summary": "Get a single course category by ID",
+                "summary": "Get a single course category by ID (role: Admin only)",
                 "operationId": "getCourseCategoryById",
                 "parameters": [
                     {
@@ -2137,7 +2441,7 @@
                         "required": true,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": ""
                         }
                     }
                 ],
@@ -2253,7 +2557,7 @@
                 "tags": [
                     "course_management.course_category"
                 ],
-                "summary": "Delete a course category",
+                "summary": "Delete a course category (role: Admin only)",
                 "operationId": "deleteCourseCategory",
                 "parameters": [
                     {
@@ -2341,7 +2645,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get all courses",
+                "summary": "Get all courses (role: Student only)",
                 "operationId": "getCoursesClient",
                 "parameters": [
                     {
@@ -2542,7 +2846,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get a single course by ID",
+                "summary": "Get a single course by ID (role: Student only)",
                 "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
                 "operationId": "getCourseByIdClient",
                 "parameters": [
@@ -2683,7 +2987,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get a single course by ID",
+                "summary": "Get a single course by ID (role: Student only)",
                 "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
                 "operationId": "getCourseByIdSecureClient",
                 "parameters": [
@@ -2824,7 +3128,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get all courses",
+                "summary": "Get all courses (role: Student only)",
                 "operationId": "getCoursesClientSecure",
                 "parameters": [
                     {
@@ -3025,7 +3329,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get all courses",
+                "summary": "Get all courses (role: Admin only)",
                 "operationId": "getCourses",
                 "parameters": [
                     {
@@ -3224,7 +3528,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Update a course (Admin only)",
+                "summary": "Update a course (role: Admin only)",
                 "operationId": "updateCourse",
                 "requestBody": {
                     "required": true,
@@ -3617,7 +3921,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Create a new course (Admin only)",
+                "summary": "Create a new course (role: Admin only)",
                 "operationId": "createCourse",
                 "requestBody": {
                     "required": true,
@@ -3938,7 +4242,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Update a course (Admin only)",
+                "summary": "Update a course (role: Admin only)",
                 "operationId": "updatePartialCourse",
                 "requestBody": {
                     "required": true,
@@ -4331,7 +4635,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get a single course by ID",
+                "summary": "Get a single course by ID (role: Admin only)",
                 "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
                 "operationId": "getCourseById",
                 "parameters": [
@@ -4472,7 +4776,7 @@
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Delete course",
+                "summary": "Delete course (role: Admin only)",
                 "operationId": "deleteCourse",
                 "parameters": [
                     {
@@ -4560,7 +4864,7 @@
                 "tags": [
                     "course_management.course_faq"
                 ],
-                "summary": "Add or update FAQs for a course",
+                "summary": "Add or update FAQs for a course (role: Admin only)",
                 "operationId": "updateCourseFaqs",
                 "requestBody": {
                     "description": "Array of FAQs to add or update for a specific course",
@@ -4669,7 +4973,7 @@
                 "tags": [
                     "course_management.course_faq"
                 ],
-                "summary": "Get all FAQs for a specific course",
+                "summary": "Get all FAQs for a specific course (role: Any Role)",
                 "operationId": "getCourseFaqs",
                 "parameters": [
                     {
@@ -4740,7 +5044,7 @@
                 "tags": [
                     "CourseReviews"
                 ],
-                "summary": "Get all approved reviews for a course",
+                "summary": "Get all approved reviews for a course (role: Any Role)",
                 "operationId": "getCourseReviews",
                 "parameters": [
                     {
@@ -4914,7 +5218,7 @@
                 "tags": [
                     "CourseReviews"
                 ],
-                "summary": "Submit a review for a course",
+                "summary": "Submit a review for a course (role: Any Role)",
                 "operationId": "submitCourseReview",
                 "parameters": [
                     {
@@ -5136,7 +5440,7 @@
                 "tags": [
                     "Enrollments"
                 ],
-                "summary": "Enroll authenticated user in a course",
+                "summary": "Enroll authenticated user in a course (role: Student only)",
                 "operationId": "createEnrollment",
                 "requestBody": {
                     "required": true,
@@ -5323,7 +5627,7 @@
                 "tags": [
                     "Enrollments"
                 ],
-                "summary": "Get all enrollments of a specific user",
+                "summary": "Get all enrollments of a specific user (role: Student only)",
                 "operationId": "7901015da31510d160b64161e01f50cb",
                 "parameters": [
                     {
@@ -5431,7 +5735,7 @@
                 "tags": [
                     "Lessons"
                 ],
-                "summary": "Get all lessons",
+                "summary": "Get all lessons (role: Admin only)",
                 "operationId": "getLessons",
                 "parameters": [
                     {
@@ -5608,7 +5912,7 @@
                 "tags": [
                     "Lessons"
                 ],
-                "summary": "Update an existing lesson (Admin only)",
+                "summary": "Update an existing lesson (role: Admin only)",
                 "operationId": "f0193a141881c250c4879a0cead36e7c",
                 "requestBody": {
                     "required": true,
@@ -5828,7 +6132,7 @@
                 "tags": [
                     "Lessons"
                 ],
-                "summary": "Create a new lesson for a course (Admin only)",
+                "summary": "Create a new lesson for a course (role: Admin only)",
                 "operationId": "0cb56050616e85692241b7cb1a3eef48",
                 "requestBody": {
                     "required": true,
@@ -5850,7 +6154,8 @@
                                             "video",
                                             "text",
                                             "file",
-                                            "quiz"
+                                            "pdf",
+                                            "audio"
                                         ],
                                         "example": "video"
                                     },
@@ -5896,6 +6201,10 @@
                                     "content": {
                                         "type": "string",
                                         "example": "Lesson detailed text content here..."
+                                    },
+                                    "pdf_read_completion_required": {
+                                        "type": "boolean",
+                                        "example": ""
                                     },
                                     "section_ids": {
                                         "type": "array",
@@ -6041,12 +6350,147 @@
                 ]
             }
         },
+        "/v1.0/lessons/{id}": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Get a single lesson by ID (role: Admin only)",
+                "operationId": "getLessonById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "lesson retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Laravel Basics"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Learn Laravel framework"
+                                        },
+                                        "price": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 49.99000000000000198951966012828052043914794921875
+                                        },
+                                        "category_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-19T12:00:00Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-19T12:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to view this course category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course Category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict: Resource conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conflict occurred while retrieving this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/lessons/{ids}": {
             "delete": {
                 "tags": [
                     "Lessons"
                 ],
-                "summary": "Delete a lesson",
+                "summary": "Delete a lesson (role: Admin only)",
                 "operationId": "6ee17e99bafc6430d2cffa52ecbf3365",
                 "parameters": [
                     {
@@ -6109,38 +6553,38 @@
                 ]
             }
         },
-        "/v1.0/lessons/{id}/progress": {
+        "/v1.0/lessons/progress": {
             "put": {
                 "tags": [
                     "LessonProgress"
                 ],
-                "summary": "Update lesson progress for authenticated user",
+                "summary": "Update lesson progress for authenticated user (role: Student only)",
                 "operationId": "updateLessonProgress",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Lesson ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 5
-                        }
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "course_id",
+                                    "lesson_id",
                                     "is_completed"
                                 ],
                                 "properties": {
+                                    "course_id": {
+                                        "description": "Course ID to update progress for",
+                                        "type": "integer",
+                                        "example": ""
+                                    },
+                                    "lesson_id": {
+                                        "description": "Lesson ID to update progress for",
+                                        "type": "integer",
+                                        "example": ""
+                                    },
                                     "is_completed": {
                                         "description": "Mark lesson as completed or not",
                                         "type": "boolean",
-                                        "example": true
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -6155,17 +6599,34 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "user_id": {
-                                            "type": "integer",
-                                            "example": 1
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "lesson_id": {
-                                            "type": "integer",
-                                            "example": 5
-                                        },
-                                        "progress_status": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "completed"
+                                            "example": "Lesson progress updated"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "lesson_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "course_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "progress_status": {
+                                                    "type": "string",
+                                                    "example": "completed"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -6289,46 +6750,33 @@
                 ]
             }
         },
-        "/v1.0/lessons/{id}/time": {
+        "/v1.0/lessons/time": {
             "put": {
                 "tags": [
                     "LessonProgress"
                 ],
-                "summary": "Track lesson time (start / stop / heartbeat) for authenticated user",
+                "summary": "Track lesson time (start / stop / heartbeat) for authenticated user (role: Student only)",
                 "operationId": "trackLessonTime",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Lesson ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 5
-                        }
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "course_id",
+                                    "lesson_id",
                                     "event"
                                 ],
                                 "properties": {
-                                    "event": {
-                                        "type": "string",
-                                        "enum": [
-                                            "start",
-                                            "stop",
-                                            "heartbeat"
-                                        ],
-                                        "example": "start"
+                                    "course_id": {
+                                        "description": "Course ID to update progress for",
+                                        "type": "integer",
+                                        "example": ""
                                     },
-                                    "client_timestamp": {
-                                        "description": "Optional client unix timestamp",
-                                        "type": "integer"
+                                    "lesson_id": {
+                                        "description": "Lesson ID",
+                                        "type": "integer",
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -6406,7 +6854,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Get all options",
+                "summary": "Get all options (role: Admin only)",
                 "description": "Returns a list of all available options.",
                 "operationId": "getAllOptions",
                 "responses": {
@@ -6461,7 +6909,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Update an existing option",
+                "summary": "Update an existing option (role: Admin only)",
                 "description": "Updates an option's details such as text, correctness, or associated question.",
                 "operationId": "updateOption",
                 "requestBody": {
@@ -6670,7 +7118,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Create a new option",
+                "summary": "Create a new option (role: Admin only)",
                 "description": "Creates a new option for a specific question.",
                 "operationId": "createOption",
                 "requestBody": {
@@ -6855,7 +7303,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Get option by ID",
+                "summary": "Get option by ID (role: Admin only)",
                 "description": "Retrieve a specific option by its unique ID.",
                 "operationId": "getOptionById",
                 "parameters": [
@@ -6966,7 +7414,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Delete one or more options by ID",
+                "summary": "Delete one or more options by ID (role: Admin only)",
                 "operationId": "deleteOptions",
                 "parameters": [
                     {
@@ -6994,7 +7442,7 @@
                 "tags": [
                     "question_management.options"
                 ],
-                "summary": "Get options by question ID",
+                "summary": "Get options by question ID (role: Admin only)",
                 "description": "Retrieve all options associated with a specific question ID.",
                 "operationId": "getOptionByQuestionId",
                 "parameters": [
@@ -7108,7 +7556,7 @@
                 "tags": [
                     "question_management.question_category"
                 ],
-                "summary": "Get all question categories",
+                "summary": "Get all question categories (role: Admin only)",
                 "description": "Fetches all question categories in the system.",
                 "operationId": "getQuestionCategories",
                 "responses": {
@@ -7167,7 +7615,7 @@
                 "tags": [
                     "question_management.question_category"
                 ],
-                "summary": "Update an existing question category",
+                "summary": "Update an existing question category (role: Admin only)",
                 "operationId": "updateQuestionCategory",
                 "requestBody": {
                     "required": true,
@@ -7312,7 +7760,7 @@
                 "tags": [
                     "question_management.question_category"
                 ],
-                "summary": "Create a new question category",
+                "summary": "Create a new question category (role: Admin only)",
                 "operationId": "createQuestionCategory",
                 "requestBody": {
                     "required": true,
@@ -7408,18 +7856,17 @@
             }
         },
         "/v1.0/question-categories/{id}": {
-            "delete": {
+            "get": {
                 "tags": [
                     "question_management.question_category"
                 ],
-                "summary": "Delete a question category",
-                "description": "Deletes a question category by its ID.",
-                "operationId": "deleteQuestionCategory",
+                "summary": "Get a single question category by ID (role: Admin only)",
+                "operationId": "getQuestionCategoryById",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID of the question category to delete",
+                        "description": "Course Question ID",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -7429,7 +7876,140 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Category deleted successfully",
+                        "description": "Question Category retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Web Development"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "example": "web-development"
+                                        },
+                                        "parent_question_category_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "description"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-18T12:00:00Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-09-18T12:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to view this course category"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course Category not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course Category not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict: Resource conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Conflict occurred while retrieving this resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "question_management.question_category"
+                ],
+                "summary": "Delete a question category (role: Admin only)",
+                "description": "Deletes a question category by its ID.",
+                "operationId": "deleteQuestionCategory",
+                "parameters": [
+                    {
+                        "name": "ids",
+                        "in": "path",
+                        "description": "ID of the question category to delete (comma-separated like 1,2,3)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Question Category deleted successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7481,9 +8061,41 @@
                 "tags": [
                     "question_management.question"
                 ],
-                "summary": "Get all questions",
+                "summary": "Get all questions (role: Admin only)",
                 "description": "Retrieve a list of all questions.",
                 "operationId": "getAllQuestions",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "question_type",
+                        "in": "query",
+                        "description": "Filter by question type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": ""
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of questions",
@@ -7622,7 +8234,7 @@
                 "tags": [
                     "question_management.question"
                 ],
-                "summary": "Update an existing question with options",
+                "summary": "Update an existing question with options (role: Admin only)",
                 "description": "Updates a question and its options by question ID.",
                 "operationId": "updateQuestion",
                 "requestBody": {
@@ -7768,7 +8380,7 @@
                 "tags": [
                     "question_management.question"
                 ],
-                "summary": "Create or update a question",
+                "summary": "Create or update a question (role: Admin only)",
                 "description": "Creates a new question or updates existing options for a specific quiz.",
                 "operationId": "createQuestion",
                 "requestBody": {
@@ -8015,7 +8627,7 @@
                 "tags": [
                     "question_management.question"
                 ],
-                "summary": "Get question by ID",
+                "summary": "Get question by ID (role: Admin only)",
                 "description": "Retrieve a specific question by its unique ID.",
                 "operationId": "getQuestionById",
                 "parameters": [
@@ -8180,7 +8792,7 @@
                 "tags": [
                     "question_management.question"
                 ],
-                "summary": "Delete one or more questions by ID",
+                "summary": "Delete one or more questions by ID (role: Admin only)",
                 "description": "Deletes one or multiple questions specified by a comma-separated list of IDs.",
                 "operationId": "deleteQuestions",
                 "parameters": [
@@ -8336,40 +8948,36 @@
                 ]
             }
         },
-        "/v1.0/quiz-attempts/{id}/grade": {
+        "/v1.0/quiz-attempts/grade": {
             "put": {
                 "tags": [
                     "QuizAttempts"
                 ],
-                "summary": "Manually grade a quiz attempt (Admin only)",
+                "summary": "Manually grade a quiz attempt (role: Admin, Owner, or Lecturer only)",
                 "operationId": "gradeQuizAttempt",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Quiz Attempt ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "attempt_id",
                                     "question_id",
                                     "score"
                                 ],
                                 "properties": {
+                                    "attempt_id": {
+                                        "description": "Quiz Attempt ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "question_id": {
+                                        "description": "Question ID to grade",
                                         "type": "integer",
                                         "example": 5
                                     },
                                     "score": {
+                                        "description": "Score assigned for the question or attempt",
                                         "type": "number",
                                         "example": 10
                                     }
@@ -8399,10 +9007,6 @@
                                                 "attempt_id": {
                                                     "type": "integer",
                                                     "example": 1
-                                                },
-                                                "message": {
-                                                    "type": "string",
-                                                    "example": "Grade updated."
                                                 },
                                                 "new_score": {
                                                     "type": "number",
@@ -8533,16 +9137,42 @@
                 ]
             }
         },
-        "/v1.0/quizzes/{id}/attempts/start": {
+        "/v1.0/quizzes/attempts/start": {
             "post": {
                 "tags": [
                     "QuizAttempts"
                 ],
-                "summary": "Start a quiz attempt for authenticated user",
+                "summary": "Start a quiz attempt for authenticated user (role: Student only)",
                 "operationId": "startQuizAttempt",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quiz_id"
+                                ],
+                                "properties": {
+                                    "quiz_id": {
+                                        "description": "ID of the quiz to start attempt for",
+                                        "type": "integer",
+                                        "example": ""
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
                         "description": "Quiz attempt started"
+                    },
+                    "400": {
+                        "description": "User already has an active attempt or invalid quiz ID"
+                    },
+                    "401": {
+                        "description": "Unauthorized or user not a student"
                     }
                 },
                 "security": [
@@ -8552,16 +9182,68 @@
                 ]
             }
         },
-        "/v1.0/quizzes/{id}/attempts/submit": {
+        "/v1.0/quizzes/attempts/submit": {
             "post": {
                 "tags": [
                     "QuizAttempts"
                 ],
-                "summary": "Submit a quiz attempt for authenticated user",
+                "summary": "Submit a quiz attempt for authenticated user (role: Student only)",
                 "operationId": "submitQuizAttempt",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quiz_id",
+                                    "answers"
+                                ],
+                                "properties": {
+                                    "quiz_id": {
+                                        "description": "ID of the quiz being submitted",
+                                        "type": "integer",
+                                        "example": ""
+                                    },
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "question_id",
+                                                "user_answer"
+                                            ],
+                                            "properties": {
+                                                "question_id": {
+                                                    "description": "ID of the question",
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "user_answer": {
+                                                    "description": "User's answer (option ID or text)",
+                                                    "type": "string",
+                                                    "example": "OptionA"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "201": {
-                        "description": "Quiz attempt submitted"
+                        "description": "Quiz attempt submitted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid input or already submitted"
+                    },
+                    "401": {
+                        "description": "Unauthorized or user not a student"
+                    },
+                    "403": {
+                        "description": "Time is up! Quiz attempt expired"
                     }
                 },
                 "security": [
@@ -8576,7 +9258,7 @@
                 "tags": [
                     "Quizzes"
                 ],
-                "summary": "Get quiz details with questions and options",
+                "summary": "Get quiz details with questions and options (role: Admin only)",
                 "operationId": "getQuizWithQuestionsById",
                 "parameters": [
                     {
@@ -8586,7 +9268,7 @@
                         "required": true,
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": ""
                         }
                     },
                     {
@@ -8596,7 +9278,7 @@
                         "required": false,
                         "schema": {
                             "type": "boolean",
-                            "example": true
+                            "example": ""
                         }
                     },
                     {
@@ -8606,7 +9288,7 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "example": 10
+                            "example": ""
                         }
                     }
                 ],
@@ -8771,7 +9453,7 @@
                 "tags": [
                     "Quizzes"
                 ],
-                "summary": "Delete a quiz",
+                "summary": "Delete a quiz (role: Admin only)",
                 "operationId": "deleteQuiz",
                 "parameters": [
                     {
@@ -8801,7 +9483,7 @@
                 "tags": [
                     "Quizzes"
                 ],
-                "summary": "Get quiz details with questions and options",
+                "summary": "Get quiz details with questions and options (role: Admin only)",
                 "operationId": "getQuizWithQuestions",
                 "parameters": [
                     {
@@ -8986,7 +9668,7 @@
                 "tags": [
                     "Quizzes"
                 ],
-                "summary": "Update a quiz and sync questions",
+                "summary": "Update a quiz and sync questions (role: Admin only)",
                 "operationId": "updateQuiz",
                 "requestBody": {
                     "required": true,
@@ -9038,7 +9720,7 @@
                 "tags": [
                     "Quizzes"
                 ],
-                "summary": "Create a new quiz and attach questions",
+                "summary": "Create a new quiz and attach questions (role: Admin only)",
                 "operationId": "createQuiz",
                 "requestBody": {
                     "required": true,
@@ -9135,7 +9817,7 @@
                 "tags": [
                     "Reports"
                 ],
-                "summary": "Get sales report for all courses (Admin only)",
+                "summary": "Get sales report for all courses (role: Admin only)",
                 "operationId": "sales",
                 "responses": {
                     "200": {
@@ -9210,7 +9892,7 @@
                 "tags": [
                     "Reports"
                 ],
-                "summary": "Get enrollment count per course (Admin only)",
+                "summary": "Get enrollment count per course (role: Admin only)",
                 "operationId": "enrollmentReport",
                 "responses": {
                     "200": {
@@ -9346,7 +10028,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Delete a section and its lessons",
+                "summary": "Delete a section and its lessons (role: Admin only)",
                 "operationId": "deleteSection",
                 "parameters": [
                     {
@@ -9415,7 +10097,7 @@
                     "section"
                 ],
                 "summary": "Fetch all sections",
-                "description": "Retrieve a list of all sections",
+                "description": "Retrieve a list of all sections (role: Admin only)",
                 "operationId": "getSections",
                 "responses": {
                     "200": {
@@ -9515,7 +10197,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Create a new section for a course (Admin only)",
+                "summary": "Create a new section for a course (role: Admin only)",
                 "operationId": "updateSection",
                 "requestBody": {
                     "required": true,
@@ -9720,7 +10402,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Create a new section for a course (Admin only)",
+                "summary": "Create a new section for a course (role: Admin only)",
                 "operationId": "createSection",
                 "requestBody": {
                     "required": true,
@@ -9922,7 +10604,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "summary": "Update a section with lessons and quizzes (role: Admin only)",
                 "operationId": "updateSectionWithLessons",
                 "requestBody": {
                     "required": true,
@@ -10222,7 +10904,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Update a section with lessons and quizzes (Admin only)",
+                "summary": "Update a section with lessons and quizzes (role: Admin only)",
                 "operationId": "updateSectionAddLessons",
                 "requestBody": {
                     "required": true,
@@ -10522,7 +11204,7 @@
                 "tags": [
                     "section"
                 ],
-                "summary": "Remove lessons or quizzes from a section (Admin only)",
+                "summary": "Remove lessons or quizzes from a section (role: Admin only)",
                 "operationId": "updateSectionRemoveLessons",
                 "requestBody": {
                     "required": true,
@@ -10682,7 +11364,7 @@
                     "section"
                 ],
                 "summary": "Fetch a single section by ID",
-                "description": "Retrieve details of a specific section using its ID",
+                "description": "Retrieve details of a specific section using its ID (role: Admin only)",
                 "operationId": "getSectionById",
                 "parameters": [
                     {
@@ -10809,7 +11491,7 @@
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to get busuness _setting",
+                "summary": "This method is to get busuness setting (role: Admin only)",
                 "description": "This method is to get busuness setting",
                 "operationId": "getBusinessSettings",
                 "responses": {
@@ -10872,7 +11554,7 @@
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to update busuness setting",
+                "summary": "This method is to update busuness setting (role: Admin only)",
                 "description": "This method is to update busuness setting",
                 "operationId": "updateBusinessSettings",
                 "requestBody": {
@@ -10963,7 +11645,7 @@
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to get Business_setting",
+                "summary": "This method is to get Business setting (role: Admin only)",
                 "description": "This method is to get Business_setting",
                 "operationId": "getBusinessSettingsClient",
                 "parameters": [
@@ -11072,7 +11754,7 @@
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Create a Stripe Payment Intent for a course",
+                "summary": "Create a Stripe Payment Intent for a course (role: Student only)",
                 "description": "Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
                 "operationId": "createPaymentIntent",
                 "requestBody": {
@@ -11231,9 +11913,9 @@
         "/v1.0/courses/{id}/complete": {
             "post": {
                 "tags": [
-                    "Certificates"
+                    "Trash"
                 ],
-                "summary": "Generate a certificate for a completed course",
+                "summary": "Generate a certificate for a completed course ",
                 "operationId": "generateCertificate",
                 "parameters": [
                     {
@@ -11451,7 +12133,7 @@
         "/v1.0/certificates/download/{id}": {
             "get": {
                 "tags": [
-                    "Certificates"
+                    "Trash"
                 ],
                 "summary": "Download a certificate PDF",
                 "operationId": "downloadCertificate",
@@ -11585,7 +12267,7 @@
         "/v1.0/certificates/verify/{code}": {
             "get": {
                 "tags": [
-                    "Certificates"
+                    "Trash"
                 ],
                 "summary": "Verify a certificate by code",
                 "operationId": "verifyCertificate",
@@ -11770,7 +12452,7 @@
                 "tags": [
                     "user_management"
                 ],
-                "summary": "Get user details by ID",
+                "summary": "Get user details by ID (role: Admin only)",
                 "operationId": "getUserById",
                 "parameters": [
                     {
@@ -11914,7 +12596,7 @@
                 "tags": [
                     "user_management"
                 ],
-                "summary": "Get all users",
+                "summary": "Get all users (role: Admin only)",
                 "description": "Retrieve a list of all users in the system",
                 "operationId": "getAllUsers",
                 "responses": {
@@ -12099,7 +12781,7 @@
                 "tags": [
                     "user_management"
                 ],
-                "summary": "Update user profile",
+                "summary": "Update user profile (role: Admin only)",
                 "operationId": "updateUser",
                 "requestBody": {
                     "required": true,
@@ -12307,7 +12989,7 @@
                 "tags": [
                     "user_management"
                 ],
-                "summary": "Delete users",
+                "summary": "Delete users (role: Admin only)",
                 "operationId": "deleteUsers",
                 "parameters": [
                     {
@@ -12458,6 +13140,10 @@
         {
             "name": "setting",
             "description": "setting"
+        },
+        {
+            "name": "Trash",
+            "description": "Trash"
         },
         {
             "name": "user_management",
