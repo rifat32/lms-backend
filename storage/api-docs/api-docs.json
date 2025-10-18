@@ -2640,12 +2640,77 @@
                 ]
             }
         },
+        "/v1.0/client/courses/{id}": {
+            "get": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Get a course by ID (Public or Authenticated)",
+                "description": "For guests, shows limited info. For authenticated students enrolled in the course, shows full details.",
+                "operationId": "getCourseByIdUnified",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course retrieved successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/client/courses": {
             "get": {
                 "tags": [
                     "course_management.course"
                 ],
-                "summary": "Get all courses (role: Student only)",
+                "summary": "Get all courses (Public and Authenticated users)",
+                "description": "Retrieve all courses. If user is logged in, filter by enrolled status or show personalized data.",
+                "operationId": "getCoursesClientUnified",
+                "parameters": [
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "1 for enrolled, 0 for not enrolled",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of courses"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "trashed/v1.0/client/courses": {
+            "get": {
+                "tags": [
+                    "trashed"
+                ],
+                "summary": "Get all courses (Public - No authentication required) (role: Student only)",
+                "description": "Retrieve all courses for non-logged in users. Never use for logged in users.",
                 "operationId": "getCoursesClient",
                 "parameters": [
                     {
@@ -2841,13 +2906,13 @@
                 ]
             }
         },
-        "/v1.0/client/courses/{id}": {
+        "trashed/v1.0/client/courses/{id}": {
             "get": {
                 "tags": [
-                    "course_management.course"
+                    "trashed"
                 ],
-                "summary": "Get a single course by ID (role: Student only)",
-                "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
+                "summary": "Get a single course by ID (Public or Non-enrolled users) (role: Student only)",
+                "description": "Retrieve a course by its ID for non-logged in users OR for logged-in users viewing a non-enrolled course",
                 "operationId": "getCourseByIdClient",
                 "parameters": [
                     {
@@ -2985,10 +3050,10 @@
         "/v1.0/client/courses/secure/{id}": {
             "get": {
                 "tags": [
-                    "course_management.course"
+                    "trashed"
                 ],
-                "summary": "Get a single course by ID (role: Student only)",
-                "description": "Retrieve a course by its ID along with lessons, FAQs, and notices",
+                "summary": "Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
+                "description": "Retrieve detailed course information including lessons, quizzes, and progress. \n *     Authenticated and enrolled users only",
                 "operationId": "getCourseByIdSecureClient",
                 "parameters": [
                     {
@@ -3126,9 +3191,10 @@
         "/v1.0/client/courses/secure": {
             "get": {
                 "tags": [
-                    "course_management.course"
+                    "trashed"
                 ],
-                "summary": "Get all courses (role: Student only)",
+                "summary": "Get all courses (Authenticated users only) (role: Student only)",
+                "description": "Retrieve courses for logged-in users only.",
                 "operationId": "getCoursesClientSecure",
                 "parameters": [
                     {
@@ -3573,10 +3639,6 @@
                                         "format": "date",
                                         "example": "2025-12-31"
                                     },
-                                    "is_free": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
                                     "status": {
                                         "type": "string",
                                         "enum": [
@@ -3707,10 +3769,6 @@
                                             "type": "string",
                                             "format": "date",
                                             "example": "2025-12-31"
-                                        },
-                                        "is_free": {
-                                            "type": "boolean",
-                                            "example": false
                                         },
                                         "status": {
                                             "type": "string",
@@ -3965,10 +4023,6 @@
                                         "format": "date",
                                         "example": "2025-12-31"
                                     },
-                                    "is_free": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
                                     "status": {
                                         "type": "string",
                                         "enum": [
@@ -4084,10 +4138,6 @@
                                             "type": "number",
                                             "format": "float",
                                             "example": 49.99000000000000198951966012828052043914794921875
-                                        },
-                                        "is_free": {
-                                            "type": "boolean",
-                                            "example": false
                                         },
                                         "status": {
                                             "type": "string",
@@ -4285,10 +4335,6 @@
                                         "format": "date",
                                         "example": "2025-12-31"
                                     },
-                                    "is_free": {
-                                        "type": "boolean",
-                                        "example": false
-                                    },
                                     "status": {
                                         "type": "string",
                                         "enum": [
@@ -4419,10 +4465,6 @@
                                             "type": "string",
                                             "format": "date",
                                             "example": "2025-12-31"
-                                        },
-                                        "is_free": {
-                                            "type": "boolean",
-                                            "example": false
                                         },
                                         "status": {
                                             "type": "string",
@@ -11910,6 +11952,385 @@
                 ]
             }
         },
+        "/v1.0/payments": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get payments with filters",
+                "operationId": "getPayments",
+                "parameters": [
+                    {
+                        "name": "course_id",
+                        "in": "query",
+                        "description": "Filter by course ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by payment status: completed, pending, failed",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "completed"
+                        }
+                    },
+                    {
+                        "name": "transaction_id",
+                        "in": "query",
+                        "description": "Search by transaction ID",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "PAY-001"
+                        }
+                    },
+                    {
+                        "name": "student_name",
+                        "in": "query",
+                        "description": "Search by student name",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "John"
+                        }
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "description": "Filter from date (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024-01-01"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "description": "Filter to date (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2024-01-31"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of payments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payments retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "transaction_id": {
+                                                        "type": "string",
+                                                        "example": "PAY-001"
+                                                    },
+                                                    "amount": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 73.9899999999999948840923025272786617279052734375
+                                                    },
+                                                    "method": {
+                                                        "type": "string",
+                                                        "example": "credit_card"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "completed"
+                                                    },
+                                                    "paid_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-01-13T12:00:00Z"
+                                                    },
+                                                    "course": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "React Fundamentals"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "student": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "john@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "summary": {
+                                            "properties": {
+                                                "total_earnings": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15420.5
+                                                },
+                                                "this_month_earnings": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 3240.75
+                                                },
+                                                "available_balance": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 892.299999999999954525264911353588104248046875
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payments/{id}": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Get payment details by ID",
+                "operationId": "getPaymentDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Payment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "transaction_id": {
+                                                    "type": "string",
+                                                    "example": "PAY-001"
+                                                },
+                                                "amount": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 73.9899999999999948840923025272786617279052734375
+                                                },
+                                                "method": {
+                                                    "type": "string",
+                                                    "example": "credit_card"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "completed"
+                                                },
+                                                "payment_intent_id": {
+                                                    "type": "string",
+                                                    "example": "pi_123456789"
+                                                },
+                                                "paid_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-13T12:00:00Z"
+                                                },
+                                                "course": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "React Fundamentals"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Learn React fundamentals"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "student": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "John Doe"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john@example.com"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/courses/{id}/complete": {
             "post": {
                 "tags": [
@@ -13116,6 +13537,10 @@
         {
             "name": "course_management.course",
             "description": "course_management.course"
+        },
+        {
+            "name": "trashed",
+            "description": "trashed"
         },
         {
             "name": "course_management.course_faq",

@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @OA\Tag(
@@ -28,12 +29,171 @@ class CourseController extends Controller
 
 
 
+
+
+
+/**
+ * @OA\Get(
+ *     path="/v1.0/client/courses/{id}",
+ *     tags={"course_management.course"},
+ *     operationId="getCourseByIdUnified",
+ *     summary="Get a course by ID (Public or Authenticated)",
+ *     description="For guests, shows limited info. For authenticated students enrolled in the course, shows full details.",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="Course ID",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(response=200, description="Course retrieved successfully")
+ * )
+ */
+public function getCourseByIdUnified($id)
+{
+    $user = auth('api')->user();
+
+           Auth::login($user);
+
+    $query = Course::with([
+        'categories',
+        'sections.sectionables.sectionable',
+        'reviews'
+    ])
+    ->filters();
+
+    if ($user) {
+
+        // // Authenticated
+        // if (!$user->hasRole('student')) {
+        //     return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        // }
+
+        // Restrict before enrollment if needed
+        $query->restrictBeforeEnrollment();
+    } else {
+        // Guest
+        $query->where('status', 'published');
+    }
+
+    $course = $query->find($id);
+
+    if (!$course) {
+        return response()->json(['success' => false, 'message' => 'Course not found'], 404);
+    }
+
+    // For enrolled users, load more details
+    if ($user && $course->enrollment()->where('user_id', $user->id)->exists()) {
+        $course->sections->each(function ($section) {
+            $section->sectionables->each(function ($sectionable, $index) {
+                $sectionable->order = $index;
+                if ($sectionable->sectionable_type === Lesson::class) {
+                    $sectionable->sectionable->load('lesson_progress');
+                }
+                if ($sectionable->sectionable_type === Quiz::class) {
+                    $sectionable->sectionable->load(['questions.options']);
+                }
+            });
+        });
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Course retrieved successfully',
+        'data' => $course
+    ], 200);
+}
+
+
+/**
+ * @OA\Get(
+ *     path="/v1.0/client/courses",
+ *     tags={"course_management.course"},
+ *     operationId="getCoursesClientUnified",
+ *     summary="Get all courses (Public and Authenticated users)",
+ *     description="Retrieve all courses. If user is logged in, filter by enrolled status or show personalized data.",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="is_enrolled",
+ *         in="query",
+ *         required=false,
+ *         description="1 for enrolled, 0 for not enrolled",
+ *         @OA\Schema(type="string", default="", example="")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="List of courses"
+ *     )
+ * )
+ */
+public function getCoursesClientUnified(Request $request)
+{
+   
+
+    $user = auth('api')->user();
+
+           Auth::login($user);
+
+    // ✅ Base query
+    $query = Course::with([
+        'categories:id,name',
+        'sections.sectionables.sectionable:id,title',
+        'reviews'
+    ])->filters();
+
+    if ($user) {
+        // Authenticated user logic
+        // if (!$user->hasAnyRole(['student'])) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'You are not authorized for this action.'
+        //     ], 403);
+        // }
+
+        // If filter by enrollment
+        if ($request->has('is_enrolled')) {
+            $is_enrolled = $request->boolean('is_enrolled');
+            $query->whereHas('enrollment', function ($q) use ($user, $is_enrolled) {
+                if ($is_enrolled) {
+                    $q->where('user_id', $user->id);
+                } else {
+                    $q->where('user_id', '!=', $user->id);
+                }
+            });
+        }
+    } else {
+        // Guest logic — show only published courses
+        $query->where('status', 'published');
+    }
+
+    $courses = retrieve_data($query, 'created_at', 'courses');
+    $courses['data']->each(fn($c) => $c->categories->makeHidden('pivot'));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Courses retrieved successfully',
+        'meta' => $courses['meta'],
+        'data' => $courses['data'],
+    ], 200);
+}
+
+
+
+
+
+
+
+
+
     /**
      * @OA\Get(
-     *     path="/v1.0/client/courses",
-     *     tags={"course_management.course"},
+     *     path="trashed/v1.0/client/courses",
+     *     tags={"Trash"},
      *     operationId="getCoursesClient",
-     *     summary="Get all courses (role: Student only)",
+
+     *  *     summary="Get all courses (Public - No authentication required) (role: Student only)",
+ *     description="Retrieve all courses for non-logged in users. Never use for logged in users.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="category_id",
@@ -167,11 +327,12 @@ class CourseController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/v1.0/client/courses/{id}",
-     *     tags={"course_management.course"},
+     *     path="trashed/v1.0/client/courses/{id}",
+     *     tags={"Trash"},
      *     operationId="getCourseByIdClient",
-     *     summary="Get a single course by ID (role: Student only)",
-     *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
+     *  *     summary="Get a single course by ID (Public or Non-enrolled users) (role: Student only)",
+ *     description="Retrieve a course by its ID for non-logged in users OR for logged-in users viewing a non-enrolled course",
+
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -280,10 +441,11 @@ class CourseController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/client/courses/secure/{id}",
-     *     tags={"course_management.course"},
+     *     tags={"Trash"},
      *     operationId="getCourseByIdSecureClient",
-     *     summary="Get a single course by ID (role: Student only)",
-     *     description="Retrieve a course by its ID along with lessons, FAQs, and notices",
+     *  *     summary="Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
+ *     description="Retrieve detailed course information including lessons, quizzes, and progress. 
+ *     Authenticated and enrolled users only",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -421,10 +583,16 @@ class CourseController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/client/courses/secure",
-     *     tags={"course_management.course"},
+     *     tags={"Trash"},
      *     operationId="getCoursesClientSecure",
-     *     summary="Get all courses (role: Student only)",
      *     security={{"bearerAuth":{}}},
+     * 
+     *     summary="Get all courses (Authenticated users only) (role: Student only)",
+     *     description="Retrieve courses for logged-in users only.",
+     * 
+     * 
+     * 
+     * 
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
@@ -523,7 +691,6 @@ class CourseController extends Controller
                 "message" => "You can not perform this action"
             ], 401);
         }
-
 
         $query = Course::with([
             'categories' => function ($q) {
@@ -808,7 +975,6 @@ class CourseController extends Controller
      *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
      *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-     *         @OA\Property(property="is_free", type="boolean", example=false),
      *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
      *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
@@ -841,7 +1007,6 @@ class CourseController extends Controller
      *             @OA\Property(property="title", type="string", example="Laravel Basics"),
      *             @OA\Property(property="description", type="string", example="Learn Laravel framework"),
      *             @OA\Property(property="price", type="number", format="float", example=49.99),
-     *             @OA\Property(property="is_free", type="boolean", example=false),
      *             @OA\Property(property="status", type="string", example="draft"),
      *             @OA\Property(property="category_id", type="integer", example=1),
      *             @OA\Property(property="created_by", type="integer", example=1),
@@ -988,7 +1153,6 @@ class CourseController extends Controller
      *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
      *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-     *         @OA\Property(property="is_free", type="boolean", example=false),
      *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
      *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
@@ -1025,7 +1189,6 @@ class CourseController extends Controller
      *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
      *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-     *         @OA\Property(property="is_free", type="boolean", example=false),
      *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
      *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
@@ -1112,6 +1275,15 @@ class CourseController extends Controller
             // FIND COURSE
             $course = Course::findOrFail($request_payload['id']);
 
+              // ========================
+            // UPDATE COURSE
+            // ========================
+            $request_payload['cover'] = $request_payload['cover'] ?? null;
+
+            $course->update($request_payload);
+
+            
+
             // ========================
             // HANDLE COVER (SINGLE FILE)
             // ========================
@@ -1140,13 +1312,9 @@ class CourseController extends Controller
                 $cover_filename = basename($request->input('cover'));
             }
 
-            $request_payload['cover'] = $cover_filename;
-
-            // ========================
-            // UPDATE COURSE
-            // ========================
-            $course->update($request_payload);
-
+            $course->cover = $cover_filename;
+            $course->save();
+          
             // ========================
             // SYNC CATEGORIES
             // ========================
@@ -1194,7 +1362,6 @@ class CourseController extends Controller
      *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
      *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-     *         @OA\Property(property="is_free", type="boolean", example=false),
      *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
      *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
@@ -1231,7 +1398,7 @@ class CourseController extends Controller
      *         @OA\Property(property="sale_price", type="number", format="float", example=29.99),
      *         @OA\Property(property="price_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="price_end_date", type="string", format="date", example="2025-12-31"),
-     *         @OA\Property(property="is_free", type="boolean", example=false),
+
      *         @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="draft"),
      *         @OA\Property(property="status_start_date", type="string", format="date", example="2025-10-01"),
      *         @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31"),
@@ -1318,34 +1485,7 @@ class CourseController extends Controller
             // FIND BY ID
             $course = Course::findOrFail($request_payload['id']);
 
-            if ($request->hasFile('cover')) {
-
-
-                $file = $request->file('cover');
-                $extension = $file->getClientOriginalExtension();
-                $filename = uniqid() . '_' . time() . '.' . $extension;
-                $folder_path = "business_1/course_{$course->id}";
-
-
-
-                $file->storeAs($folder_path, $filename, 'public');
-
-                // Delete old cover if exists
-                if ($course->cover) {
-                    $old_path = "business_1/course_{$course->id}/{$course->getRawOriginal('cover')}";
-                    if (Storage::disk('public')->exists($old_path)) {
-                        Storage::disk('public')->delete($old_path);
-                    }
-                }
-
-                $course->cover = $filename; // store only filename
-                $course->save();
-            }
-            if (isset($request_payload["category_ids"])) {
-                $course->categories()->sync($request_payload["category_ids"]);
-            }
-
-            // SEND RESPONSE
+              // SEND RESPONSE
             if (empty($course)) {
                 return response()->json([
                     'success' => false,
@@ -1353,8 +1493,53 @@ class CourseController extends Controller
                 ], 404);
             }
 
-            // UPDATE
+          // ========================
+            // UPDATE COURSE
+            // ========================
+            $request_payload['cover'] = $request_payload['cover'] ?? null;
+
             $course->update($request_payload);
+
+            
+
+            // ========================
+            // HANDLE COVER (SINGLE FILE)
+            // ========================
+            $cover_filename = $course->getRawOriginal('cover');
+            $folder_path = "business_1/course_{$course->id}";
+
+            // If uploaded file
+            if ($request->hasFile('cover')) {
+                $file = $request->file('cover');
+                $new_filename = $file->hashName();
+                $file->storeAs($folder_path, $new_filename, 'public');
+
+                // Delete old cover if exists
+                if ($cover_filename) {
+                    $old_path = "{$folder_path}/{$cover_filename}";
+                    if (Storage::disk('public')->exists($old_path)) {
+                        Storage::disk('public')->delete($old_path);
+                    }
+                }
+
+                $cover_filename = $new_filename;
+            }
+
+            // If string file path provided instead of upload
+            if ($request->filled('cover') && is_string($request->input('cover'))) {
+                $cover_filename = basename($request->input('cover'));
+            }
+
+            $course->cover = $cover_filename;
+            $course->save();
+
+            if (isset($request_payload["category_ids"])) {
+                $course->categories()->sync($request_payload["category_ids"]);
+            }
+
+          
+
+       
 
             // COMMIT TRANSACTION
             DB::commit();

@@ -96,6 +96,10 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
     });
 
+    Route::get('/v1.0/payments', [StripePaymentController::class, 'getPayments']);
+    Route::get('/v1.0/payments/{id}', [StripePaymentController::class, 'getPaymentDetail']);
+
+
     // quiz attempt
     Route::put('/v1.0/quiz-attempts/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
 
@@ -229,8 +233,13 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
-Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
-Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
+
+// Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
+// Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
+
+ Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
+ Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClientUnified']);
+
 
 
 Route::get('/v1.0/client/business-settings', [SettingController::class, "getBusinessSettingsClient"]);

@@ -33,7 +33,7 @@ class QuizRequest extends FormRequest
             'points_cut_after_retake' => 'nullable|integer|min:0|max:100',
             'passing_grade' => 'nullable|integer|min:0|max:100',
             'question_limit' => 'nullable|integer|min:0',
-            'question_ids' => 'nullable|array',
+            'question_ids' => 'required|array',
             'question_ids.*' => ['required', 'integer', new ValidQuestion()],
         ];
 

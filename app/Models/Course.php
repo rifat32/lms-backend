@@ -43,7 +43,6 @@ class Course extends Model
         'sale_price',
         'price_start_date',
         'price_end_date',
-        'is_free',
         'status',
         'status_start_date',
         'status_end_date',
@@ -141,7 +140,21 @@ class Course extends Model
                         $enrollmentQuery->where('user_id', auth()->user()->id);
                     });
                 }
-            });
+            })
+            ->when(request()->filled('status'), function ($q) {
+            $validStatus = array_values(Course::STATUS);
+            $status = request('status');
+
+            if (!in_array($status, $validStatus)) {
+                throw ValidationException::withMessages([
+                    'status' => 'Invalid status value. allowed values: ' . implode(', ', $validStatus)
+                ]);
+            }
+
+            $q->where('status', $status);
+        })->when(request()->filled('search_key'), function ($q) {
+            $q->where('title', 'like', '%' . request('search_key') . '%');
+        });
     }
 
     public function scopeRestrictBeforeEnrollment($query)
@@ -155,19 +168,6 @@ class Course extends Model
                                 ->orWhereDate('expiry_date', '>=', now());
                         });
                 });
-        })->when(request()->filled('status'), function ($q) {
-            $validStatus = array_values(Course::STATUS);
-            $status = request('status');
-
-            if (!in_array($status, $validStatus)) {
-                throw ValidationException::withMessages([
-                    'status' => 'Invalid status value. allowed values: ' . implode(', ', $validStatus)
-                ]);
-            }
-
-            $q->where('status', $status);
-        })->when(request()->filled('search_key'), function ($q) {
-            $q->where('title', 'like', '%' . request('search_key') . '%');
         });
     }
 }

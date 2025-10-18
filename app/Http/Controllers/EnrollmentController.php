@@ -139,7 +139,7 @@ class EnrollmentController extends Controller
 
             $course = Course::findOrFail($request->course_id);
 
-            if(!$course->is_free || $course->sale_price > 0) {
+            if( $course->sale_price > 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot enroll in a paid course without payment.',

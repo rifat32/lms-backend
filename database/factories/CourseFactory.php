@@ -19,7 +19,6 @@ class CourseFactory extends Factory
             'sale_price' => $this->faker->randomFloat(2, 0, 100),
             'price_start_date' => now(),
             'price_end_date' => now()->addMonths(1),
-            'is_free' => false,
             'status' => Course::STATUS['DRAFT'],
             'status_start_date' => now(),
             'status_end_date' => now()->addMonths(1),

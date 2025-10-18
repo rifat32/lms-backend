@@ -23,7 +23,6 @@ class CreateCoursesTable extends Migration
             $table->date("price_start_date")->nullable();
             $table->date("price_end_date")->nullable();
 
-            $table->boolean('is_free')->default(false);
 
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->date('status_start_date')->nullable();
