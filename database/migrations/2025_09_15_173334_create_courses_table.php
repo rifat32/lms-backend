@@ -41,8 +41,8 @@ class CreateCoursesTable extends Migration
 
             $table->string('duration')->nullable();
             $table->string('video_duration')->nullable();
-            $table->string('course_preview_description')->nullable();
-
+            $table->text('course_preview_description')->nullable();
+  
 
             $table->boolean('is_featured')->nullable();
             $table->boolean('is_lock_lessons_in_order')->nullable();

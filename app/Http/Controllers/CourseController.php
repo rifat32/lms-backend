@@ -54,28 +54,20 @@ public function getCourseByIdUnified($id)
 {
     $user = auth('api')->user();
 
-           Auth::login($user);
+    if($user){
+         Auth::login($user);
+    }
 
+        
     $query = Course::with([
         'categories',
         'sections.sectionables.sectionable',
-        'reviews'
+        'reviews',
+        'enrollment'
     ])
+    ->where('status', 'published')
     ->filters();
 
-    if ($user) {
-
-        // // Authenticated
-        // if (!$user->hasRole('student')) {
-        //     return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
-        // }
-
-        // Restrict before enrollment if needed
-        $query->restrictBeforeEnrollment();
-    } else {
-        // Guest
-        $query->where('status', 'published');
-    }
 
     $course = $query->find($id);
 
@@ -133,14 +125,12 @@ public function getCoursesClientUnified(Request $request)
 
     $user = auth('api')->user();
 
-           Auth::login($user);
+         if($user){
+         Auth::login($user);
+    }
 
-    // ✅ Base query
-    $query = Course::with([
-        'categories:id,name',
-        'sections.sectionables.sectionable:id,title',
-        'reviews'
-    ])->filters();
+
+   
 
     if ($user) {
         // Authenticated user logic
@@ -150,6 +140,15 @@ public function getCoursesClientUnified(Request $request)
         //         'message' => 'You are not authorized for this action.'
         //     ], 403);
         // }
+         // ✅ Base query
+    $query = Course::with([
+        'categories:id,name',
+        'sections.sectionables.sectionable:id,title',
+        'reviews',
+        "enrollment"
+    ])
+    ->where('status', 'published')
+    ->filters();
 
         // If filter by enrollment
         if ($request->has('is_enrolled')) {
@@ -163,8 +162,16 @@ public function getCoursesClientUnified(Request $request)
             });
         }
     } else {
-        // Guest logic — show only published courses
-        $query->where('status', 'published');
+         // ✅ Base query
+    $query = Course::with([
+        'categories:id,name',
+        'sections.sectionables.sectionable:id,title',
+        'reviews',
+      
+    ])
+    ->where('status', 'published')
+    ->filters();
+      
     }
 
     $courses = retrieve_data($query, 'created_at', 'courses');
