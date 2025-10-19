@@ -660,7 +660,7 @@ class SectionController extends Controller
                 $section->sectionables()->create([
                     'sectionable_id' => $item['id'],
                     'sectionable_type' => $modelClass,
-                    'order' => $item['order'] ?? null,
+                    'order' => $item['order'] ?? 1,
                 ]);
             }
 

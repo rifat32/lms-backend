@@ -31,4 +31,12 @@ class Sectionable extends Model
     {
         return $this->sectionable_type === Quiz::class;
     }
+
+    public function getOrderAttribute($value) {
+
+        if(empty($value)) {
+return 1;
+        }
+        return $value;
+    }
 }

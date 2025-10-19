@@ -28,10 +28,6 @@ class CourseController extends Controller
 {
 
 
-
-
-
-
 /**
  * @OA\Get(
  *     path="/v1.0/client/courses/{id}",
@@ -58,7 +54,6 @@ public function getCourseByIdUnified($id)
          Auth::login($user);
     }
 
-        
     $query = Course::with([
         'categories',
         'sections.sectionables.sectionable',
@@ -79,7 +74,7 @@ public function getCourseByIdUnified($id)
     if ($user && $course->enrollment()->where('user_id', $user->id)->exists()) {
         $course->sections->each(function ($section) {
             $section->sectionables->each(function ($sectionable, $index) {
-                $sectionable->order = $index;
+
                 if ($sectionable->sectionable_type === Lesson::class) {
                     $sectionable->sectionable->load('lesson_progress');
                 }
@@ -121,7 +116,7 @@ public function getCourseByIdUnified($id)
  */
 public function getCoursesClientUnified(Request $request)
 {
-   
+
 
     $user = auth('api')->user();
 
@@ -130,7 +125,7 @@ public function getCoursesClientUnified(Request $request)
     }
 
 
-   
+
 
     if ($user) {
         // Authenticated user logic
@@ -167,11 +162,11 @@ public function getCoursesClientUnified(Request $request)
         'categories:id,name',
         'sections.sectionables.sectionable:id,title',
         'reviews',
-      
+
     ])
     ->where('status', 'published')
     ->filters();
-      
+
     }
 
     $courses = retrieve_data($query, 'created_at', 'courses');
@@ -244,7 +239,7 @@ public function getCoursesClientUnified(Request $request)
      *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
      *         @OA\Schema(type="string", default="", example="")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of courses",
@@ -314,7 +309,7 @@ public function getCoursesClientUnified(Request $request)
         ])
             ->filters();
 
-        // 
+        //
         $courses = retrieve_data($query, 'created_at', 'courses');
 
         // Remove pivot from all categories
@@ -451,7 +446,7 @@ public function getCoursesClientUnified(Request $request)
      *     tags={"Trash"},
      *     operationId="getCourseByIdSecureClient",
      *  *     summary="Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
- *     description="Retrieve detailed course information including lessons, quizzes, and progress. 
+ *     description="Retrieve detailed course information including lessons, quizzes, and progress.
  *     Authenticated and enrolled users only",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -557,11 +552,10 @@ public function getCoursesClientUnified(Request $request)
         }
 
 
-        // ✅ Add order + eager-load quiz questions
+      
         $course->sections->each(function ($section) {
             $section->sectionables->each(function ($sectionable, $index) {
-                // assign manual order for response
-                $sectionable->order = $index;
+
 
                 // if Lesson → load lesson_progress
                 if ($sectionable->sectionable_type === Lesson::class) {
@@ -593,13 +587,13 @@ public function getCoursesClientUnified(Request $request)
      *     tags={"Trash"},
      *     operationId="getCoursesClientSecure",
      *     security={{"bearerAuth":{}}},
-     * 
+     *
      *     summary="Get all courses (Authenticated users only) (role: Student only)",
      *     description="Retrieve courses for logged-in users only.",
-     * 
-     * 
-     * 
-     * 
+     *
+     *
+     *
+     *
      *     @OA\Parameter(
      *         name="category_id",
      *         in="query",
@@ -642,7 +636,7 @@ public function getCoursesClientUnified(Request $request)
      *         description="Course status only: draft, published, archived",
      *         @OA\Schema(type="string", default="", example="")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of courses",
@@ -767,7 +761,7 @@ public function getCoursesClientUnified(Request $request)
      *         description="Course status only: draft, published, archived",
      *         @OA\Schema(type="string", default="", example="")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of courses",
@@ -1289,7 +1283,7 @@ public function getCoursesClientUnified(Request $request)
 
             $course->update($request_payload);
 
-            
+
 
             // ========================
             // HANDLE COVER (SINGLE FILE)
@@ -1321,7 +1315,7 @@ public function getCoursesClientUnified(Request $request)
 
             $course->cover = $cover_filename;
             $course->save();
-          
+
             // ========================
             // SYNC CATEGORIES
             // ========================
@@ -1507,7 +1501,7 @@ public function getCoursesClientUnified(Request $request)
 
             $course->update($request_payload);
 
-            
+
 
             // ========================
             // HANDLE COVER (SINGLE FILE)
@@ -1544,9 +1538,9 @@ public function getCoursesClientUnified(Request $request)
                 $course->categories()->sync($request_payload["category_ids"]);
             }
 
-          
 
-       
+
+
 
             // COMMIT TRANSACTION
             DB::commit();
