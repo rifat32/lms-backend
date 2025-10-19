@@ -147,7 +147,15 @@ class LessonProgressController extends Controller
             // Ensure the user is enrolled in the course
             $enrollment = Enrollment::where('user_id', $user->id)
                 ->where('course_id', $course->id)
-                ->firstOrFail();
+                ->first();
+
+                if(empty($enrollment)) {
+ return response()->json([
+                'success' => false,
+                'message' => 'You are not enrolled on this course',
+
+            ],409);
+                }
 
             // Update progress (for simplicity, mark completed = 100%)
             $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
@@ -195,9 +203,9 @@ class LessonProgressController extends Controller
      *                 description="Course ID to update progress for"
      *             ),
      *             @OA\Property(
-     *                 property="lesson_id", 
-     *                 type="integer", 
-     *                 example="", 
+     *                 property="lesson_id",
+     *                 type="integer",
+     *                 example="",
      *                 description="Lesson ID")
      *         )
      *     ),
