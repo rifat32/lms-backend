@@ -48,4 +48,14 @@ class Quiz extends Model
     {
         return $this->morphToMany(Section::class, 'sectionable');
     }
+
+
+    public function quiz_attempts()
+{
+    return $this->hasOne(QuizAttempt::class, 'quiz_id')
+        ->where('quiz_attempts.user_id', auth()->id())
+        ->orderByDesc('quiz_attempts.id');
+}
+
+
 }

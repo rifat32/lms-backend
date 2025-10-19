@@ -128,7 +128,8 @@ class Lesson extends Model
 
     public function lesson_progress(): HasOne
     {
-        return $this->hasOne(LessonProgress::class, 'lesson_id');
+        return $this->hasOne(LessonProgress::class, 'lesson_id')
+        ->where("lesson_progresses.user_id",auth()->user()->id);
     }
 
     public function scopeFilters($query)

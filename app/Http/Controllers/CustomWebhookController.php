@@ -72,20 +72,22 @@ class CustomWebhookController extends Controller
 
         $payment_intent_id = $data['id'] ?? $data['payment_intent'] ?? null;
 
+         $transaction_id = $data['id'] ?? $data['id'] ?? null;
+
         foreach ($course_ids as $course_id) {
-            // Save Payment
-            $payment = Payment::firstOrCreate(
-                [
-                    'payment_intent_id' => $payment_intent_id,
-                    'course_id' => $course_id,
-                    'user_id' => $user_id,
-                ],
-                [
-                    'status' => 'complete',
-                    'amount' => $amount / count($course_ids),
-                    'method' => 'stripe',
-                ]
-            );
+          $payment = Payment::updateOrCreate(
+    [
+        'payment_intent_id' => $payment_intent_id,
+        'course_id' => $course_id,
+        'user_id' => $user_id,
+    ],
+    [
+        'status' => 'complete',
+        'amount' => $amount / count($course_ids),
+        'method' => 'stripe',
+        "transaction_id" => $transaction_id
+    ]
+);
 
             // Enroll user
             Enrollment::firstOrCreate(

@@ -79,7 +79,7 @@ public function getCourseByIdUnified($id)
                     $sectionable->sectionable->load('lesson_progress');
                 }
                 if ($sectionable->sectionable_type === Quiz::class) {
-                    $sectionable->sectionable->load(['questions.options']);
+                    $sectionable->sectionable->load(['questions.options',"quiz_attempts"]);
                 }
             });
         });
@@ -552,7 +552,7 @@ public function getCoursesClientUnified(Request $request)
         }
 
 
-      
+
         $course->sections->each(function ($section) {
             $section->sectionables->each(function ($sectionable, $index) {
 
