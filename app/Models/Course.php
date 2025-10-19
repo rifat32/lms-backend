@@ -119,7 +119,11 @@ class Course extends Model
     }
     public function enrollment()
     {
-        return $this->hasOne(Enrollment::class, 'course_id', 'id')->where('user_id', auth()->user()->id);
+        return $this->hasOne(Enrollment::class, 'course_id', 'id')
+        ->when(auth()->user(), function($query) {
+  $query->where('user_id', auth()->user()->id);
+        });
+
     }
 
     public function scopeFilters($query)
