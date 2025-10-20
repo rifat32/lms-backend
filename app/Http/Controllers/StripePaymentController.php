@@ -210,7 +210,7 @@ class StripePaymentController extends Controller
            return  response()->json([
             'success' => false,
             'message' => $e->getMessage(),
-        ], $e->getCode());
+        ], 500);
 
         }
 

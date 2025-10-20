@@ -346,12 +346,22 @@ class UserController extends Controller
 
         $users = retrieve_data($query, 'created_at', 'users');
 
+
+
+        $summary = [];
+
+    $summary["total_users"] =   User::get()->count();
+     $summary["total_students"] =   User::whereHas('roles', function ($q)  {
+            $q->where('roles.name', 'student');
+        })->count();
+
         // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Users retrieved successfully',
             'meta' => $users['meta'],
             'data' => $users['data'],
+            "summary" => $summary
         ], 200);
 
 

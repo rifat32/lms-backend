@@ -220,6 +220,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/client/courses/secure/{id}', [CourseController::class, 'getCourseByIdSecureClient']);
 
     Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
+
+      Route::get('/v1.0/client/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsByIdClient']);
+
+
 });
 
 // Get all reviews (auth optional)

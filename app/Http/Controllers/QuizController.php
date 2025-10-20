@@ -18,6 +18,171 @@ use Illuminate\Http\Request;
  */
 class QuizController extends Controller
 {
+      /**
+     * @OA\Get(
+     *     path="/v1.0/client/quizzes/{id}",
+     *     operationId="getQuizWithQuestionsByIdClient",
+     *     tags={"Quizzes"},
+     *     summary="Get quiz details with questions and options (role: Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Quiz ID",
+     *         @OA\Schema(type="integer", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_randomized",
+     *         in="query",
+     *         required=false,
+     *         description="Whether to randomize the quiz questions",
+     *         @OA\Schema(type="boolean", example="")
+     *     ),
+     *     @OA\Parameter(
+     *         name="question_limit",
+     *         in="query",
+     *         required=false,
+     *         description="The maximum number of questions to include in the quiz",
+     *         @OA\Schema(type="integer", example="")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Quiz retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Quiz retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="title", type="string", example="Laravel Basics Quiz"),
+     *                 @OA\Property(
+     *                     property="questions",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="question_id", type="integer", example=10),
+     *                         @OA\Property(property="text", type="string", example="What is Laravel?"),
+     *                         @OA\Property(property="type", type="string", example="multiple_choice"),
+     *                         @OA\Property(
+     *                             property="options",
+     *                             type="array",
+     *                             @OA\Items(
+     *                                 @OA\Property(property="option_id", type="integer", example=101),
+     *                                 @OA\Property(property="text", type="string", example="A PHP framework")
+     *                             )
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request - Invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized - Authentication required",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden - Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission to access this resource.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Quiz not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Quiz not found.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getQuizWithQuestionsByIdClient($id)
+    {
+
+
+
+        // GETTING QUIZ BY ID
+        $quiz = Quiz::with(['questions.options', 'sections' => function ($query) {
+            $query->select('sections.id')->pluck('id');
+        }])->findOrFail($id);
+
+        // GETTING QUESTIONS
+        $questions = $quiz->questions;
+
+        // Handle randomization and limit
+        if ($quiz->is_randomized && $quiz->question_limit > 0) {
+            // Case 1: Randomize + Limit
+            $questions = $questions->shuffle()->take($quiz->question_limit);
+        } elseif ($quiz->is_randomized) {
+            // Case 2: Randomize only
+            $questions = $questions->shuffle();
+        } elseif ($quiz->question_limit > 0) {
+            // Case 3: Limit only
+            $questions = $questions->take($quiz->question_limit);
+        }
+
+        // $result = [
+        //     'id' => $quiz->id,
+        //     'title' => $quiz->title,
+        //     'questions' => $questions->map(function ($question) {
+        //         return [
+        //             'question_id' => $question->id,
+        //             'text' => $question->question_text,
+        //             'type' => $question->question_type,
+        //             'options' => $question->options->map(function ($option) {
+        //                 return [
+        //                     'option_id' => $option->id,
+        //                     'text' => $option->option_text,
+        //                 ];
+        //             }),
+        //         ];
+        //     })->values(),
+        // ];
+
+
+        // ADD QUESTIONS DATA
+        $quiz->setRelation('questions', $questions->values());
+
+        // SEND ONLY SECTION IDS
+        $quiz->setRelation('sections', $quiz->sections->pluck('id'));
+        // $quiz->sections->pluck('id');
+
+        $last_attempt =  QuizAttempt::where([
+            "user_id" => auth()->user()->id,
+            "quiz_id"=> $id
+
+        ])
+        ->orderByDesc("id")
+        ->first();
+
+        // Return the response
+        return response()->json([
+            'success' => true,
+            'message' => 'Quiz retrieved successfully',
+            'data' => $quiz,
+          "last_attempt" =>  $last_attempt
+        ], 200);
+    }
     /**
      * @OA\Get(
      *     path="/v1.0/quizzes/{id}",
@@ -172,20 +337,13 @@ class QuizController extends Controller
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
         // $quiz->sections->pluck('id');
 
-        $last_attempt =  QuizAttempt::where([
-            "user_id" => auth()->user()->id,
-            "quiz_id"=> $id
-
-        ])
-        ->orderByDesc("id")
-        ->first();
+     
 
         // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',
-            'data' => $quiz,
-          "last_attempt" =>  $last_attempt
+            'data' => $quiz
         ], 200);
     }
     /**
