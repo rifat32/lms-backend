@@ -315,7 +315,6 @@ class QuizController extends Controller
      *             @OA\Property(property="time_unit", type="string", example="Hours"),
      *             @OA\Property(property="style", type="string", example="pagination"),
      *             @OA\Property(property="is_randomized", type="boolean", example=true),
-     *             @OA\Property(property="show_correct_answer", type="boolean", example=false),
      *             @OA\Property(property="allow_retake_after_pass", type="boolean", example=true),
      *             @OA\Property(property="max_attempts", type="integer", example=4),
      *             @OA\Property(property="points_cut_after_retake", type="integer", example=20),

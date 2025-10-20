@@ -21,7 +21,6 @@ class CreateQuizzesTable extends Migration
             $table->string('time_unit')->nullable()->default('Hours'); // optional: Hours/Minutes
             $table->string('style')->nullable()->default('pagination'); // quiz style
             $table->boolean('is_randomized')->default(false);
-            $table->boolean('show_correct_answer')->default(false);
             $table->boolean('allow_retake_after_pass')->default(false);
             $table->integer('max_attempts')->nullable(); // e.g., 4
             $table->integer('points_cut_after_retake')->nullable(); // e.g., 20%

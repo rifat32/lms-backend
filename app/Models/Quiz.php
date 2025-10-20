@@ -27,7 +27,7 @@ class Quiz extends Model
         'time_unit',
         'style',
         'is_randomized',
-        'show_correct_answer',
+
         'allow_retake_after_pass',
         'max_attempts',
         'points_cut_after_retake',

@@ -27,7 +27,7 @@ class QuizRequest extends FormRequest
             'time_unit' => ['nullable', Rule::in(array_values(Quiz::TIME_UNITS))],
             'style' => ['nullable', Rule::in(array_values(Quiz::STYLES))],
             'is_randomized' => 'nullable|boolean',
-            'show_correct_answer' => 'nullable|boolean',
+
             'allow_retake_after_pass' => 'nullable|boolean',
             'max_attempts' => 'nullable|integer|min:1',
             'points_cut_after_retake' => 'nullable|integer|min:0|max:100',
