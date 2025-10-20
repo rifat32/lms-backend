@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuizRequest;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
 use App\Models\Sectionable;
 use Illuminate\Http\Request;
 
@@ -171,11 +172,20 @@ class QuizController extends Controller
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
         // $quiz->sections->pluck('id');
 
+        $last_attempt =  QuizAttempt::where([
+            "user_id" => auth()->user()->id,
+            "quiz_id"=> $id
+
+        ])
+        ->orderByDesc("id")
+        ->first();
+
         // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',
-            'data' => $quiz
+            'data' => $quiz,
+          "last_attempt" =>  $last_attempt
         ], 200);
     }
     /**

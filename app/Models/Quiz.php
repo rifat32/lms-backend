@@ -53,7 +53,12 @@ class Quiz extends Model
     public function quiz_attempts()
 {
     return $this->hasOne(QuizAttempt::class, 'quiz_id')
-        ->where('quiz_attempts.user_id', auth()->id())
+     ->when(auth()->user(), function($query) {
+  $query->where('quiz_attempts.user_id', auth()->user()->id);
+        }, function($query) {
+  $query->where('quiz_attempts.user_id', -1);
+        })
+
         ->orderByDesc('quiz_attempts.id');
 }
 

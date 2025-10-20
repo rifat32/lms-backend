@@ -40,14 +40,15 @@ class CreateCoursesTable extends Migration
             $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
 
             $table->string('duration')->nullable();
+            
             $table->string('video_duration')->nullable();
             $table->text('course_preview_description')->nullable();
-  
+
 
             $table->boolean('is_featured')->nullable();
             $table->boolean('is_lock_lessons_in_order')->nullable();
 
-          
+
 
 
             $table->foreignId('created_by')

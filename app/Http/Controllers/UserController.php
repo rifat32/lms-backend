@@ -200,7 +200,7 @@ class UserController extends Controller
     ], 401);
 }
 
-            // Start a database transaction 
+            // Start a database transaction
             DB::beginTransaction();
 
             // Validate the request payload
@@ -251,6 +251,13 @@ class UserController extends Controller
      *     summary="Get all users (role: Admin only)",
      *     description="Retrieve a list of all users in the system",
      *     security={{"bearerAuth":{}}},
+     * *     @OA\Parameter(
+ *         name="role",
+ *         in="query",
+ *         required=false,
+ *         description="Filter users by role name (e.g., admin, student, lecturer)",
+ *         @OA\Schema(type="string", example="student")
+ *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -330,6 +337,13 @@ class UserController extends Controller
 
         $query = User::query();
 
+         // ROLE FILTER (Spatie relationship-based)
+    if (request()->filled('role')) {
+        $query->whereHas('roles', function ($q)  {
+            $q->where('roles.name', request()->role);
+        });
+    }
+
         $users = retrieve_data($query, 'created_at', 'users');
 
         // SEND RESPONSE
@@ -340,7 +354,7 @@ class UserController extends Controller
             'data' => $users['data'],
         ], 200);
 
-      
+
     }
 
     /**

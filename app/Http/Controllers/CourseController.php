@@ -124,19 +124,7 @@ public function getCoursesClientUnified(Request $request)
          Auth::login($user);
     }
 
-
-
-
-    if ($user) {
-        // Authenticated user logic
-        // if (!$user->hasAnyRole(['student'])) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'You are not authorized for this action.'
-        //     ], 403);
-        // }
-         // ✅ Base query
-    $query = Course::with([
+  $query = Course::with([
         'categories:id,name',
         'sections.sectionables.sectionable:id,title',
         'reviews',
@@ -144,6 +132,9 @@ public function getCoursesClientUnified(Request $request)
     ])
     ->where('status', 'published')
     ->filters();
+
+
+    if ($user) {
 
         // If filter by enrollment
         if ($request->has('is_enrolled')) {
@@ -156,27 +147,63 @@ public function getCoursesClientUnified(Request $request)
                 }
             });
         }
-    } else {
-         // ✅ Base query
-    $query = Course::with([
-        'categories:id,name',
-        'sections.sectionables.sectionable:id,title',
-        'reviews',
-
-    ])
-    ->where('status', 'published')
-    ->filters();
-
     }
 
     $courses = retrieve_data($query, 'created_at', 'courses');
     $courses['data']->each(fn($c) => $c->categories->makeHidden('pivot'));
+
+    $summary = [];
+
+
+
+    if(auth()->user()->id) {
+    $summary["enrolled_courses_count"] = Course::whereHas("enrollment")
+    ->count();
+
+ $summary["completed_courses_count"] = Course::whereHas("enrollment", function($query) {
+        $query->where("enrollments.progress",100);
+    })
+    ->count();
+
+
+    $lesson_progress_seconds = LessonProgress::where(
+        [
+            "user_id" => auth()->user()->id,
+        ]
+    )
+    ->sum("total_time_spent");
+
+
+
+
+// Get all quizzes that the user has attempted
+$quizzes = Quiz::whereHas('quiz_attempts')
+    ->get(['id', 'time_limit', 'time_unit']);
+
+// Convert quiz time limits to seconds
+$quiz_seconds = $quizzes->sum(function ($quiz) {
+    if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
+        return $quiz->time_limit * 3600; // 1 hour = 3600 seconds
+    } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
+        return $quiz->time_limit * 60;   // 1 minute = 60 seconds
+    }
+    return 0;
+});
+
+$total_learning_seconds = $lesson_progress_seconds + $quiz_seconds;
+
+$summary["total_learning_seconds"] = $total_learning_seconds;
+
+
+
+    }
 
     return response()->json([
         'success' => true,
         'message' => 'Courses retrieved successfully',
         'meta' => $courses['meta'],
         'data' => $courses['data'],
+        'summary' => $summary
     ], 200);
 }
 
