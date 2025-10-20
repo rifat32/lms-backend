@@ -19,7 +19,7 @@ class CreateLessonProgressAndSessionsTables extends Migration
             $table->timestamp('last_accessed')->nullable();
             $table->timestamps();
 
-            $table->unique(['user_id', 'lesson_id']);
+            $table->unique(['user_id', 'lesson_id',"course_id"]);
         });
 
         Schema::create('lesson_sessions', function (Blueprint $table) {

@@ -143,23 +143,28 @@ class LessonProgressController extends Controller
             // Get the course
             $course = Course::findOrFail($request->course_id);
 
+    // fetch or create progress row
+$progress = LessonProgress::firstOrCreate(
+    [
+        'user_id' => auth()->user()->id,
+        'course_id' => $course->id,
+        'lesson_id' => $lesson->id,
+    ],
+    [
+        'total_time_spent' => 0,
+        'is_completed' => false,
+        'last_accessed' => now(),
+    ]
+);
 
-            // Ensure the user is enrolled in the course
-            $enrollment = Enrollment::where('user_id', $user->id)
-                ->where('course_id', $course->id)
-                ->first();
+// update progress with new info
+$progress->update([
+    'is_completed' => $request->is_completed,
+    'last_accessed' => now(),
 
-                if(empty($enrollment)) {
- return response()->json([
-                'success' => false,
-                'message' => 'You are not enrolled on this course',
+]);
 
-            ],409);
-                }
 
-            // Update progress (for simplicity, mark completed = 100%)
-            $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
-            $enrollment->save();
 
             $this->recalculateCourseProgress( $course->id);
 
@@ -173,7 +178,7 @@ class LessonProgressController extends Controller
                     'course_id' => $course->id,
                     'lesson_id' => $lesson->id,
                     'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
-                    
+
                 ]
             ]);
         } catch (\Throwable $th) {
