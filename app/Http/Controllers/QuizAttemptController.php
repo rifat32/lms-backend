@@ -378,13 +378,13 @@ class QuizAttemptController extends Controller
 
 
                 // ✅ Save answer details
-        QuizAttemptAnswer::create([
-            'quiz_attempt_id' => $attempt->id,
-            'question_id' => $question->id,
-            'user_answer_ids' => $user_ids,
-            'correct_answer_ids' => $correct_ids,
-            'is_correct' => $is_correct,
-        ]);
+                QuizAttemptAnswer::create([
+                    'quiz_attempt_id' => $attempt->id,
+                    'question_id' => $question->id,
+                    'user_answer_ids' => $user_ids,
+                    'correct_answer_ids' => $correct_ids,
+                    'is_correct' => $is_correct,
+                ]);
 
                 $score += $is_correct ? $question->points : 0;
             } else {
@@ -420,9 +420,4 @@ class QuizAttemptController extends Controller
             ]
         ], 201);
     }
-
-
-
-
-
 }
