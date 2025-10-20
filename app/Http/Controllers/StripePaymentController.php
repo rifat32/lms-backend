@@ -11,6 +11,7 @@ use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Stripe\WebhookEndpoint;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @OA\Tag(
@@ -95,6 +96,10 @@ class StripePaymentController extends Controller
      */
     public function createPaymentIntent(Request $request)
     {
+
+        try{
+  DB::beginTransaction();
+
         if (!auth()->user()->hasAnyRole(['student'])) {
     return response()->json([
         "message" => "You can not perform this action"
@@ -172,6 +177,11 @@ class StripePaymentController extends Controller
         // Save payment for each course
         // -------------------------------
         foreach ($courses as $course) {
+
+            if(!empty($course->enrollment)) {
+              throw new Exception("Course Already Enrolled",409);
+            }
+
             Payment::create([
                 'user_id' => auth()->user()->id,
                 'course_id' => $course->id,
@@ -195,6 +205,15 @@ class StripePaymentController extends Controller
             'totalAmount' => $total_amount,
             'courses' => $courses->pluck('title'),
         ]);
+        } catch(Exception $e) {
+
+           return  response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], $e->getCode());
+
+        }
+
     }
 
 
@@ -376,7 +395,7 @@ class StripePaymentController extends Controller
     public function getPayments(Request $request)
     {
         $user = auth()->user();
-        
+
         if (!$user->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
                 "success" => false,
@@ -441,7 +460,7 @@ class StripePaymentController extends Controller
     private function getPaymentSummary()
     {
         $totalEarnings = (float) Payment::where('status', 'completed')->sum('amount');
-        
+
         $thisMonthEarnings = (float) Payment::where('status', 'completed')
             ->whereYear('paid_at', now()->year)
             ->whereMonth('paid_at', now()->month)

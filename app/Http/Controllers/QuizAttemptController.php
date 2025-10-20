@@ -167,9 +167,9 @@ class QuizAttemptController extends Controller
      *         @OA\JsonContent(
      *             required={"quiz_id"},
      *             @OA\Property(
-     *             property="quiz_id", 
-     *             type="integer", 
-     *             example="", 
+     *             property="quiz_id",
+     *             type="integer",
+     *             example="",
      *             description="ID of the quiz to start attempt for")
      *         )
      *     ),
@@ -215,6 +215,21 @@ class QuizAttemptController extends Controller
             // ], 400);
         }
 
+        // DETERMINE TIME LIMIT BASED ON UNIT
+    $time_limit = $quiz->time_limit ?? 0;
+    $expires_at = null;
+
+    if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
+        $expires_at = now()->addHours($time_limit);
+    } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
+        $expires_at = now()->addMinutes($time_limit);
+    } else {
+        // default fallback (minutes)
+        $expires_at = now()->addMinutes($time_limit);
+    }
+
+
+
         // CREATE QUIZ ATTEMPT
         $attempt = QuizAttempt::create([
             'quiz_id' => $quiz->id,
@@ -230,7 +245,8 @@ class QuizAttemptController extends Controller
             'data' => [
                 'attempt_id' => $attempt->id,
                 'time_limit' => $quiz->time_limit,
-                'expires_at' => now()->addMinutes($quiz->time_limit)->toIso8601String(),
+                  'time_unit' => $quiz->time_unit,
+           'expires_at' => $expires_at->toIso8601String(),
             ]
         ], 201);
     }
@@ -248,18 +264,18 @@ class QuizAttemptController extends Controller
      *         @OA\JsonContent(
      *             required={"quiz_id", "answers"},
      *             @OA\Property(
-     *             property="quiz_id", 
-     *             type="integer", 
-     *             example="", 
+     *             property="quiz_id",
+     *             type="integer",
+     *             example="",
      *             description="ID of the quiz being submitted"),
      *             @OA\Property(
      *                 property="answers",
      *                 type="array",
      *                 @OA\Items(
      *                     type="object",
-     *                     required={"question_id", "user_answer"},
+     *                     required={"question_id", "user_answer_id"},
      *                     @OA\Property(property="question_id", type="integer", example=12, description="ID of the question"),
-     *                     @OA\Property(property="user_answer", type="string", example="OptionA", description="User's answer (option ID or text)")
+     *                     @OA\Property(property="user_answer_id", type="string", example="OptionA", description="User's answer (option ID or text)")
      *                 )
      *             )
      *         )
@@ -286,7 +302,7 @@ class QuizAttemptController extends Controller
             'quiz_id' => 'required|integer|exists:quizzes,id',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.user_answer' => 'required'
+            'answers.*.user_answer_id' => 'required'
         ]);
 
         // GET AUTHENTICATED USER
@@ -301,25 +317,37 @@ class QuizAttemptController extends Controller
             ->whereNull('completed_at')
             ->firstOrFail();
 
-        // ⏱️ enforce timer
-        $elapsed = now()->diffInSeconds($attempt->started_at);
+            // ⏱️ enforce timer
+    $elapsed = now()->diffInSeconds($attempt->started_at);
+
+    // Apply time unit (Hours or Minutes)
+    if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
+        $limit_seconds = $quiz->time_limit * 3600; // convert hours to seconds
+    } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
+        $limit_seconds = $quiz->time_limit * 60; // convert minutes to seconds
+    } else {
+        // fallback default (minutes)
         $limit_seconds = $quiz->time_limit * 60;
+    }
 
+        // ⏱️ enforce timer
         if ($elapsed > $limit_seconds) {
-            $attempt->is_expired = true;
-            $attempt->completed_at = now();
-            $attempt->save();
+        $attempt->is_expired = true;
+        $attempt->completed_at = now();
+        $attempt->save();
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Time is up! Quiz attempt expired.',
-                'data' => [
-                    'attempt_id' => $attempt->id,
-                    'elapsed' => $elapsed,
-                    'time_limit' => $limit_seconds,
-                ]
-            ], 406);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Time is up! Quiz attempt expired.',
+            'data' => [
+                'attempt_id' => $attempt->id,
+                'elapsed' => $elapsed,
+                'time_limit' => $limit_seconds,
+                'time_unit' => $quiz->time_unit,
+            ]
+        ], 406);
+    }
+
 
         // ✅ proceed with scoring
         $score = 0;
@@ -333,12 +361,12 @@ class QuizAttemptController extends Controller
 
             if ($question->question_type !== 'essay') {
                 $correct = $question->options()->where('is_correct', true)->first();
-                $is_correct = $correct && $correct->id == $answer['user_answer'];
+                $is_correct = $correct && $correct->id == $answer['user_answer_id'];
                 $score += $is_correct ? $question->points : 0;
             } else {
                 $feedback[] = [
                     'question_id' => $question->id,
-                    'user_answer' => $answer['user_answer'],
+                    'user_answer_id' => $answer['user_answer_id'],
                     'message' => 'Requires manual grading',
                 ];
             }
