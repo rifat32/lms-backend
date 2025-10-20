@@ -7,6 +7,7 @@ use App\Models\Enrollment;
 use App\Models\LessonProgress;
 use App\Models\QuizAttempt;
 use App\Models\Section;
+use Exception;
 
 trait BasicUtil
 {
@@ -17,8 +18,9 @@ trait BasicUtil
         return BusinessSetting::first();
     }
 
-    public function recalculateCourseProgress($user_id, $course_id)
+    public function recalculateCourseProgress( $course_id)
     {
+
         // ✅ Collect all lessons and quizzes of the course
         $sections = Section::where('course_id', $course_id)
             ->with('sectionables.sectionable')
@@ -40,15 +42,17 @@ trait BasicUtil
 
         $total_items = count($lesson_ids) + count($quiz_ids);
 
+
+
         // ✅ Count completed lessons
-        $completed_lessons = LessonProgress::where('user_id', $user_id)
+        $completed_lessons = LessonProgress::where('user_id', auth()->user()->id)
             ->whereIn('lesson_id', $lesson_ids)
             ->where('course_id', $course_id)
             ->where('is_completed', true)
             ->count();
 
         // ✅ Count completed quizzes
-        $completed_quizzes = QuizAttempt::where('user_id', $user_id)
+        $completed_quizzes = QuizAttempt::where('user_id', auth()->user()->id)
             ->where("is_passed", 1)
             ->whereIn('quiz_id', $quiz_ids)
             ->whereNotNull('completed_at')
@@ -60,9 +64,10 @@ trait BasicUtil
         $percentage = $total_items > 0 ? round(($completed_items / $total_items) * 100, 2) : 0;
 
         // ✅ Update enrollment progress
-        Enrollment::where('user_id', $user_id)
+        Enrollment::where('user_id', auth()->user()->id)
             ->where('course_id', $course_id)
             ->update(['progress' => $percentage]);
+
 
         return $percentage;
     }

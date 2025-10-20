@@ -161,7 +161,7 @@ class LessonProgressController extends Controller
             $enrollment->progress = $request->is_completed ? 100 : $enrollment->progress;
             $enrollment->save();
 
-            $this->recalculateCourseProgress($user->id, $course->id);
+            $this->recalculateCourseProgress( $course->id);
 
             DB::commit();
 
@@ -173,6 +173,7 @@ class LessonProgressController extends Controller
                     'course_id' => $course->id,
                     'lesson_id' => $lesson->id,
                     'progress_status' => $request->is_completed ? 'completed' : 'in_progress',
+                    
                 ]
             ]);
         } catch (\Throwable $th) {

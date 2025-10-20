@@ -262,7 +262,14 @@ class QuizAttemptController extends Controller
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             required={"quiz_id", "answers"},
+ *             required={"course_id","quiz_id", "answers"},
+ *
+ *  *             @OA\Property(
+ *                 property="course_id",
+ *                 type="integer",
+ *                 example=1,
+ *                 description="ID of the course"
+ *             ),
  *             @OA\Property(
  *                 property="quiz_id",
  *                 type="integer",
@@ -311,10 +318,11 @@ class QuizAttemptController extends Controller
 
     // VALIDATE PAYLOAD
     $request->validate([
+        "course_id" => "required|numeric",
         'quiz_id' => 'required|integer|exists:quizzes,id',
         'answers' => 'required|array',
         'answers.*.question_id' => 'required|exists:questions,id',
-        'answers.*.user_answer_ids' => 'required|array'
+        'answers.*.user_answer_ids' => 'required|array',
     ]);
 
     $user = Auth::user();
@@ -382,8 +390,9 @@ class QuizAttemptController extends Controller
     $attempt->time_spent = $elapsed;
     $attempt->save();
 
+    $percentage=null;
     if ($attempt->is_passed) {
-        $this->recalculateCourseProgress($user->id, $quiz->course_id);
+      $percentage =  $this->recalculateCourseProgress($request->course_id);
     }
 
     return response()->json([
@@ -395,6 +404,7 @@ class QuizAttemptController extends Controller
             'is_passed' => $attempt->is_passed,
             'time_spent' => $attempt->time_spent,
             'feedback' => $feedback,
+            'percentage' => $percentage,
         ]
     ], 201);
 }
