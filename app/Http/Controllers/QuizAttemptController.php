@@ -251,87 +251,87 @@ class QuizAttemptController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/v1.0/quizzes/attempts/submit",
-     *     operationId="submitQuizAttempt",
-     *     tags={"QuizAttempts"},
-     *     summary="Submit a quiz attempt for authenticated user (role: Student only)",
-     *     security={{"bearerAuth":{}}},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"quiz_id", "answers"},
-     *             @OA\Property(
-     *             property="quiz_id",
-     *             type="integer",
-     *             example="",
-     *             description="ID of the quiz being submitted"),
-     *             @OA\Property(
-     *                 property="answers",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     required={"question_id", "user_answer_id"},
-     *                     @OA\Property(property="question_id", type="integer", example=12, description="ID of the question"),
-     *                     @OA\Property(property="user_answer_id", type="string", example="OptionA", description="User's answer (option ID or text)")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(response=201, description="Quiz attempt submitted successfully"),
-     *     @OA\Response(response=400, description="Invalid input or already submitted"),
-     *     @OA\Response(response=401, description="Unauthorized or user not a student"),
-     *     @OA\Response(response=403, description="Time is up! Quiz attempt expired"),
-     * )
-     */
-    public function submitQuizAttempt(Request $request)
-    {
+   /**
+ * @OA\Post(
+ *     path="/v1.0/quizzes/attempts/submit",
+ *     operationId="submitQuizAttempt",
+ *     tags={"QuizAttempts"},
+ *     summary="Submit a quiz attempt for authenticated user (role: Student only)",
+ *     security={{"bearerAuth":{}}},
+ *
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"quiz_id", "answers"},
+ *             @OA\Property(
+ *                 property="quiz_id",
+ *                 type="integer",
+ *                 example=1,
+ *                 description="ID of the quiz being submitted"
+ *             ),
+ *             @OA\Property(
+ *                 property="answers",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     required={"question_id", "user_answer_ids"},
+ *                     @OA\Property(
+ *                         property="question_id",
+ *                         type="integer",
+ *                         example=12,
+ *                         description="ID of the question"
+ *                     ),
+ *                     @OA\Property(
+ *                         property="user_answer_ids",
+ *                         type="array",
+ *                         @OA\Items(type="integer"),
+ *                         example={1,3},
+ *                         description="Array of user's selected answer IDs. Multiple IDs allowed for multi-choice questions"
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *
+ *     @OA\Response(response=201, description="Quiz attempt submitted successfully"),
+ *     @OA\Response(response=400, description="Invalid input or already submitted"),
+ *     @OA\Response(response=401, description="Unauthorized or user not a student"),
+ *     @OA\Response(response=403, description="Time is up! Quiz attempt expired"),
+ * )
+ */
 
-        // CHECK PERMISSION
-        if (!auth()->user()->hasAnyRole(['student'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
-
-        // VALIDATE PAYLOAD
-        $request->validate([
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.user_answer_id' => 'required'
-        ]);
-
-        // GET AUTHENTICATED USER
-        $user = Auth::user();
-
-        // GET QUIZ
-        $quiz = Quiz::findOrFail($request->quiz_id);
-
-        // GET QUIZ ATTEMPT
-        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
-            ->where('user_id', $user->id)
-            ->whereNull('completed_at')
-            ->firstOrFail();
-
-            // ⏱️ enforce timer
-    $elapsed = now()->diffInSeconds($attempt->started_at);
-
-    // Apply time unit (Hours or Minutes)
-    if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
-        $limit_seconds = $quiz->time_limit * 3600; // convert hours to seconds
-    } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
-        $limit_seconds = $quiz->time_limit * 60; // convert minutes to seconds
-    } else {
-        // fallback default (minutes)
-        $limit_seconds = $quiz->time_limit * 60;
+  public function submitQuizAttempt(Request $request)
+{
+    // CHECK PERMISSION
+    if (!auth()->user()->hasAnyRole(['student'])) {
+        return response()->json([
+            "message" => "You can not perform this action"
+        ], 401);
     }
 
-        // ⏱️ enforce timer
-        if ($elapsed > $limit_seconds) {
+    // VALIDATE PAYLOAD
+    $request->validate([
+        'quiz_id' => 'required|integer|exists:quizzes,id',
+        'answers' => 'required|array',
+        'answers.*.question_id' => 'required|exists:questions,id',
+        'answers.*.user_answer_ids' => 'required|array'
+    ]);
+
+    $user = Auth::user();
+    $quiz = Quiz::findOrFail($request->quiz_id);
+
+    $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+        ->where('user_id', $user->id)
+        ->whereNull('completed_at')
+        ->firstOrFail();
+
+    // ⏱️ enforce timer
+    $elapsed = now()->diffInSeconds($attempt->started_at);
+    $limit_seconds = $quiz->time_unit === Quiz::TIME_UNITS['HOURS']
+        ? $quiz->time_limit * 3600
+        : $quiz->time_limit * 60;
+
+    if ($elapsed > $limit_seconds) {
         $attempt->is_expired = true;
         $attempt->completed_at = now();
         $attempt->save();
@@ -348,50 +348,59 @@ class QuizAttemptController extends Controller
         ], 406);
     }
 
+    // ✅ SCORING
+    $score = 0;
+    $feedback = [];
 
-        // ✅ proceed with scoring
-        $score = 0;
-        $feedback = [];
+    foreach ($request->answers as $answer) {
+        $question = Question::find($answer['question_id']);
+        if (!$question) continue;
 
-        foreach ($request->answers as $answer) {
-            $question = Question::find($answer['question_id']);
-            if (!$question) {
-                continue;
-            }
+        if ($question->question_type !== 'essay') {
+            // GET all correct answer IDs
+            $correct_ids = $question->options()->where('is_correct', true)->pluck('id')->toArray();
+            $user_ids = $answer['user_answer_ids'];
 
-            if ($question->question_type !== 'essay') {
-                $correct = $question->options()->where('is_correct', true)->first();
-                $is_correct = $correct && $correct->id == $answer['user_answer_id'];
-                $score += $is_correct ? $question->points : 0;
-            } else {
-                $feedback[] = [
-                    'question_id' => $question->id,
-                    'user_answer_id' => $answer['user_answer_id'],
-                    'message' => 'Requires manual grading',
-                ];
-            }
+            // check if user selected exactly all correct answers (no more, no less)
+            sort($correct_ids);
+            sort($user_ids);
+            $is_correct = $correct_ids === $user_ids;
+
+            $score += $is_correct ? $question->points : 0;
+        } else {
+            $feedback[] = [
+                'question_id' => $question->id,
+                'user_answer_ids' => $answer['user_answer_ids'],
+                'message' => 'Requires manual grading',
+            ];
         }
-
-        $attempt->score = $score;
-        $attempt->is_passed = $score >= 50;
-        $attempt->completed_at = now();
-        $attempt->time_spent = $elapsed;
-        $attempt->save();
-
-        if ($attempt->is_passed) {
-            $this->recalculateCourseProgress($user->id, $quiz->course_id);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Quiz attempt submitted',
-            'data' => [
-                'attempt_id' => $attempt->id,
-                'score' => $attempt->score,
-                'is_passed' => $attempt->is_passed,
-                'time_spent' => $attempt->time_spent,
-                'feedback' => $feedback,
-            ]
-        ], 201);
     }
+
+    $attempt->score = $score;
+    $attempt->is_passed = $score >= $quiz->passing_grade; // use quiz passing_grade
+    $attempt->completed_at = now();
+    $attempt->time_spent = $elapsed;
+    $attempt->save();
+
+    if ($attempt->is_passed) {
+        $this->recalculateCourseProgress($user->id, $quiz->course_id);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Quiz attempt submitted',
+        'data' => [
+            'attempt_id' => $attempt->id,
+            'score' => $attempt->score,
+            'is_passed' => $attempt->is_passed,
+            'time_spent' => $attempt->time_spent,
+            'feedback' => $feedback,
+        ]
+    ], 201);
+}
+
+
+
+
+
 }
