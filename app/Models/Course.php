@@ -122,6 +122,8 @@ class Course extends Model
         return $this->hasOne(Enrollment::class, 'course_id', 'id')
         ->when(auth()->user(), function($query) {
   $query->where('user_id', auth()->user()->id);
+        }, function($query) {
+  $query->where('user_id', -1);
         });
 
     }
