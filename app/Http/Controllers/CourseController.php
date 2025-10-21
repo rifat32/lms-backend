@@ -7,6 +7,7 @@ use App\Http\Requests\CoursePartialRequest;
 use App\Http\Requests\CourseRequest;
 use App\Models\Course;
 use App\Models\CourseFaq;
+use App\Models\Enrollment;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Quiz;
@@ -855,12 +856,26 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
             return $course->categories->makeHidden('pivot');
         });
 
+        $summary = [];
+
+
+        $summary["total_courses_count"] = Course::get()->count();
+
+     // Loop through statuses and count each
+foreach (Course::STATUS as $status_key => $status_value) {
+    $summary["{$status_value}_count"] = Course::where('status', $status_value)->count();
+}
+
+ $summary["total_enrollments_count"] = Enrollment::get()->count();
+
+
         // SEND RESPONSE
         return response()->json([
             'success' => true,
             'message' => 'Courses retrieved successfully',
             'meta' => $courses['meta'],
             'data' => $courses['data'],
+            "summary" => $summary
         ], 200);
     }
 
