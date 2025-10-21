@@ -11,6 +11,7 @@ class Course extends Model
 {
     use HasFactory;
     protected $hidden = ['pivot'];
+  protected $appends = ['computed_price'];
 
     public const STATUS = [
         'DRAFT' => 'draft',
@@ -61,7 +62,24 @@ class Course extends Model
         'created_by',
     ];
 
+ // ✅ Computed attribute
+    public function getComputedPriceAttribute()
+    {
+        $now = now();
 
+        // Check if sale is active
+        if (
+            $this->sale_price &&
+            $this->price_start_date &&
+            $this->price_end_date &&
+            $now->between($this->price_start_date, $this->price_end_date)
+        ) {
+            return $this->sale_price;
+        }
+
+        // Otherwise return regular price
+        return $this->price;
+    }
 
     // Relationships
     public function getCoverAttribute($value)

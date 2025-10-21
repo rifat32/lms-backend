@@ -152,7 +152,7 @@ class StripePaymentController extends Controller
         // -------------------------------
         // Calculate total amount
         // -------------------------------
-        $total_amount = $courses->sum(fn($course) => $course->sale_price + ($course->vat_amount ?? 0));
+        $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
 
         // Prepare metadata with all course IDs and webhook URL
         $metadata = [
@@ -185,7 +185,7 @@ class StripePaymentController extends Controller
             Payment::create([
                 'user_id' => auth()->user()->id,
                 'course_id' => $course->id,
-                'amount' => $course->sale_price,
+                'amount' => $course->computed_price,
                 'method' => 'stripe',
                 'status' => 'pending',
                 'payment_intent_id' => $payment_intent->id,

@@ -139,13 +139,13 @@ class EnrollmentController extends Controller
 
             $course = Course::findOrFail($request->course_id);
 
-            if( $course->sale_price > 0) {
+            if( $course->computed_price > 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Cannot enroll in a paid course without payment.',
                 ], 403); // Forbidden
             }
-            
+
 
             // COMMIT TRANSACTION
             DB::commit(); // Uncomment if you want to use transactions
