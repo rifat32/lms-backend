@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
  */
 class QuizController extends Controller
 {
-      /**
+    /**
      * @OA\Get(
      *     path="/v1.0/client/quizzes/{id}",
      *     operationId="getQuizWithQuestionsByIdClient",
@@ -122,9 +122,13 @@ class QuizController extends Controller
 
 
         // GETTING QUIZ BY ID
-        $quiz = Quiz::with(['questions.options', 'sections' => function ($query) {
-            $query->select('sections.id')->pluck('id');
-        }])->findOrFail($id);
+        $quiz = Quiz::with([
+            'questions.options',
+            'quiz_attempts',
+            'sections' => function ($query) {
+                $query->select('sections.id')->pluck('id');
+            }
+        ])->findOrFail($id);
 
         // GETTING QUESTIONS
         $questions = $quiz->questions;
@@ -165,22 +169,13 @@ class QuizController extends Controller
 
         // SEND ONLY SECTION IDS
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
-        // $quiz->sections->pluck('id');
 
-        $last_attempt =  QuizAttempt::where([
-            "user_id" => auth()->user()->id,
-            "quiz_id"=> $id
-
-        ])
-        ->orderByDesc("id")
-        ->first();
 
         // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',
             'data' => $quiz,
-          "last_attempt" =>  $last_attempt
         ], 200);
     }
     /**
@@ -337,7 +332,7 @@ class QuizController extends Controller
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
         // $quiz->sections->pluck('id');
 
-     
+
 
         // Return the response
         return response()->json([
