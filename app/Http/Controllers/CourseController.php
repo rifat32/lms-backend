@@ -156,7 +156,7 @@ public function getCoursesClientUnified(Request $request)
 
 
 
-    if(auth()->user()->id) {
+    if(auth()->user()) {
     $summary["enrolled_courses_count"] = Course::whereHas("enrollment")
     ->count();
 
