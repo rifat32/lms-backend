@@ -605,6 +605,14 @@ class QuizController extends Controller
 
         $quiz->delete();
 
+
+        Sectionable::where([
+        'sectionable_id' => $quiz->id,
+        'sectionable_type' => Quiz::class,
+        ])
+        ->delete();
+
+
         return response()->json([
             'success' => true,
             'message' => 'Quiz deleted successfully'

@@ -55,7 +55,7 @@ class LessonController extends Controller
      *         description="Number of items per page",
      *         @OA\Schema(type="integer", default="", example="")
      *     ),
-     * 
+     *
      *     @OA\Response(
      *         response=200,
      *         description="List of courses",
@@ -274,7 +274,7 @@ class LessonController extends Controller
      *                 @OA\Property(property="content", type="string", example="Lesson detailed text content here..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
      *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/video.mp4")),
-     * 
+     *
      *                 @OA\Property(property="content_type", type="string", example="video"),
      *                 @OA\Property(property="content_url", type="string", example="https://example.com/video.mp4"),
      *                 @OA\Property(property="sort_order", type="integer", example=1),
@@ -487,8 +487,8 @@ class LessonController extends Controller
      *                 @OA\Items(type="string", format="binary"),
      *                 example={}
      *             )
-     * 
-     * 
+     *
+     *
      *         )
      *     ),
      *     @OA\Response(
@@ -512,8 +512,8 @@ class LessonController extends Controller
      *                 @OA\Property(property="content", type="string", example="Updated detailed content..."),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
      *                 @OA\Property(property="materials", type="array", @OA\Items(type="string", example="lessons/files/new-video.mp4")),
-     * 
-     * 
+     *
+     *
      *                 @OA\Property(property="content_type", type="string", example="video"),
      *                 @OA\Property(property="content_url", type="string", example="https://example.com/updated-video.mp4"),
      *                 @OA\Property(property="sort_order", type="integer", example=2),
@@ -765,6 +765,12 @@ class LessonController extends Controller
                         }
                     }
                 }
+// Delete the sectionable
+        Sectionable::where([
+        'sectionable_id' => $lesson->id,
+        'sectionable_type' => Lesson::class,
+        ])
+        ->delete();
             }
 
 
