@@ -49,7 +49,10 @@ class Quiz extends Model
         return $this->morphToMany(Section::class, 'sectionable');
     }
 
-
+    public function all_quiz_attempts()
+    {
+        return $this->hasMany(QuizAttempt::class, 'quiz_id');
+    }
     public function quiz_attempts()
     {
         return $this->hasOne(QuizAttempt::class, 'quiz_id')

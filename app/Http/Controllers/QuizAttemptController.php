@@ -425,8 +425,10 @@ class QuizAttemptController extends Controller
                 'is_passed' => $attempt->is_passed,
                 'time_spent' => $attempt->time_spent,
                 'feedback' => $feedback,
-                'percentage' => $percentage,
-            ]
+                'answers' => $attempt->quiz_attempt_answers
+       ]
         ], 201);
+
+
     }
 }

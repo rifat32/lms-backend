@@ -124,7 +124,7 @@ class QuizController extends Controller
         // GETTING QUIZ BY ID
         $quiz = Quiz::with([
             'questions.options',
-            'quiz_attempts',
+            'quiz_attempts.quiz_attempt_answers',
             'sections' => function ($query) {
                 $query->select('sections.id')->pluck('id');
             }
@@ -561,6 +561,7 @@ class QuizController extends Controller
         if (isset($request_payload['question_ids'])) {
             $quiz->questions()->sync($request_payload['question_ids']); // sync instead of attach
         }
+
 
 
         // Sectionable::where('sectionable_id', $quiz->id)

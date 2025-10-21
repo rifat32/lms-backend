@@ -256,27 +256,56 @@ class QuestionController extends Controller
 
 
 
-    public function updateQuestion(QuestionRequest $request)
-    {
-        try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+  public function updateQuestion(QuestionRequest $request)
+{
+    try {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
-            DB::beginTransaction();
+        DB::beginTransaction();
 
-            // VALIDATE PAYLOAD
-            $request_payload = $request->validated();
+        $request_payload = $request->validated();
+        $question = Question::findOrFail($request_payload['id']);
 
-            // FIND & UPDATE QUESTION
-            $question = Question::findOrFail($request_payload['id']);
+        // Check if any quiz containing this question has attempts
+        $has_attempts = $question->quizzes()
+            ->whereHas('all_quiz_attempts')
+            ->exists();
+
+        if ($has_attempts) {
+            // ⚠️ Restrict updates if attempts exist
+            $question->update([
+                'question_text' => $request_payload['question_text']
+            ]);
+
+            if (!empty($request->options)) {
+                foreach ($request->options as $opt_data) {
+                    if (!empty($opt_data['id'])) {
+                        $option = Option::find($opt_data['id']);
+                        if ($option && $option->question_id === $question->id) {
+                            $option->update([
+                                'option_text' => $opt_data['option_text'] ?? $option->option_text,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Only titles were updated (since quiz attempts exist)',
+                'question' => $question
+            ], 200);
+
+        } else {
+            // ✅ No attempts — full update allowed
             $question->update($request_payload);
-
             $question->categories()->sync($request_payload["category_ids"]);
 
-            // HANDLE OPTIONS
             if (!empty($request->options)) {
                 foreach ($request->options as $optData) {
                     $option = Option::updateOrCreate(
@@ -325,17 +354,19 @@ class QuestionController extends Controller
             }
 
             DB::commit();
-
             return response()->json([
                 'success' => true,
                 'message' => 'Question updated successfully',
                 'question' => $question
             ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
         }
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        throw $th;
     }
+}
+
 
 
     /**
@@ -346,7 +377,7 @@ class QuestionController extends Controller
      *     summary="Get all questions (role: Admin only)",
      *     description="Retrieve a list of all questions.",
      *     security={{"bearerAuth":{}}},
-     * 
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
@@ -354,7 +385,7 @@ class QuestionController extends Controller
      *         description="Page number for pagination",
      *         @OA\Schema(type="integer", example="")
      *     ),
-     * 
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -362,7 +393,7 @@ class QuestionController extends Controller
      *         description="Number of items per page",
      *         @OA\Schema(type="integer", example="")
      *     ),
-     * 
+     *
      *     @OA\Parameter(
      *         name="question_type",
      *         in="query",
@@ -636,33 +667,49 @@ class QuestionController extends Controller
      */
 
     public function deleteQuestion(Request $request, $ids)
-    {
+{
+    if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        return response()->json([
+            "message" => "You can not perform this action"
+        ], 401);
+    }
 
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
+    $ids_array = array_map('intval', explode(',', $ids));
+
+    // VALIDATE IDS EXISTENCE
+    $existing_ids = Question::whereIn('id', $ids_array)->pluck('id')->toArray();
+
+    if (count($existing_ids) !== count($ids_array)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Some or all of the provided IDs do not exist'
+        ], 404);
+    }
+
+    // 🔍 CHECK FOR QUIZ ATTEMPTS
+    $questions_with_attempts = Question::whereIn('id', $ids_array)
+        ->whereHas('quizzes.all_quiz_attempts') // means any quiz with attempts
+        ->pluck('id')
+        ->toArray();
+
+    if (!empty($questions_with_attempts)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot delete these questions because they are part of quizzes that already have attempts.',
+            'question_ids' => $questions_with_attempts
+        ], 403);
+    }
+
+    // ✅ SAFE TO DELETE
+    Question::destroy($ids_array);
+
     return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
+        'success' => true,
+        'message' => 'Question(s) deleted successfully'
+    ], 200);
 }
 
-        $idsArray = array_map('intval', explode(',', $ids));
 
-        // VALIDATE IDS
-        $existingIds = Question::whereIn('id', $idsArray)->pluck('id')->toArray();
 
-        if (count($existingIds) !== count($idsArray)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Some or all of the provided IDs do not exist'
-            ], 404);
-        }
 
-        // DELETE QUESTION
-        Question::destroy($idsArray);
-
-        // SEND RESPONSE
-        return response()->json([
-            'success' => true,
-            'message' => 'Question deleted successfully'
-        ], 200);
-    }
 }

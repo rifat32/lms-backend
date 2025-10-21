@@ -27,8 +27,7 @@ class CreateQuizAttemptsTable extends Migration
             $table->integer('time_spent')->default(0); // in seconds
             $table->boolean('is_expired')->default(false);
             $table->boolean('is_passed')->default(false);
-
-
+            
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
