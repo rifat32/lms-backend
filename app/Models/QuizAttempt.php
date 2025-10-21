@@ -11,6 +11,7 @@ class QuizAttempt extends Model
     protected $hidden = ['pivot'];
 
     protected $fillable = [
+        "course_id",
         'quiz_id',
         'user_id',
         'score',

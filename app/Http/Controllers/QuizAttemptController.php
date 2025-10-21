@@ -171,7 +171,13 @@ class QuizAttemptController extends Controller
      *             property="quiz_id",
      *             type="integer",
      *             example="",
-     *             description="ID of the quiz to start attempt for")
+     *             description="ID of the quiz to start attempt for"),
+     *  *             @OA\Property(
+     *             property="course_id",
+     *             type="integer",
+     *             example="",
+     *             description="ID of the course to start attempt for")
+     *
      *         )
      *     ),
      *
@@ -193,6 +199,7 @@ class QuizAttemptController extends Controller
         // VALIDATE REQUEST
         $request->validate([
             'quiz_id' => 'required|integer|exists:quizzes,id',
+            "course_id" => "required|integer"
         ]);
 
         // GET AUTHENTICATED USER
@@ -233,6 +240,7 @@ class QuizAttemptController extends Controller
 
         // CREATE QUIZ ATTEMPT
         $attempt = QuizAttempt::create([
+            "course_id" => $request->course_id,
             'quiz_id' => $quiz->id,
             'user_id' => $user->id,
             'score' => 0,
@@ -331,6 +339,7 @@ class QuizAttemptController extends Controller
 
         $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
+            ->where("course_id",$request->course_id)
             ->whereNull('completed_at')
             ->firstOrFail();
 

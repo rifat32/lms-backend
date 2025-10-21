@@ -50,6 +50,7 @@ trait BasicUtil
 
     // ✅ Count completed quizzes (distinct)
     $completed_quizzes = QuizAttempt::where('user_id', auth()->user()->id)
+    ->where("course_id",$course_id)
         ->whereIn('quiz_id', $quiz_ids)
         ->where('is_passed', 1)
         ->whereNotNull('completed_at')

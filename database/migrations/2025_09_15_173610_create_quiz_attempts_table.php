@@ -19,6 +19,8 @@ class CreateQuizAttemptsTable extends Migration
 
             $table->unsignedBigInteger('quiz_id');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('course_id');
+
             $table->integer('score')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
@@ -29,6 +31,7 @@ class CreateQuizAttemptsTable extends Migration
 
             $table->timestamps();
 
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->foreign('quiz_id')->references('id')->on('quizzes')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });

@@ -10,7 +10,6 @@ use App\Models\CourseFaq;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Quiz;
-use App\Models\QuizAttempt;
 use App\Models\Section;
 use Exception;
 use Illuminate\Http\Request;
