@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SectionRequest;
 use App\Http\Requests\SectionWithLessonRequest;
 use App\Models\Lesson;
+use App\Models\Quiz;
 use App\Models\Section;
 use App\Models\Sectionable;
 use Illuminate\Http\Request;
@@ -779,8 +780,36 @@ class SectionController extends Controller
                 ]);
             }
 
-            // ✅ Delete sectionables matching given IDs
-            Sectionable::whereIn('id', collect($validated['sectionable'])->pluck('id'))->delete();
+
+
+
+             $cannot_delete_ids = [];
+
+        foreach ($validated['sectionable'] as $sectionable_data) {
+            $sectionable = Sectionable::where("id", $sectionable_data['id'])->first();
+
+            if (!$sectionable) {
+                continue;
+            }
+
+            if ($sectionable->sectionable_type === Quiz::class) {
+                // Check if quiz has any attempts
+                $quiz = Quiz::find($sectionable->sectionable_id);
+                if ($quiz && $quiz->all_quiz_attempts()->exists()) {
+                    $cannot_delete_ids[] = $sectionable->id;
+                }
+            } else if ($sectionable->sectionable_type === Lesson::class) {
+                // Check if lesson has any progress
+                $lesson = Lesson::find($sectionable->sectionable_id);
+                if ($lesson && $lesson->all_lesson_progress()->exists()) {
+                    $cannot_delete_ids[] = $sectionable->id;
+                }
+            }
+        }
+
+        // Delete only sectionables that can be safely removed
+        $delete_ids = collect($validated['sectionable'])->pluck('id')->diff($cannot_delete_ids);
+        Sectionable::whereIn('id', $delete_ids)->delete();
 
 
             DB::commit();

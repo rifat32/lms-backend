@@ -126,10 +126,20 @@ class Lesson extends Model
         return $this->morphToMany(Section::class, 'sectionable');
     }
 
-    public function lesson_progress(): HasOne
+    public function all_lesson_progress()
+    {
+        return $this->hasMany(LessonProgress::class, 'lesson_id');
+
+    }
+    public function lesson_progress()
     {
         return $this->hasOne(LessonProgress::class, 'lesson_id')
-        ->where("lesson_progresses.user_id",auth()->user()->id);
+        ->when(auth()->user(), function($query) {
+       $query->where("lesson_progresses.user_id",auth()->user()->id);
+        }, function($query) {
+       $query->where("lesson_progresses.user_id", -1);
+        });
+
     }
 
     public function scopeFilters($query)

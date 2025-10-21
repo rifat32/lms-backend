@@ -564,24 +564,30 @@ class QuestionController extends Controller
      */
 
 
-    public function getQuestionById(Request $request, $id)
-    {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
-
-        // GET QUESTION BY ID
-        $question = Question::with('options', "categories")->findOrFail($id);
-
-        // SEND RESPONSE
+   public function getQuestionById(Request $request, $id)
+{
+    if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
         return response()->json([
-            'success' => true,
-            'message' => 'Question retrieved successfully',
-            'question' => $question
-        ], 200);
+            "message" => "You can not perform this action"
+        ], 401);
     }
+
+    // ✅ Get question with relations
+    $question = Question::with(['options', 'categories'])->findOrFail($id);
+
+    // ✅ Check if this question belongs to any quiz that has attempts
+    $has_attempt = $question->quizzes()
+        ->whereHas('quiz_attempts')
+        ->exists();
+
+    // ✅ Send response
+    return response()->json([
+        'success' => true,
+        'message' => 'Question retrieved successfully',
+        'question' => $question,
+        'has_attempt' => $has_attempt
+    ], 200);
+}
 
     /**
      * @OA\Delete(

@@ -740,6 +740,23 @@ class LessonController extends Controller
                 ], 404);
             }
 
+// Check if any lesson has progress
+        $lessons_with_progress = $lessons->filter(function ($lesson) {
+            return $lesson->all_lesson_progress()->exists();
+        });
+
+        if ($lessons_with_progress->count() > 0) {
+            $ids_with_progress = $lessons_with_progress->pluck('id')->toArray();
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete lesson(s) with existing progress',
+                'data' => [
+                    'lesson_ids' => $ids_with_progress
+                ]
+            ], 400);
+        }
+
+
             // Delete lesson files (use raw DB value, not accessor!)
             foreach ($lessons as $lesson) {
                 $raw_files = $lesson->getRawOriginal('files'); // raw JSON string from DB

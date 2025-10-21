@@ -602,6 +602,14 @@ class QuizController extends Controller
         }
 
         $quiz = Quiz::findOrFail($id);
+         // Check if the quiz has any attempts
+    if ($quiz->all_quiz_attempts()->exists()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot delete quiz with existing attempts',
+        ], 400);
+    }
+
 
         $quiz->delete();
 
@@ -618,4 +626,7 @@ class QuizController extends Controller
             'message' => 'Quiz deleted successfully'
         ]);
     }
+
+
+
 }
