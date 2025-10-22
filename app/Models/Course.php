@@ -148,37 +148,102 @@ class Course extends Model
 
     public function scopeFilters($query)
     {
-        return $query->when(request()->filled('searchKey'), function ($q) {
-            $q->where('title', 'like', '%' . request('searchKey') . '%');
-        })->when(request()->filled('category_id'), function ($q) {
-            $q->where('category_id', request('category_id'));
-        })
-            ->when(request()->filled('is_enrolled'), function ($q) {
-                $isEnrolled = request('is_enrolled');
-                if ($isEnrolled) {
-                    $q->whereHas('enrollments', function ($enrollmentQuery) {
-                        $enrollmentQuery->where('user_id', auth()->user()->id);
-                    });
-                } else {
-                    $q->whereDoesntHave('enrollments', function ($enrollmentQuery) {
-                        $enrollmentQuery->where('user_id', auth()->user()->id);
-                    });
-                }
-            })
-            ->when(request()->filled('status'), function ($q) {
-            $validStatus = array_values(Course::STATUS);
-            $status = request('status');
+       return $query
+    ->when(request()->filled('searchKey'), function ($q) {
+        $q->where('title', 'like', '%' . request('searchKey') . '%');
+    })
 
-            if (!in_array($status, $validStatus)) {
-                throw ValidationException::withMessages([
-                    'status' => 'Invalid status value. allowed values: ' . implode(', ', $validStatus)
-                ]);
+    ->when(request()->filled('is_enrolled'), function ($q) {
+
+        if(auth()->user()) {
+              $is_enrolled = request('is_enrolled');
+        if ($is_enrolled) {
+            $q->whereHas('enrollments', function ($enrollmentQuery) {
+                $enrollmentQuery->where('user_id', auth()->user()->id);
+            });
+        } else {
+            $q->whereDoesntHave('enrollments', function ($enrollmentQuery) {
+                $enrollmentQuery->where('user_id', auth()->user()->id);
+            });
+        }
+        }
+         else {
+            $q->whereDoesntHave('enrollments');
+        }
+        
+    })
+    ->when(request()->filled('status'), function ($q) {
+        $valid_status = array_values(Course::STATUS);
+        $status = request('status');
+
+        if (!in_array($status, $valid_status)) {
+            throw ValidationException::withMessages([
+                'status' => 'Invalid status value. Allowed values: ' . implode(', ', $valid_status),
+            ]);
+        }
+
+        $q->where('status', $status);
+    })
+    ->when(request()->filled('search_key'), function ($q) {
+        $q->where('title', 'like', '%' . request('search_key') . '%');
+    })
+
+    // ✅ Category filter (many-to-many)
+->when(request()->filled('category_ids'), function ($q) {
+    $category_ids = array_filter(explode(',', request('category_ids'))); // make array and remove empty values
+
+    if (!empty($category_ids)) {
+        $q->whereHas('categories', function ($cat_q) use ($category_ids) {
+            $cat_q->whereIn('course_category_id', $category_ids);
+        });
+    }
+})
+
+    // ✅ Level filter
+    ->when(request()->filled('level'), function ($q) {
+        $q->where('level', request('level'));
+    })
+
+    // ✅ Price range filter
+    ->when(request()->filled('price_range'), function ($q) {
+        $range = explode(',', request('price_range'));
+
+        $start_price = isset($range[0]) && $range[0] !== '' ? (float)$range[0] : null;
+        $end_price   = isset($range[1]) && $range[1] !== '' ? (float)$range[1] : null;
+
+        $q->where(function ($price_q) use ($start_price, $end_price) {
+            if (!is_null($start_price)) {
+                $price_q->where(function ($p_q) use ($start_price) {
+                    $p_q->whereRaw('
+                        CASE
+                            WHEN sale_price IS NOT NULL
+                                 AND price_start_date IS NOT NULL
+                                 AND price_end_date IS NOT NULL
+                                 AND NOW() BETWEEN price_start_date AND price_end_date
+                            THEN sale_price
+                            ELSE price
+                        END >= ?
+                    ', [$start_price]);
+                });
             }
 
-            $q->where('status', $status);
-        })->when(request()->filled('search_key'), function ($q) {
-            $q->where('title', 'like', '%' . request('search_key') . '%');
+            if (!is_null($end_price)) {
+                $price_q->where(function ($p_q) use ($end_price) {
+                    $p_q->whereRaw('
+                        CASE
+                            WHEN sale_price IS NOT NULL
+                                 AND price_start_date IS NOT NULL
+                                 AND price_end_date IS NOT NULL
+                                 AND NOW() BETWEEN price_start_date AND price_end_date
+                            THEN sale_price
+                            ELSE price
+                        END <= ?
+                    ', [$end_price]);
+                });
+            }
         });
+    });
+
     }
 
     public function scopeRestrictBeforeEnrollment($query)

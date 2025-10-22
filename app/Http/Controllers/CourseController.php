@@ -102,11 +102,60 @@ public function getCourseByIdUnified($id)
  *     description="Retrieve all courses. If user is logged in, filter by enrolled status or show personalized data.",
  *     security={{"bearerAuth":{}}},
  *     @OA\Parameter(
+ *         name="searchKey",
+ *         in="query",
+ *         required=false,
+ *         description="Search by course title (case-insensitive, partial match)",
+ *         @OA\Schema(type="string", example="Laravel")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course status. Allowed values: draft, published, archived.",
+ *         @OA\Schema(type="string", example="published")
+ *     ),
+ *     @OA\Parameter(
  *         name="is_enrolled",
  *         in="query",
  *         required=false,
- *         description="1 for enrolled, 0 for not enrolled",
- *         @OA\Schema(type="string", default="", example="")
+ *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="category_ids",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+ *         @OA\Schema(type="string", example="2,5,8")
+ *     ),
+ *     @OA\Parameter(
+ *         name="level",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+ *         @OA\Schema(type="string", example="beginner")
+ *     ),
+ *     @OA\Parameter(
+ *         name="price_range",
+ *         in="query",
+ *         required=false,
+ *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+ *         @OA\Schema(type="string", example="100,500")
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Page number for pagination.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         required=false,
+ *         description="Number of results per page.",
+ *         @OA\Schema(type="integer", example=10)
  *     ),
  *     @OA\Response(
  *         response=200,
@@ -134,20 +183,7 @@ public function getCoursesClientUnified(Request $request)
     ->filters();
 
 
-    if ($user) {
 
-        // If filter by enrollment
-        if ($request->has('is_enrolled')) {
-            $is_enrolled = $request->boolean('is_enrolled');
-            $query->whereHas('enrollment', function ($q) use ($user, $is_enrolled) {
-                if ($is_enrolled) {
-                    $q->where('user_id', $user->id);
-                } else {
-                    $q->where('user_id', '!=', $user->id);
-                }
-            });
-        }
-    }
 
     $courses = retrieve_data($query, 'created_at', 'courses');
     $courses['data']->each(fn($c) => $c->categories->makeHidden('pivot'));
@@ -225,47 +261,61 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
  *     description="Retrieve all courses for non-logged in users. Never use for logged in users.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="category_id",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="searchKey",
-     *         in="query",
-     *         required=false,
-     *         description="Search by keyword in title only",
-     *         @OA\Schema(type="string", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         required=false,
-     *         description="Page number for pagination",
-     *         @OA\Schema(type="integer", default="", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Number of items per page",
-     *         @OA\Schema(type="integer", default="", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         required=false,
-     *         description="Course status only: draft, published, archived",
-     *         @OA\Schema(type="string", default="", example="")
-     *     ),
-     *    *     @OA\Parameter(
-     *         name="is_enrolled",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
-     *         @OA\Schema(type="string", default="", example="")
-     *     ),
+ *         name="searchKey",
+ *         in="query",
+ *         required=false,
+ *         description="Search by course title (case-insensitive, partial match)",
+ *         @OA\Schema(type="string", example="Laravel")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course status. Allowed values: draft, published, archived.",
+ *         @OA\Schema(type="string", example="published")
+ *     ),
+ *     @OA\Parameter(
+ *         name="is_enrolled",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="category_ids",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+ *         @OA\Schema(type="string", example="2,5,8")
+ *     ),
+ *     @OA\Parameter(
+ *         name="level",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+ *         @OA\Schema(type="string", example="beginner")
+ *     ),
+ *     @OA\Parameter(
+ *         name="price_range",
+ *         in="query",
+ *         required=false,
+ *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+ *         @OA\Schema(type="string", example="100,500")
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Page number for pagination.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         required=false,
+ *         description="Number of results per page.",
+ *         @OA\Schema(type="integer", example=10)
+ *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -747,47 +797,61 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *     summary="Get all courses (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
-     *         name="category_id",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by category ID",
-     *         @OA\Schema(type="integer", example="")
-     *     ),
-     *    *    *     @OA\Parameter(
-     *         name="is_enrolled",
-     *         in="query",
-     *         required=false,
-     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
-     *         @OA\Schema(type="string", default="", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="searchKey",
-     *         in="query",
-     *         required=false,
-     *         description="Search by keyword in title only",
-     *         @OA\Schema(type="string", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         required=false,
-     *         description="Page number for pagination",
-     *         @OA\Schema(type="integer", default="", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         required=false,
-     *         description="Number of items per page",
-     *         @OA\Schema(type="integer", default="", example="")
-     *     ),
-     *     @OA\Parameter(
-     *         name="status",
-     *         in="query",
-     *         required=false,
-     *         description="Course status only: draft, published, archived",
-     *         @OA\Schema(type="string", default="", example="")
-     *     ),
+ *         name="searchKey",
+ *         in="query",
+ *         required=false,
+ *         description="Search by course title (case-insensitive, partial match)",
+ *         @OA\Schema(type="string", example="Laravel")
+ *     ),
+ *     @OA\Parameter(
+ *         name="status",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course status. Allowed values: draft, published, archived.",
+ *         @OA\Schema(type="string", example="published")
+ *     ),
+ *     @OA\Parameter(
+ *         name="is_enrolled",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="category_ids",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+ *         @OA\Schema(type="string", example="2,5,8")
+ *     ),
+ *     @OA\Parameter(
+ *         name="level",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+ *         @OA\Schema(type="string", example="beginner")
+ *     ),
+ *     @OA\Parameter(
+ *         name="price_range",
+ *         in="query",
+ *         required=false,
+ *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+ *         @OA\Schema(type="string", example="100,500")
+ *     ),
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Page number for pagination.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         required=false,
+ *         description="Number of results per page.",
+ *         @OA\Schema(type="integer", example=10)
+ *     ),
      *
      *     @OA\Response(
      *         response=200,
