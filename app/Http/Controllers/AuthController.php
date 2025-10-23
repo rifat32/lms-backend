@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\StudentWelcomeMail;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * @OA\Tag(
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     use BasicUtil;
+
     /**
      * @OA\Post(
      *     path="/v1.0/auth/register",
@@ -91,6 +94,14 @@ class AuthController extends Controller
             $token = $user->createToken('API Token')->accessToken;
 
             $business_settings = $this->get_business_setting();
+
+             if (env("SEND_EMAIL") == true) {
+  if ($request->role === 'student') {
+    Mail::to($user->email)->send(new StudentWelcomeMail($user));
+}
+
+             }
+
 
             // Commit the transaction
             DB::commit();
