@@ -21,13 +21,15 @@ class CreateQuizAttemptsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('course_id');
 
+
+   $table->integer('total_points')->nullable();
             $table->integer('score')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->integer('time_spent')->default(0); // in seconds
             $table->boolean('is_expired')->default(false);
             $table->boolean('is_passed')->default(false);
-            
+
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');

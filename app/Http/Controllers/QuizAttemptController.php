@@ -244,6 +244,7 @@ class QuizAttemptController extends Controller
             'quiz_id' => $quiz->id,
             'user_id' => $user->id,
             'score' => 0,
+            'total_points' => 0,
             'started_at' => now(),
         ]);
 
@@ -368,12 +369,16 @@ class QuizAttemptController extends Controller
 
         // ✅ SCORING
         $score = 0;
+        $total_points = 0;
         $feedback = [];
 
         foreach ($request->answers as $answer) {
             $question = Question::find($answer['question_id']);
-            if (!$question)
+            if (!$question){
                 continue;
+        };
+
+             $total_points += $question->points;
 
             if ($question->question_type !== 'essay') {
                 // GET all correct answer IDs
@@ -405,8 +410,13 @@ class QuizAttemptController extends Controller
             }
         }
 
+
+        // 📊 Calculate percentage
+    $percentage_score = $total_points > 0 ? ($score / $total_points) * 100 : 0;
+
+        $attempt->total_points = $total_points;
         $attempt->score = $score;
-        $attempt->is_passed = $score >= $quiz->passing_grade; // use quiz passing_grade
+        $attempt->is_passed = $percentage_score >= $quiz->passing_grade; // use quiz passing_grade
         $attempt->completed_at = now();
         $attempt->time_spent = $elapsed;
         $attempt->save();
@@ -421,6 +431,7 @@ class QuizAttemptController extends Controller
             'message' => 'Quiz attempt submitted',
             'data' => [
                 'attempt_id' => $attempt->id,
+                "total_points" => $attempt->total_points,
                 'score' => $attempt->score,
                 'is_passed' => $attempt->is_passed,
                 'time_spent' => $attempt->time_spent,
