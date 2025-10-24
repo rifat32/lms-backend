@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'last_name'     => $request->last_name,
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
-                // 'business_id' => $request->business_id
+                 'business_id' => $request->business_id??1
             ]);
 
             // $user->assignRole("$request->role" . "#" . $request->business_id);
