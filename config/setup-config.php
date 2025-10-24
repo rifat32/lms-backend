@@ -1,7 +1,7 @@
 <?php
 
 $superAdminPermissions = include(__DIR__ . '/permissions_super_admin.php');
-$resellerPermissions = include(__DIR__ . '/permissions_reseller.php');
+
 $businessOwnerPermissions = include(__DIR__ . '/permissions_business_owner.php');
 $businessAdminPermissions = include(__DIR__ . '/permissions_business_admin.php');
 $businessLecturerPermissions = include(__DIR__ . '/permissions_business_lecturer.php');
@@ -29,10 +29,7 @@ return [
             "role" => "super_admin",
             "permissions" => $superAdminPermissions['permissions'],
         ],
-        [
-            "role" => "reseller",
-            "permissions" => $resellerPermissions['permissions'],
-        ],
+
         [
             "role" => "owner",
             "permissions" => $businessOwnerPermissions['permissions'],
@@ -53,7 +50,6 @@ return [
 
     "permissions" => [
         'super_admin',
-        'reseller',
         'owner',
         'admin',
         'lecturer',

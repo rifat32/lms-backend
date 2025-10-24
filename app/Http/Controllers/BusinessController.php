@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BusinessRequest;
+use App\Http\Requests\BusinessUpdateRequest;
 use App\Http\Requests\RegisterUserWithBusinessRequest;
 use App\Models\Business;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -107,17 +108,13 @@ class BusinessController extends Controller
         try {
             DB::beginTransaction();
 
+
             if(!auth()->user()->hasRole('super_admin')) {
               return response()->json([
                 "message" => "You can not perform this action"
               ], 401);
             }
 
-            // if (!$request->user()->hasPermissionTo('business_create')) {
-            //     return response()->json([
-            //         "message" => "You can not perform this action"
-            //     ], 401);
-            // }
 
             // VALIDATE USER
             $request_payload = $request->validated();
@@ -141,7 +138,7 @@ class BusinessController extends Controller
             $user->save();
 
 
-            // PREPARE PREPARE RESPONSE 
+            // PREPARE PREPARE RESPONSE
             $user->business_id = $business->id;
             DB::commit();
 
@@ -160,115 +157,7 @@ class BusinessController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/v1.0/businesses",
-     *     operationId="createBusiness",
-     *     tags={"business_management"},
-     *     summary="Create a new business (role: Super Admin only)",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "registration_date", "address_line_1", "country", "city", "postcode"},
-     *             @OA\Property(property="name", type="string", example="Acme Corporation"),
-     *             @OA\Property(property="email", type="string", example="contact@acme.com"),
-     *             @OA\Property(property="phone", type="string", example="+8801765432109"),
-     *             @OA\Property(property="registration_date", type="string", format="date", example="2025-09-22"),
-     *             @OA\Property(property="trail_end_date", type="string", format="date", example="2025-10-22"),
-     *             @OA\Property(property="about", type="string", example="We provide tech solutions worldwide."),
-     *             @OA\Property(property="web_page", type="string", example="https://acme.com"),
-     *             @OA\Property(property="address_line_1", type="string", example="123 Business Street"),
-     *             @OA\Property(property="country", type="string", example="Bangladesh"),
-     *             @OA\Property(property="city", type="string", example="Dhaka"),
-     *             @OA\Property(property="postcode", type="string", example="1207"),
-     *             @OA\Property(property="currency", type="string", example="BDT"),
-     *             @OA\Property(property="logo", type="string", example="https://cdn.acme.com/logo.png")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Business created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Business created successfully"),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Acme Corporation"),
-     *                 @OA\Property(property="email", type="string", example="contact@acme.com"),
-     *                 @OA\Property(property="phone", type="string", example="+8801765432109"),
-     *                 @OA\Property(property="registration_date", type="string", format="date", example="2025-09-22"),
-     *                 @OA\Property(property="trail_end_date", type="string", format="date", example="2025-10-22"),
-     *                 @OA\Property(property="country", type="string", example="Bangladesh"),
-     *                 @OA\Property(property="city", type="string", example="Dhaka"),
-     *                 @OA\Property(property="status", type="string", example="pending"),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-22T12:00:00Z"),
-     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-22T12:00:00Z")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Invalid request.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have permission to perform this action.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The name field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="name", type="array",
-     *                     @OA\Items(type="string", example="The name field is required.")
-     *                 ),
-     *                 @OA\Property(property="email", type="array",
-     *                     @OA\Items(type="string", example="The email must be a valid email address.")
-     *                 )
-     *             )
-     *         )
-     *     )
-     * )
-     */
-    public function createBusiness(BusinessRequest $request)
-    {
-        try {
-            DB::beginTransaction();
 
-            if(!auth()->user()->hasRole('super_admin')) {
-              return response()->json([
-                "message" => "You can not perform this action"
-              ], 401);
-            }
-
-            $business = Business::create($request->validated());
-
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Business created successfully',
-                'data' => $business
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
-    }
 
     /**
      * @OA\Put(
@@ -356,37 +245,108 @@ class BusinessController extends Controller
      *     )
      * )
      */
-
-    public function updateBusiness(BusinessRequest $request)
+ public function businessOwnerCheck($business_id, $strict = FALSE)
     {
+
+        $business = Business::where('id', $business_id)
+            ->when(
+                $strict || !request()->user()->hasRole('superadmin'),
+                function ($query) {
+                    $query->where(function ($query) {
+                        $query
+
+                            ->orWhere('owner_id', auth()->user()->id)
+
+                        ;
+                    });
+                },
+            )
+            ->first();
+
+
+        if (empty($business)) {
+            throw new Exception("you are not the owner of the business or the requested business does not exist.", 401);
+        }
+        return $business;
+    }
+   public function updateBusiness(BusinessUpdateRequest $request)
+    {
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
 
-            if(!auth()->user()->hasRole('super_admin')) {
-              return response()->json([
-                "message" => "You can not perform this action"
-              ], 401);
+
+            $request_data = $request->validated();
+
+            $business = $this->businessOwnerCheck($request_data['business']["id"], FALSE);
+
+
+
+            //    user email check
+            $userPrev = User::where([
+                "id" => $request_data["user"]["id"]
+            ])->first();
+
+            if (!$userPrev) {
+                throw new Exception("no user found with this id", 404);
             }
-            // VALIDATE PAYLOAD
-            $request_payload = $request->validated();
 
-            // FIND BY ID
-            $business = Business::findOrFail($request_payload['id']);
-            // UPDATE
-            $business->update($request_payload);
 
-            // COMMIT TRANSACTION
+
+            if (!empty($request_data['user']['password'])) {
+                $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+            } else {
+                unset($request_data['user']['password']);
+            }
+
+
+            $request_data['user']['is_active'] = true;
+            $request_data['user']['remember_token'] = Str::random(10);
+            $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
+            $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
+            $request_data['user']['country'] = $request_data['business']['country'];
+            $request_data['user']['city'] = $request_data['business']['city'];
+            $request_data['user']['postcode'] = $request_data['business']['postcode'];
+            $request_data['user']['latitude'] = $request_data['business']['latitude'];
+            $request_data['user']['longitude'] = $request_data['business']['longitude'];
+
+
+            $user = User::where([
+                "id" => $request_data['user']["id"]
+            ])
+            ->first();
+
+               if (!$user) {
+                throw new Exception("something went wrong updating user.", 500);
+            }
+
+            $user->fill($request_data['user'] );
+            $user->save();
+
+            $business->fill($request_data['business']);
+
+            $business->save();
+
+
+            if (empty($business)) {
+                return response()->json([
+                    "massage" => "something went wrong"
+                ], 500);
+            }
+
+
+
+
             DB::commit();
-            // SEND RESPONSE
-            return response()->json([
-                'success' => true,
-                'message' => 'Business updated successfully',
-                'data' => $business
-            ], 200);
-        } catch (\Throwable $th) {
-            // ROLLBACK TRANSACTION
+
+            return response([
+                "user" => $user,
+                "business" => $business
+            ], 201);
+        } catch (Exception $e) {
             DB::rollBack();
-            throw $th;
+
+            return $this->sendError($e);
         }
     }
 
@@ -550,7 +510,7 @@ class BusinessController extends Controller
 
     public function getAllBusinesses(Request $request)
     {
-      
+
         if(!auth()->user()->hasRole('super_admin')) {
               return response()->json([
                 "message" => "You can not perform this action"
@@ -605,7 +565,7 @@ class BusinessController extends Controller
     public function deleteBusiness($ids)
     {
         try {
-            
+
             if(!auth()->user()->hasRole('super_admin')) {
               return response()->json([
                 "message" => "You can not perform this action"

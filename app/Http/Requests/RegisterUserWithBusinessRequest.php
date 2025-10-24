@@ -34,20 +34,28 @@ class RegisterUserWithBusinessRequest extends FormRequest
             'user.password' => 'nullable|string|min:8',
 
             // BUSINESS INFORMATION
-            'business.name' => 'required|string|max:255',
-            'business.email' => ['nullable', 'string', 'email', 'max:255', new UniqueBusinessEmail()],
-            'business.phone' => 'nullable|string',
-            'business.registration_date' => 'required|date|before_or_equal:today',
-            'business.trail_end_date' => 'nullable|date',
-            'business.about' => 'nullable|string',
-            'business.web_page' => 'nullable|string',
-            // 'business.identifier_prefix' => 'nullable|string',
-            'business.address_line_1' => 'required|string',
-            'business.country' => 'required|string',
-            'business.city' => 'required|string',
-            'business.postcode' => 'required|string',
-            'business.currency' => 'nullable|string',
-            'business.logo' => 'nullable|string',
+
+'business.name' => 'required|string|max:255',
+'business.about' => 'nullable|string',
+'business.web_page' => 'nullable|string',
+'business.pin_code' => 'nullable|string', // optional, maps to postcode
+'business.phone' => 'nullable|string',
+'business.email' => 'nullable|string|unique:businesses,email,' . $this->business["id"] . ',id',
+'business.additional_information' => 'nullable|string', // extra info, not in migration
+'business.lat' => 'nullable|string',
+'business.long' => 'nullable|string',
+'business.currency' => 'nullable|string',
+'business.country' => 'required|string',
+'business.city' => 'required|string',
+'business.postcode' => 'nullable|string',
+'business.address_line_1' => 'required|string',
+'business.address_line_2' => 'nullable|string',
+'business.logo' => 'nullable|string',
+'business.image' => 'nullable|string',
+'business.background_image' => 'nullable|string',
+'business.theme' => 'nullable|string',
+'business.images' => 'nullable|array',
+'business.images.*' => 'nullable|string',
         ];
     }
 

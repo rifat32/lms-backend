@@ -122,8 +122,6 @@ Route::middleware('auth:api')->group(function () {
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
-        Route::post('/', [BusinessController::class, 'createBusiness']);
-        Route::put('/', [BusinessController::class, 'updateBusiness']);
         Route::put('/', [BusinessController::class, 'updateBusiness']);
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);

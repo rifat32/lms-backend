@@ -11,32 +11,40 @@ class CreateBusinessesTable extends Migration
      *
      * @return void
      */
-    public function up()
+   public function up()
     {
         Schema::create('businesses', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string("email")->nullable()->unique();
-            $table->string("phone")->nullable();
-            $table->date("registration_date");
-            $table->date("trail_end_date")->nullable();
-            $table->text("about")->nullable();
-            $table->string("web_page")->nullable();
-            $table->string("address_line_1")->nullable();
-            $table->string("country");
-            $table->string("city");
-            $table->string("postcode")->nullable();
-            $table->string("currency")->nullable();
-            $table->foreignId("service_plan_id")->nullable()->constrained('service_plans')->restrictOnDelete();
-            $table->enum('status', ['pending', 'active',  'suspended', 'cancelled', 'expired', 'trail_ended', 'inactive'])->default("pending");
-            $table->boolean('is_active')->default(1);
-            $table->string("logo")->nullable();
-            $table->foreignId("owner_id")->constrained('users')->cascadeOnDelete();
-            $table->foreignId("created_by")->nullable()->constrained('users')->nullOnDelete();
-            $table->softDeletes();
+           $table->string("name"); // required|string|max:255
+        $table->string("email")->nullable()->unique(); // nullable|string|unique
+        $table->string("phone")->nullable(); // nullable|string
+        $table->date("registration_date"); // required in migration, can be auto-set
+        $table->date("trail_end_date")->nullable(); // nullable
+        $table->text("about")->nullable(); // nullable|string
+        $table->string("web_page")->nullable(); // nullable|string
+        $table->string("address_line_1"); // required|string
+        $table->string("address_line_2")->nullable(); // nullable|string
+        $table->string("country"); // required|string
+        $table->string("city"); // required|string
+        $table->string("postcode")->nullable(); // nullable|string
+        $table->string("currency")->nullable(); // nullable|string
+        $table->string("latitude")->nullable(); // nullable|string
+        $table->string("longitude")->nullable(); // nullable|string
+        $table->string("logo")->nullable(); // nullable|string
+        $table->string("image")->nullable(); // nullable|string
+        $table->string("background_image")->nullable(); // nullable|string
+        $table->string("theme")->nullable(); // nullable|string
+        $table->json("images")->nullable(); // nullable|array of strings
+        $table->foreignId("service_plan_id")->nullable()->constrained('service_plans')->restrictOnDelete();
+        $table->enum('status', ['pending', 'active', 'suspended', 'cancelled', 'expired', 'trail_ended', 'inactive'])->default("pending");
+        $table->boolean('is_active')->default(1);
+        $table->foreignId("owner_id")->constrained('users')->cascadeOnDelete();
+        $table->foreignId("created_by")->nullable()->constrained('users')->nullOnDelete();
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

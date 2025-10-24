@@ -22,7 +22,7 @@ class CreateQuizAttemptsTable extends Migration
             $table->unsignedBigInteger('course_id');
 
 
-   $table->integer('total_points')->nullable();
+            $table->integer('total_points')->nullable();
             $table->integer('score')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
