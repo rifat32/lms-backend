@@ -14,13 +14,12 @@ class CreateBusinessSettingsTable extends Migration
     public function up()
     {
         Schema::create('business_settings', function (Blueprint $table) {
+
             $table->id();
             $table->integer('business_start_day')->default(0);
             $table->string('business_time_zone')->nullable();
             $table->string('identifier_prefix')->nullable();
             $table->boolean('delete_read_notifications_after_30_days')->nullable();
-
-          
 
             $table->string('STRIPE_KEY')->nullable();
             $table->string('STRIPE_SECRET')->nullable();

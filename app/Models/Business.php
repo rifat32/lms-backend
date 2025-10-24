@@ -19,7 +19,7 @@ class Business extends Model
         'email',
         'phone',
         'registration_date',
-        'trail_end_date',
+
         'about',
         'web_page',
         'additional_information',
@@ -28,7 +28,7 @@ class Business extends Model
         'city',
         'postcode',
         'currency',
-        'service_plan_id',
+
         'status',
         'is_active',
         'logo',

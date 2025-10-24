@@ -9,143 +9,133 @@ use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
-        /**
-     *
-     * @OA\Put(
-     *      path="/v1.0/business-settings",
-     *      operationId="updateBusinessSettings",
-     *      tags={"setting"},
-     *       security={
-     *           {"bearerAuth": {}}
-     *       },
-     *      summary="This method is to update busuness setting (role: Admin only)",
-     *      description="This method is to update busuness setting",
-     *
-     *  @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-
-
-     *          @OA\Property(property="STRIPE_KEY", type="string", format="string",example="STRIPE_KEY"),
-     *           @OA\Property(property="STRIPE_SECRET", type="string", format="string",example="STRIPE_SECRET"),
-     *  *   @OA\Property(property="stripe_enabled", type="boolean", example=true)
- 
-     *
-     *
-     *         ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successful operation",
-     *       @OA\JsonContent(),
-     *       ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthenticated",
-     * @OA\JsonContent(),
-     *      ),
-     *        @OA\Response(
-     *          response=422,
-     *          description="Unprocesseble Content",
-     *    @OA\JsonContent(),
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden",
-     *   @OA\JsonContent()
-     * ),
-     *  * @OA\Response(
-     *      response=400,
-     *      description="Bad Request",
-     *   *@OA\JsonContent()
-     *   ),
-     * @OA\Response(
-     *      response=404,
-     *      description="not found",
-     *   *@OA\JsonContent()
-     *   )
-     *      )
-     *     )
-     */
-
-    public function updateBusinessSettings(UpdateBusinessSettingRequest $request)
-    {
-
-        try {
-   if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
-
-            
-            $request_data = $request->validated();
-            $request_data["business_id"] = auth()->user()->business_id;
-
-
-            if (!empty($request_data['stripe_enabled'])) {
-                // Verify the Stripe credentials before updating
-                $stripeValid = false;
-
-                try {
-                    // Set Stripe client with the provided secret
-                    $stripe = new \Stripe\StripeClient($request_data['STRIPE_SECRET']);
-
-                    // Make a test API call to check balance instead of account details
-                    $balance = $stripe->balance->retrieve();
-
-                    // If the request is successful, mark the Stripe credentials as valid
-                    $stripeValid = true;
-                } catch (\Stripe\Exception\AuthenticationException $e) {
-                    return response()->json([
-                        "message" => "Invalid Stripe credentials: " . $e->getMessage()
-                    ], 401);
-                } catch (\Stripe\Exception\ApiConnectionException $e) {
-                    return response()->json([
-                        "message" => "Network error while connecting to Stripe: " . $e->getMessage()
-                    ], 502);
-                } catch (\Stripe\Exception\InvalidRequestException $e) {
-                    return response()->json([
-                        "message" => "Invalid request to Stripe: " . $e->getMessage()
-                    ], 400);
-                } catch (\Exception $e) {
-                    return response()->json([
-                        "message" => "An error occurred while verifying Stripe credentials: " . $e->getMessage()
-                    ], 500);
-                }
-            }
-
-            $busunessSetting = BusinessSetting::first();
-
-            if (!$busunessSetting) {
-             $busunessSetting =   BusinessSetting::create($request_data);
-            } else {
-
-
-                $busunessSetting->fill(collect($request_data)->only([
-                    'STRIPE_KEY',
-                    "STRIPE_SECRET",
-                ])->toArray());
-                $busunessSetting->save();
-            }
+      /**
+ *
+ * @OA\Put(
+ *      path="/v1.0/business-settings",
+ *      operationId="updateBusinessSettings",
+ *      tags={"setting"},
+ *      security={{"bearerAuth": {}}},
+ *      summary="Update business settings (role: Admin/Owner/Lecturer only)",
+ *      description="Updates business settings. All fields are optional; only passed fields will be updated.",
+ *
+ *      @OA\RequestBody(
+ *          required=true,
+ *          @OA\JsonContent(
+ *              // General Settings
+ *              @OA\Property(property="general__main_color", type="string"),
+ *              @OA\Property(property="general__secondary_color", type="string"),
+ *              @OA\Property(property="general__accent_color", type="string"),
+ *              @OA\Property(property="general__danger_color", type="string"),
+ *              @OA\Property(property="general__warning_color", type="string"),
+ *              @OA\Property(property="general__success_color", type="string"),
+ *              @OA\Property(property="general__featured_courses_count", type="integer"),
+ *              @OA\Property(property="general__loading_animation", type="string"),
+ *
+ *              // Courses Settings
+ *              @OA\Property(property="courses__import_demo_courses", type="boolean"),
+ *              @OA\Property(property="courses__courses_page", type="string"),
+ *              @OA\Property(property="courses__courses_page_layout", type="string", enum={"grid","list","masonry"}),
+ *              @OA\Property(property="courses__courses_per_row", type="integer"),
+ *              @OA\Property(property="courses__courses_per_page", type="integer"),
+ *              @OA\Property(property="courses__load_more_type", type="string", enum={"button","infinite_scroll"}),
+ *              @OA\Property(property="courses__course_card_style", type="string", enum={"default","price_on_hover","scale_on_hover"}),
+ *              @OA\Property(property="courses__course_card_info_position", type="string", enum={"center","right"}),
+ *              @OA\Property(property="courses__course_image_size", type="string"),
+ *              @OA\Property(property="courses__lazy_loading", type="boolean"),
+ *              @OA\Property(property="courses__category_slug", type="string"),
+ *              @OA\Property(property="courses__show_featured_courses_on_top", type="boolean"),
+ *              @OA\Property(property="courses__featured_courses_count", type="integer"),
+ *              @OA\Property(property="courses__filters_on_archive_page", type="boolean"),
+ *
+ *              // Course Settings
+ *              @OA\Property(property="course__page_style", type="string"),
+ *              @OA\Property(property="course__show_course_reviews", type="boolean"),
+ *              @OA\Property(property="course__default_tab", type="string"),
+ *              @OA\Property(property="course__use_emoji_in_quizzes", type="boolean"),
+ *              @OA\Property(property="course__show_description_tab", type="boolean"),
+ *              @OA\Property(property="course__show_curriculum_tab", type="boolean"),
+ *              @OA\Property(property="course__show_faq_tab", type="boolean"),
+ *              @OA\Property(property="course__show_notice_tab", type="boolean"),
+ *              @OA\Property(property="course__course_levels", type="array", @OA\Items(type="object")),
+ *              @OA\Property(property="course__allow_presto_player", type="boolean"),
+ *              @OA\Property(property="course__auto_enroll_free_courses", type="boolean"),
+ *              @OA\Property(property="course__allow_reviews_non_enrolled", type="boolean"),
+ *              @OA\Property(property="course__allow_basic_info_section", type="boolean"),
+ *              @OA\Property(property="course__allow_course_requirements_section", type="boolean"),
+ *              @OA\Property(property="course__allow_intended_audience_section", type="boolean"),
+ *              @OA\Property(property="course__preferred_video_sources", type="array", @OA\Items(type="string")),
+ *              @OA\Property(property="course__preferred_audio_sources", type="array", @OA\Items(type="string")),
+ *              @OA\Property(property="course__bottom_sticky_panel", type="boolean"),
+ *              @OA\Property(property="course__show_popular_courses", type="boolean"),
+ *              @OA\Property(property="course__show_related_courses", type="boolean"),
+ *              @OA\Property(property="course__disable_default_completion_image", type="boolean"),
+ *              @OA\Property(property="course__failed_course_image", type="string"),
+ *              @OA\Property(property="course__passed_course_image", type="string"),
+ *
+ *              // Certificate Settings
+ *              @OA\Property(property="certificate__threshold", type="integer"),
+ *              @OA\Property(property="certificate__allow_instructor_create", type="boolean"),
+ *              @OA\Property(property="certificate__use_current_student_name", type="boolean"),
+ *              @OA\Property(property="certificate__builder_data", type="array", @OA\Items(type="object")),
+ *
+ *              // Stripe
+ *              @OA\Property(property="stripe_enabled", type="boolean"),
+ *              @OA\Property(property="STRIPE_KEY", type="string"),
+ *              @OA\Property(property="STRIPE_SECRET", type="string")
+ *          ),
+ *      ),
+ *      @OA\Response(response=200, description="Successful operation"),
+ *      @OA\Response(response=401, description="Unauthenticated"),
+ *      @OA\Response(response=403, description="Forbidden"),
+ *      @OA\Response(response=404, description="Not Found"),
+ *      @OA\Response(response=422, description="Unprocessable Content"),
+ *      @OA\Response(response=400, description="Bad Request")
+ * )
+ */
 
 
 
-            $busunessSettingArray = $busunessSetting->toArray();
-
-            $busunessSettingArray["STRIPE_KEY"] = $busunessSetting->STRIPE_KEY;
-            $busunessSettingArray["STRIPE_SECRET"] = $busunessSetting->STRIPE_SECRET;
-
-            return response()->json($busunessSettingArray, 200);
-        } catch (Exception $e) {
-
+  public function updateBusinessSettings(UpdateBusinessSettingRequest $request)
+{
+    try {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                "message" => "An error occurred while updating business settings: " . $e->getMessage()
-            ], 500);
-           // return $this->sendError($e, 500, $request); --- IGNORE ---
-      
+                "message" => "You cannot perform this action"
+            ], 401);
         }
+
+        $request_data = $request->validated();
+
+        // Stripe validation if stripe_enabled is passed and true
+        if (!empty($request_data['stripe_enabled'])) {
+            try {
+                $stripe = new \Stripe\StripeClient($request_data['STRIPE_SECRET'] ?? '');
+                $stripe->balance->retrieve();
+            } catch (\Exception $e) {
+                return response()->json([
+                    "message" => "Stripe error: " . $e->getMessage()
+                ], 400);
+            }
+        }
+
+        $businessSetting = BusinessSetting::first();
+
+        if (!$businessSetting) {
+            $businessSetting = BusinessSetting::create($request_data);
+        } else {
+            $businessSetting->fill($request_data);
+            $businessSetting->save();
+        }
+
+        return response()->json($businessSetting, 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            "message" => "An error occurred while updating business settings: " . $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      *
@@ -220,7 +210,7 @@ class SettingController extends Controller
             return response()->json([
                 "message" => "An error occurred while retrieving business settings: " . $e->getMessage()
             ], 500);
-         
+
         }
     }
 
@@ -343,7 +333,7 @@ class SettingController extends Controller
             return response()->json([
                 "message" => "An error occurred while retrieving business settings: " . $e->getMessage()
             ], 500);
-           
+
         }
     }
 }

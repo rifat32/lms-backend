@@ -239,6 +239,7 @@ $progress->update([
     {
         DB::beginTransaction();
         try {
+            
             if (!auth()->user()->hasAnyRole(['student'])) {
                 return response()->json([
                     "message" => "You can not perform this action"

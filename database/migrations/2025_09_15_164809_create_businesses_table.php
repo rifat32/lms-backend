@@ -19,7 +19,7 @@ class CreateBusinessesTable extends Migration
         $table->string("email")->nullable()->unique(); // nullable|string|unique
         $table->string("phone")->nullable(); // nullable|string
         $table->date("registration_date"); // required in migration, can be auto-set
-        $table->date("trail_end_date")->nullable(); // nullable
+
         $table->text("about")->nullable(); // nullable|string
         $table->string("web_page")->nullable(); // nullable|string
         $table->string("address_line_1"); // required|string
@@ -35,12 +35,16 @@ class CreateBusinessesTable extends Migration
         $table->string("background_image")->nullable(); // nullable|string
         $table->string("theme")->nullable(); // nullable|string
         $table->json("images")->nullable(); // nullable|array of strings
-        $table->foreignId("service_plan_id")->nullable()->constrained('service_plans')->restrictOnDelete();
+
+        $table->string("additional_information")->nullable(); // nullable|string
+
+
         $table->enum('status', ['pending', 'active', 'suspended', 'cancelled', 'expired', 'trail_ended', 'inactive'])->default("pending");
         $table->boolean('is_active')->default(1);
         $table->foreignId("owner_id")->constrained('users')->cascadeOnDelete();
         $table->foreignId("created_by")->nullable()->constrained('users')->nullOnDelete();
 
+         $table->softDeletes();
             $table->timestamps();
         });
     }

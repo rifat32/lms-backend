@@ -102,7 +102,7 @@ class RegisterUserWithBusinessRequest extends FormRequest
             'business.registration_date.date' => 'Business registration date must be a valid date.',
             'business.registration_date.before_or_equal' => 'Business registration date cannot be in the future.',
 
-            'business.trail_end_date.date' => 'Business trial end date must be a valid date.',
+        
 
             'business.about.string' => 'Business about must be a string.',
             'business.web_page.string' => 'Business web page must be a string.',
