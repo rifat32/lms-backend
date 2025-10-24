@@ -108,4 +108,25 @@ class BusinessSetting extends Model
         "STRIPE_SECRET",
         "pivot"
     ];
+
+    public function getCourseFailedCourseImageAttribute($value)
+{
+    if (empty($value)) return null;
+    $folder_path = "business_1/course__failed_course_image";
+    return asset("storage-proxy/{$folder_path}/{$value}");
+}
+
+public function getCoursePassedCourseImageAttribute($value)
+{
+    if (empty($value)) return null;
+    $folder_path = "business_1/course__passed_course_image";
+    return asset("storage-proxy/{$folder_path}/{$value}");
+}
+
+public function getGeneralLoadingAnimationAttribute($value)
+{
+    if (empty($value)) return null;
+    $folder_path = "business_1/general__loading_animation";
+    return asset("storage-proxy/{$folder_path}/{$value}");
+}
 }

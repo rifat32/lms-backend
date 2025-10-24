@@ -33,7 +33,7 @@ class UpdateBusinessSettingRequest extends FormRequest
             'general__warning_color' => 'sometimes|string|nullable',
             'general__success_color' => 'sometimes|string|nullable',
             'general__featured_courses_count' => 'sometimes|integer|min:0',
-            'general__loading_animation' => 'sometimes|string|nullable',
+            'general__loading_animation' => 'sometimes|nullable',
 
             // Courses Settings
             'courses__import_demo_courses' => 'sometimes|boolean',
@@ -73,8 +73,8 @@ class UpdateBusinessSettingRequest extends FormRequest
             'course__show_popular_courses' => 'sometimes|boolean',
             'course__show_related_courses' => 'sometimes|boolean',
             'course__disable_default_completion_image' => 'sometimes|boolean',
-            'course__failed_course_image' => 'sometimes|string|nullable',
-            'course__passed_course_image' => 'sometimes|string|nullable',
+            'course__failed_course_image' => 'sometimes|nullable',
+            'course__passed_course_image' => 'sometimes|nullable',
 
             // Certificate Settings
             'certificate__threshold' => 'sometimes|integer|min:0|max:100',
@@ -91,5 +91,18 @@ class UpdateBusinessSettingRequest extends FormRequest
         ];
 
     }
+
+          public function messages()
+    {
+        return [
+            'courses__courses_page_layout.in' => 'The selected courses page layout is invalid. Valid options: grid, list, masonry.',
+            'courses__courses_per_row.min' => 'The courses per row must be at least 1.',
+            'courses__courses_per_page.min' => 'The courses per page must be at least 1.',
+            'courses__load_more_type.in' => 'The selected courses load more type is invalid. Valid options: button, infinite_scroll.',
+            'courses__course_card_style.in' => 'The selected courses course card style is invalid. Valid options: default, price_on_hover, scale_on_hover.',
+            'courses__course_card_info_position.in' => 'The selected courses course card info position is invalid. Valid options: center, right.',
+        ];
+    }
+
 
 }

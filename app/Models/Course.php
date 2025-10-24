@@ -11,7 +11,7 @@ class Course extends Model
 {
     use HasFactory;
     protected $hidden = ['pivot'];
-  protected $appends = ['computed_price'];
+    protected $appends = ['computed_price'];
 
     public const STATUS = [
         'DRAFT' => 'draft',
@@ -170,7 +170,7 @@ class Course extends Model
          else {
             $q->whereDoesntHave('enrollments');
         }
-        
+
     })
     ->when(request()->filled('status'), function ($q) {
         $valid_status = array_values(Course::STATUS);

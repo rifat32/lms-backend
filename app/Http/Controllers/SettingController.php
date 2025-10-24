@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
-      /**
+   /**
  *
  * @OA\Put(
  *      path="/v1.0/business-settings",
@@ -22,7 +22,9 @@ class SettingController extends Controller
  *      @OA\RequestBody(
  *          required=true,
  *          @OA\JsonContent(
- *              // General Settings
+ *              type="object",
+ *
+ *
  *              @OA\Property(property="general__main_color", type="string"),
  *              @OA\Property(property="general__secondary_color", type="string"),
  *              @OA\Property(property="general__accent_color", type="string"),
@@ -32,15 +34,15 @@ class SettingController extends Controller
  *              @OA\Property(property="general__featured_courses_count", type="integer"),
  *              @OA\Property(property="general__loading_animation", type="string"),
  *
- *              // Courses Settings
+ *
  *              @OA\Property(property="courses__import_demo_courses", type="boolean"),
  *              @OA\Property(property="courses__courses_page", type="string"),
- *              @OA\Property(property="courses__courses_page_layout", type="string", enum={"grid","list","masonry"}),
+ *              @OA\Property(property="courses__courses_page_layout", type="string"),
  *              @OA\Property(property="courses__courses_per_row", type="integer"),
  *              @OA\Property(property="courses__courses_per_page", type="integer"),
- *              @OA\Property(property="courses__load_more_type", type="string", enum={"button","infinite_scroll"}),
- *              @OA\Property(property="courses__course_card_style", type="string", enum={"default","price_on_hover","scale_on_hover"}),
- *              @OA\Property(property="courses__course_card_info_position", type="string", enum={"center","right"}),
+ *              @OA\Property(property="courses__load_more_type", type="string"),
+ *              @OA\Property(property="courses__course_card_style", type="string"),
+ *              @OA\Property(property="courses__course_card_info_position", type="string"),
  *              @OA\Property(property="courses__course_image_size", type="string"),
  *              @OA\Property(property="courses__lazy_loading", type="boolean"),
  *              @OA\Property(property="courses__category_slug", type="string"),
@@ -48,7 +50,7 @@ class SettingController extends Controller
  *              @OA\Property(property="courses__featured_courses_count", type="integer"),
  *              @OA\Property(property="courses__filters_on_archive_page", type="boolean"),
  *
- *              // Course Settings
+ *
  *              @OA\Property(property="course__page_style", type="string"),
  *              @OA\Property(property="course__show_course_reviews", type="boolean"),
  *              @OA\Property(property="course__default_tab", type="string"),
@@ -73,17 +75,17 @@ class SettingController extends Controller
  *              @OA\Property(property="course__failed_course_image", type="string"),
  *              @OA\Property(property="course__passed_course_image", type="string"),
  *
- *              // Certificate Settings
+ *
  *              @OA\Property(property="certificate__threshold", type="integer"),
  *              @OA\Property(property="certificate__allow_instructor_create", type="boolean"),
  *              @OA\Property(property="certificate__use_current_student_name", type="boolean"),
  *              @OA\Property(property="certificate__builder_data", type="array", @OA\Items(type="object")),
  *
- *              // Stripe
+ *
  *              @OA\Property(property="stripe_enabled", type="boolean"),
  *              @OA\Property(property="STRIPE_KEY", type="string"),
  *              @OA\Property(property="STRIPE_SECRET", type="string")
- *          ),
+ *          )
  *      ),
  *      @OA\Response(response=200, description="Successful operation"),
  *      @OA\Response(response=401, description="Unauthenticated"),
@@ -93,6 +95,7 @@ class SettingController extends Controller
  *      @OA\Response(response=400, description="Bad Request")
  * )
  */
+
 
 
 
@@ -106,6 +109,28 @@ class SettingController extends Controller
         }
 
         $request_data = $request->validated();
+
+        $file_fields = [
+    'course__failed_course_image',
+    'course__passed_course_image',
+    'general__loading_animation', // if it's a file
+];
+
+foreach ($file_fields as $field) {
+    if ($request->hasFile($field)) {
+        $file = $request->file($field);
+        $filename = $file->hashName();
+        $folder_path = "business_1/{$field}";
+        $file->storeAs($folder_path, $filename, 'public');
+        $request_data[$field] = $filename;
+    }
+
+    // If existing path string is passed
+    if ($request->filled($field) && is_string($request->input($field))) {
+        $request_data[$field] = basename($request->input($field));
+    }
+}
+
 
         // Stripe validation if stripe_enabled is passed and true
         if (!empty($request_data['stripe_enabled'])) {
