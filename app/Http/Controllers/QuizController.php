@@ -118,7 +118,7 @@ class QuizController extends Controller
 
     public function getQuizWithQuestionsByIdClient($id)
     {
-
+        
         // GETTING QUIZ BY ID
         $quiz = Quiz::withCount("all_quiz_attempts")
         ->with([
@@ -144,23 +144,6 @@ class QuizController extends Controller
             $questions = $questions->take($quiz->question_limit);
         }
 
-        // $result = [
-        //     'id' => $quiz->id,
-        //     'title' => $quiz->title,
-        //     'questions' => $questions->map(function ($question) {
-        //         return [
-        //             'question_id' => $question->id,
-        //             'text' => $question->question_text,
-        //             'type' => $question->question_type,
-        //             'options' => $question->options->map(function ($option) {
-        //                 return [
-        //                     'option_id' => $option->id,
-        //                     'text' => $option->option_text,
-        //                 ];
-        //             }),
-        //         ];
-        //     })->values(),
-        // ];
 
 
         // ADD QUESTIONS DATA
@@ -292,38 +275,10 @@ class QuizController extends Controller
             $query->select('sections.id')->pluck('id');
         }])->findOrFail($id);
 
+
         // GETTING QUESTIONS
         $questions = $quiz->questions;
 
-        // Handle randomization and limit
-        if ($quiz->is_randomized && $quiz->question_limit > 0) {
-            // Case 1: Randomize + Limit
-            $questions = $questions->shuffle()->take($quiz->question_limit);
-        } elseif ($quiz->is_randomized) {
-            // Case 2: Randomize only
-            $questions = $questions->shuffle();
-        } elseif ($quiz->question_limit > 0) {
-            // Case 3: Limit only
-            $questions = $questions->take($quiz->question_limit);
-        }
-
-        // $result = [
-        //     'id' => $quiz->id,
-        //     'title' => $quiz->title,
-        //     'questions' => $questions->map(function ($question) {
-        //         return [
-        //             'question_id' => $question->id,
-        //             'text' => $question->question_text,
-        //             'type' => $question->question_type,
-        //             'options' => $question->options->map(function ($option) {
-        //                 return [
-        //                     'option_id' => $option->id,
-        //                     'text' => $option->option_text,
-        //                 ];
-        //             }),
-        //         ];
-        //     })->values(),
-        // ];
 
 
         // ADD QUESTIONS DATA

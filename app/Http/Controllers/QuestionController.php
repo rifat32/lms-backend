@@ -470,7 +470,11 @@ class QuestionController extends Controller
 }
 
         // GET ALL QUESTIONS
-        $query = Question::with(['options', "categories"])->filters();
+        $query = Question::with(['options', "categories"])
+        ->withExists(['quizzes as has_attempt' => function ($quiz_query) {
+            $quiz_query->whereHas('quiz_attempts');
+        }])
+        ->filters();
 
         $questions = retrieve_data($query, 'created_at', 'questions');
 
