@@ -119,10 +119,9 @@ class QuizController extends Controller
     public function getQuizWithQuestionsByIdClient($id)
     {
 
-
-
         // GETTING QUIZ BY ID
-        $quiz = Quiz::with([
+        $quiz = Quiz::withCount("all_quiz_attempts")
+        ->with([
             'questions.options',
             'quiz_attempts.quiz_attempt_answers',
             'sections' => function ($query) {
@@ -287,7 +286,9 @@ class QuizController extends Controller
         }
 
         // GETTING QUIZ BY ID
-        $quiz = Quiz::with(['questions.options', 'sections' => function ($query) {
+        $quiz = Quiz::
+        withCount(["all_quiz_attempts"])
+        ->with(['questions.options', 'sections' => function ($query) {
             $query->select('sections.id')->pluck('id');
         }])->findOrFail($id);
 
@@ -441,7 +442,9 @@ class QuizController extends Controller
         }
 
 
-        $query = Quiz::with(['questions.options']);
+        $query = Quiz::
+        withCount("all_quiz_attempts")
+        ->with(['questions.options']);
 
         $quizzes = retrieve_data($query, 'created_at', 'quizzes');
 
@@ -602,6 +605,7 @@ class QuizController extends Controller
         }
 
         $quiz = Quiz::findOrFail($id);
+
          // Check if the quiz has any attempts
     if ($quiz->all_quiz_attempts()->exists()) {
         return response()->json([
