@@ -118,16 +118,16 @@ class QuizController extends Controller
 
     public function getQuizWithQuestionsByIdClient($id)
     {
-        
+
         // GETTING QUIZ BY ID
         $quiz = Quiz::withCount("all_quiz_attempts")
-        ->with([
-            'questions.options',
-            'quiz_attempts.quiz_attempt_answers',
-            'sections' => function ($query) {
-                $query->select('sections.id')->pluck('id');
-            }
-        ])->findOrFail($id);
+            ->with([
+                'questions.options',
+                'quiz_attempts.quiz_attempt_answers',
+                'sections' => function ($query) {
+                    $query->select('sections.id')->pluck('id');
+                }
+            ])->findOrFail($id);
 
         // GETTING QUESTIONS
         $questions = $quiz->questions;
@@ -269,24 +269,17 @@ class QuizController extends Controller
         }
 
         // GETTING QUIZ BY ID
-        $quiz = Quiz::
-        withCount(["all_quiz_attempts"])
-        ->with(['questions.options', 'sections' => function ($query) {
-            $query->select('sections.id')->pluck('id');
-        }])->findOrFail($id);
+        $quiz = Quiz::withCount(["all_quiz_attempts"])
+            ->with([
+                'questions.options',
+                'sections' => function ($query) {
+                    $query->select('sections.id');
+                }
+            ])->findOrFail($id);
 
-
-        // GETTING QUESTIONS
-        $questions = $quiz->questions;
-
-
-
-        // ADD QUESTIONS DATA
-        $quiz->setRelation('questions', $questions->values());
 
         // SEND ONLY SECTION IDS
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
-        // $quiz->sections->pluck('id');
 
 
 
@@ -397,9 +390,8 @@ class QuizController extends Controller
         }
 
 
-        $query = Quiz::
-        withCount("all_quiz_attempts")
-        ->with(['questions.options']);
+        $query = Quiz::withCount("all_quiz_attempts")
+            ->with(['questions.options']);
 
         $quizzes = retrieve_data($query, 'created_at', 'quizzes');
 
@@ -561,23 +553,23 @@ class QuizController extends Controller
 
         $quiz = Quiz::findOrFail($id);
 
-         // Check if the quiz has any attempts
-    if ($quiz->all_quiz_attempts()->exists()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Cannot delete quiz with existing attempts',
-        ], 400);
-    }
+        // Check if the quiz has any attempts
+        if ($quiz->all_quiz_attempts()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete quiz with existing attempts',
+            ], 400);
+        }
 
 
         $quiz->delete();
 
 
         Sectionable::where([
-        'sectionable_id' => $quiz->id,
-        'sectionable_type' => Quiz::class,
+            'sectionable_id' => $quiz->id,
+            'sectionable_type' => Quiz::class,
         ])
-        ->delete();
+            ->delete();
 
 
         return response()->json([
@@ -585,7 +577,4 @@ class QuizController extends Controller
             'message' => 'Quiz deleted successfully'
         ]);
     }
-
-
-
 }
