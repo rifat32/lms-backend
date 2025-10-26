@@ -20,6 +20,9 @@ class QuizAttempt extends Model
         'completed_at',
         "time_spent",
         'is_expired',
+
+        // 
+        "attempt_count"
     ];
 
     public function quiz()
@@ -32,9 +35,8 @@ class QuizAttempt extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-     public function quiz_attempt_answers()
+    public function quiz_attempt_answers()
     {
         return $this->hasMany(QuizAttemptAnswer::class, 'quiz_attempt_id', 'id');
     }
-
 }

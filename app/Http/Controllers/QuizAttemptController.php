@@ -340,9 +340,12 @@ class QuizAttemptController extends Controller
 
         $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
-            ->where("course_id",$request->course_id)
+            ->where("course_id", $request->course_id)
             ->whereNull('completed_at')
             ->firstOrFail();
+
+        // INCREASE ATTEMPT COUNT
+        $attempt->attempt_count = $attempt->attempt_count + 1;
 
         // ⏱️ enforce timer
         $elapsed = now()->diffInSeconds($attempt->started_at);
@@ -374,11 +377,11 @@ class QuizAttemptController extends Controller
 
         foreach ($request->answers as $answer) {
             $question = Question::find($answer['question_id']);
-            if (!$question){
+            if (!$question) {
                 continue;
-        };
+            };
 
-             $total_points += $question->points;
+            $total_points += $question->points;
 
             if ($question->question_type !== 'essay') {
                 // GET all correct answer IDs
@@ -412,7 +415,7 @@ class QuizAttemptController extends Controller
 
 
         // 📊 Calculate percentage
-    $percentage_score = $total_points > 0 ? ($score / $total_points) * 100 : 0;
+        $percentage_score = $total_points > 0 ? ($score / $total_points) * 100 : 0;
 
         $attempt->total_points = $total_points;
         $attempt->score = $score;
@@ -437,9 +440,7 @@ class QuizAttemptController extends Controller
                 'time_spent' => $attempt->time_spent,
                 'feedback' => $feedback,
                 'answers' => $attempt->quiz_attempt_answers
-       ]
+            ]
         ], 201);
-
-
     }
 }
