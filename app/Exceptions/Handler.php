@@ -45,7 +45,7 @@ class Handler extends ExceptionHandler
                 if ($e instanceof NotFoundHttpException) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Endpoint not found',
+                        'message' => $e->getMessage(),
                         'errors' => $e->getMessage(),
                     ], 404);
                 }
