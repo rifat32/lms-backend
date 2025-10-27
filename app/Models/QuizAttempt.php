@@ -21,8 +21,7 @@ class QuizAttempt extends Model
         "time_spent",
         'is_expired',
 
-        // 
-        "attempt_count"
+       
     ];
 
     public function quiz()

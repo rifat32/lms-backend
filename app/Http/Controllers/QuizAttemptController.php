@@ -344,8 +344,7 @@ class QuizAttemptController extends Controller
             ->whereNull('completed_at')
             ->firstOrFail();
 
-        // INCREASE ATTEMPT COUNT
-        $attempt->attempt_count = $attempt->attempt_count + 1;
+      
 
         // ⏱️ enforce timer
         $elapsed = now()->diffInSeconds($attempt->started_at);

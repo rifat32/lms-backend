@@ -201,7 +201,8 @@ class Course extends Model
 
     // ✅ Level filter
     ->when(request()->filled('level'), function ($q) {
-        $q->where('level', request('level'));
+          $levels = explode(',', request('level'));
+        $q->whereIn('level', $levels);
     })
 
     // ✅ Price range filter
