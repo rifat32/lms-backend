@@ -304,11 +304,6 @@
                                                 "format": "date",
                                                 "example": "01-01-2010"
                                             },
-                                            "trail_end_date": {
-                                                "type": "string",
-                                                "format": "date",
-                                                "example": "01-02-2027"
-                                            },
                                             "about": {
                                                 "type": "string",
                                                 "example": "About the business..."
@@ -664,73 +659,162 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "id",
-                                    "name",
-                                    "registration_date",
-                                    "address_line_1",
-                                    "country",
-                                    "city",
-                                    "postcode"
-                                ],
                                 "properties": {
-                                    "id": {
-                                        "type": "integer",
-                                        "example": 1
+                                    "user": {
+                                        "required": [
+                                            "id",
+                                            "first_name",
+                                            "last_Name",
+                                            "email"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "description": "User ID (must exist in users table)",
+                                                "type": "integer",
+                                                "example": 5
+                                            },
+                                            "first_name": {
+                                                "description": "User first name",
+                                                "type": "string",
+                                                "example": "John"
+                                            },
+                                            "last_Name": {
+                                                "description": "User last name",
+                                                "type": "string",
+                                                "example": "Doe"
+                                            },
+                                            "email": {
+                                                "description": "User email",
+                                                "type": "string",
+                                                "example": "admin@yopmail.com"
+                                            },
+                                            "password": {
+                                                "description": "Optional user password (min 6 chars)",
+                                                "type": "string",
+                                                "example": "secret123"
+                                            }
+                                        },
+                                        "type": "object"
                                     },
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Acme Corporation"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "contact@acme.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "+8801765432109"
-                                    },
-                                    "registration_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-09-22"
-                                    },
-                                    "trail_end_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-22"
-                                    },
-                                    "about": {
-                                        "type": "string",
-                                        "example": "We provide tech solutions worldwide."
-                                    },
-                                    "web_page": {
-                                        "type": "string",
-                                        "example": "https://acme.com"
-                                    },
-                                    "address_line_1": {
-                                        "type": "string",
-                                        "example": "123 Business Street"
-                                    },
-                                    "country": {
-                                        "type": "string",
-                                        "example": "Bangladesh"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "Dhaka"
-                                    },
-                                    "postcode": {
-                                        "type": "string",
-                                        "example": "1207"
-                                    },
-                                    "currency": {
-                                        "type": "string",
-                                        "example": "BDT"
-                                    },
-                                    "logo": {
-                                        "type": "string",
-                                        "example": "https://cdn.acme.com/logo.png"
+                                    "business": {
+                                        "required": [
+                                            "id",
+                                            "name",
+                                            "country",
+                                            "city",
+                                            "address_line_1"
+                                        ],
+                                        "properties": {
+                                            "id": {
+                                                "description": "Business ID (must exist in businesses table)",
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "description": "Business name",
+                                                "type": "string",
+                                                "example": "Acme Corporation"
+                                            },
+                                            "about": {
+                                                "description": "About the business",
+                                                "type": "string",
+                                                "example": "We provide tech solutions worldwide."
+                                            },
+                                            "web_page": {
+                                                "description": "Website URL",
+                                                "type": "string",
+                                                "example": "https://acme.com"
+                                            },
+                                            "pin_code": {
+                                                "description": "Optional pin code",
+                                                "type": "string",
+                                                "example": "1207"
+                                            },
+                                            "phone": {
+                                                "description": "Business phone number",
+                                                "type": "string",
+                                                "example": "+8801765432109"
+                                            },
+                                            "email": {
+                                                "description": "Business email",
+                                                "type": "string",
+                                                "example": "contact@acme.com"
+                                            },
+                                            "additional_information": {
+                                                "description": "Additional info",
+                                                "type": "string",
+                                                "example": "24/7 support available"
+                                            },
+                                            "lat": {
+                                                "description": "Latitude",
+                                                "type": "string",
+                                                "example": "23.7808875"
+                                            },
+                                            "long": {
+                                                "description": "Longitude",
+                                                "type": "string",
+                                                "example": "90.2792371"
+                                            },
+                                            "currency": {
+                                                "description": "Currency code",
+                                                "type": "string",
+                                                "example": "BDT"
+                                            },
+                                            "country": {
+                                                "description": "Country name",
+                                                "type": "string",
+                                                "example": "Bangladesh"
+                                            },
+                                            "city": {
+                                                "description": "City name",
+                                                "type": "string",
+                                                "example": "Dhaka"
+                                            },
+                                            "postcode": {
+                                                "description": "Postal code",
+                                                "type": "string",
+                                                "example": "1207"
+                                            },
+                                            "address_line_1": {
+                                                "description": "Primary address line",
+                                                "type": "string",
+                                                "example": "123 Business Street"
+                                            },
+                                            "address_line_2": {
+                                                "description": "Secondary address line",
+                                                "type": "string",
+                                                "example": "2nd Floor, Suite 5"
+                                            },
+                                            "logo": {
+                                                "description": "Logo URL",
+                                                "type": "string",
+                                                "example": "https://cdn.acme.com/logo.png"
+                                            },
+                                            "image": {
+                                                "description": "Image URL",
+                                                "type": "string",
+                                                "example": "https://cdn.acme.com/cover.jpg"
+                                            },
+                                            "background_image": {
+                                                "description": "Background image URL",
+                                                "type": "string",
+                                                "example": "https://cdn.acme.com/bg.jpg"
+                                            },
+                                            "theme": {
+                                                "description": "Business theme",
+                                                "type": "string",
+                                                "example": "dark"
+                                            },
+                                            "images": {
+                                                "description": "Optional image list",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "example": "https://cdn.acme.com/gallery/img1.jpg"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -771,16 +855,6 @@
                                                     "type": "string",
                                                     "example": "+8801765432109"
                                                 },
-                                                "registration_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-09-22"
-                                                },
-                                                "trail_end_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-10-22"
-                                                },
                                                 "country": {
                                                     "type": "string",
                                                     "example": "Bangladesh"
@@ -791,7 +865,7 @@
                                                 },
                                                 "status": {
                                                     "type": "string",
-                                                    "example": "pending"
+                                                    "example": "active"
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -872,262 +946,67 @@
                                         },
                                         "errors": {
                                             "properties": {
-                                                "name": {
+                                                "user.id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The user ID field is required."
+                                                    }
+                                                },
+                                                "user.first_name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The user.first name field is required."
+                                                    }
+                                                },
+                                                "user.last_Name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The last name field is required."
+                                                    }
+                                                },
+                                                "user.email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The email field is required."
+                                                    }
+                                                },
+                                                "business.id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The business ID field is required."
+                                                    }
+                                                },
+                                                "business.name": {
                                                     "type": "array",
                                                     "items": {
                                                         "type": "string",
                                                         "example": "The name field is required."
                                                     }
                                                 },
-                                                "email": {
+                                                "business.country": {
                                                     "type": "array",
                                                     "items": {
                                                         "type": "string",
-                                                        "example": "The email must be a valid email address."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "business_management"
-                ],
-                "summary": "Create a new business (role: Super Admin only)",
-                "operationId": "createBusiness",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "registration_date",
-                                    "address_line_1",
-                                    "country",
-                                    "city",
-                                    "postcode"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Acme Corporation"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "contact@acme.com"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "+8801765432109"
-                                    },
-                                    "registration_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-09-22"
-                                    },
-                                    "trail_end_date": {
-                                        "type": "string",
-                                        "format": "date",
-                                        "example": "2025-10-22"
-                                    },
-                                    "about": {
-                                        "type": "string",
-                                        "example": "We provide tech solutions worldwide."
-                                    },
-                                    "web_page": {
-                                        "type": "string",
-                                        "example": "https://acme.com"
-                                    },
-                                    "address_line_1": {
-                                        "type": "string",
-                                        "example": "123 Business Street"
-                                    },
-                                    "country": {
-                                        "type": "string",
-                                        "example": "Bangladesh"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "Dhaka"
-                                    },
-                                    "postcode": {
-                                        "type": "string",
-                                        "example": "1207"
-                                    },
-                                    "currency": {
-                                        "type": "string",
-                                        "example": "BDT"
-                                    },
-                                    "logo": {
-                                        "type": "string",
-                                        "example": "https://cdn.acme.com/logo.png"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Business created successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Business created successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Acme Corporation"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "contact@acme.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "+8801765432109"
-                                                },
-                                                "registration_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-09-22"
-                                                },
-                                                "trail_end_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-10-22"
-                                                },
-                                                "country": {
-                                                    "type": "string",
-                                                    "example": "Bangladesh"
-                                                },
-                                                "city": {
-                                                    "type": "string",
-                                                    "example": "Dhaka"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "pending"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-22T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-22T12:00:00Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to perform this action."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The name field is required."
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "name": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The name field is required."
+                                                        "example": "The country field is required."
                                                     }
                                                 },
-                                                "email": {
+                                                "business.city": {
                                                     "type": "array",
                                                     "items": {
                                                         "type": "string",
-                                                        "example": "The email must be a valid email address."
+                                                        "example": "The city field is required."
+                                                    }
+                                                },
+                                                "business.address_line_1": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The address line 1 field is required."
                                                     }
                                                 }
                                             },
@@ -1202,11 +1081,6 @@
                                                     "type": "string",
                                                     "format": "date",
                                                     "example": "2025-09-22"
-                                                },
-                                                "trail_end_date": {
-                                                    "type": "string",
-                                                    "format": "date",
-                                                    "example": "2025-12-31"
                                                 },
                                                 "country": {
                                                     "type": "string",
@@ -2681,14 +2555,83 @@
                 "operationId": "getCoursesClientUnified",
                 "parameters": [
                     {
-                        "name": "is_enrolled",
+                        "name": "searchKey",
                         "in": "query",
-                        "description": "1 for enrolled, 0 for not enrolled",
+                        "description": "Search by course title (case-insensitive, partial match)",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "",
-                            "example": ""
+                            "example": "Laravel"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by course status. Allowed values: draft, published, archived.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "published"
+                        }
+                    },
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "category_ids",
+                        "in": "query",
+                        "description": "Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2,5,8"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filter by course level (e.g., beginner, intermediate, advanced).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "beginner"
+                        }
+                    },
+                    {
+                        "name": "price_range",
+                        "in": "query",
+                        "description": "Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "100,500"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
                         }
                     }
                 ],
@@ -2707,74 +2650,90 @@
         "trashed/v1.0/client/courses": {
             "get": {
                 "tags": [
-                    "trashed"
+                    "Trash"
                 ],
                 "summary": "Get all courses (Public - No authentication required) (role: Student only)",
                 "description": "Retrieve all courses for non-logged in users. Never use for logged in users.",
                 "operationId": "getCoursesClient",
                 "parameters": [
                     {
-                        "name": "category_id",
-                        "in": "query",
-                        "description": "Filter by category ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": ""
-                        }
-                    },
-                    {
                         "name": "searchKey",
                         "in": "query",
-                        "description": "Search by keyword in title only",
+                        "description": "Search by course title (case-insensitive, partial match)",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": ""
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": "",
-                            "example": ""
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": "",
-                            "example": ""
+                            "example": "Laravel"
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Course status only: draft, published, archived",
+                        "description": "Filter by course status. Allowed values: draft, published, archived.",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "",
-                            "example": ""
+                            "example": "published"
                         }
                     },
                     {
                         "name": "is_enrolled",
                         "in": "query",
-                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "category_ids",
+                        "in": "query",
+                        "description": "Filter by one or more category IDs (comma-separated). Example: 1,3,5",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "",
-                            "example": ""
+                            "example": "2,5,8"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filter by course level (e.g., beginner, intermediate, advanced).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "beginner"
+                        }
+                    },
+                    {
+                        "name": "price_range",
+                        "in": "query",
+                        "description": "Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "100,500"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
                         }
                     }
                 ],
@@ -2909,7 +2868,7 @@
         "trashed/v1.0/client/courses/{id}": {
             "get": {
                 "tags": [
-                    "trashed"
+                    "Trash"
                 ],
                 "summary": "Get a single course by ID (Public or Non-enrolled users) (role: Student only)",
                 "description": "Retrieve a course by its ID for non-logged in users OR for logged-in users viewing a non-enrolled course",
@@ -3050,10 +3009,10 @@
         "/v1.0/client/courses/secure/{id}": {
             "get": {
                 "tags": [
-                    "trashed"
+                    "Trash"
                 ],
                 "summary": "Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
-                "description": "Retrieve detailed course information including lessons, quizzes, and progress. \n *     Authenticated and enrolled users only",
+                "description": "Retrieve detailed course information including lessons, quizzes, and progress.\n *     Authenticated and enrolled users only",
                 "operationId": "getCourseByIdSecureClient",
                 "parameters": [
                     {
@@ -3191,7 +3150,7 @@
         "/v1.0/client/courses/secure": {
             "get": {
                 "tags": [
-                    "trashed"
+                    "Trash"
                 ],
                 "summary": "Get all courses (Authenticated users only) (role: Student only)",
                 "description": "Retrieve courses for logged-in users only.",
@@ -3399,67 +3358,83 @@
                 "operationId": "getCourses",
                 "parameters": [
                     {
-                        "name": "category_id",
-                        "in": "query",
-                        "description": "Filter by category ID",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": ""
-                        }
-                    },
-                    {
-                        "name": "is_enrolled",
-                        "in": "query",
-                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "",
-                            "example": ""
-                        }
-                    },
-                    {
                         "name": "searchKey",
                         "in": "query",
-                        "description": "Search by keyword in title only",
+                        "description": "Search by course title (case-insensitive, partial match)",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "example": ""
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Page number for pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": "",
-                            "example": ""
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Number of items per page",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": "",
-                            "example": ""
+                            "example": "Laravel"
                         }
                     },
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "Course status only: draft, published, archived",
+                        "description": "Filter by course status. Allowed values: draft, published, archived.",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "",
-                            "example": ""
+                            "example": "published"
+                        }
+                    },
+                    {
+                        "name": "is_enrolled",
+                        "in": "query",
+                        "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "category_ids",
+                        "in": "query",
+                        "description": "Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2,5,8"
+                        }
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filter by course level (e.g., beginner, intermediate, advanced).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "beginner"
+                        }
+                    },
+                    {
+                        "name": "price_range",
+                        "in": "query",
+                        "description": "Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "100,500"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
                         }
                     }
                 ],
@@ -9199,6 +9174,11 @@
                                         "description": "ID of the quiz to start attempt for",
                                         "type": "integer",
                                         "example": ""
+                                    },
+                                    "course_id": {
+                                        "description": "ID of the course to start attempt for",
+                                        "type": "integer",
+                                        "example": ""
                                     }
                                 },
                                 "type": "object"
@@ -9237,21 +9217,27 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "course_id",
                                     "quiz_id",
                                     "answers"
                                 ],
                                 "properties": {
+                                    "course_id": {
+                                        "description": "ID of the course",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "quiz_id": {
                                         "description": "ID of the quiz being submitted",
                                         "type": "integer",
-                                        "example": ""
+                                        "example": 1
                                     },
                                     "answers": {
                                         "type": "array",
                                         "items": {
                                             "required": [
                                                 "question_id",
-                                                "user_answer"
+                                                "user_answer_ids"
                                             ],
                                             "properties": {
                                                 "question_id": {
@@ -9259,10 +9245,16 @@
                                                     "type": "integer",
                                                     "example": 12
                                                 },
-                                                "user_answer": {
-                                                    "description": "User's answer (option ID or text)",
-                                                    "type": "string",
-                                                    "example": "OptionA"
+                                                "user_answer_ids": {
+                                                    "description": "Array of user's selected answer IDs. Multiple IDs allowed for multi-choice questions",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        1,
+                                                        3
+                                                    ]
                                                 }
                                             },
                                             "type": "object"
@@ -9286,6 +9278,203 @@
                     },
                     "403": {
                         "description": "Time is up! Quiz attempt expired"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/client/quizzes/{id}": {
+            "get": {
+                "tags": [
+                    "Quizzes"
+                ],
+                "summary": "Get quiz details with questions and options (role: Admin only)",
+                "operationId": "getQuizWithQuestionsByIdClient",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Quiz ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "is_randomized",
+                        "in": "query",
+                        "description": "Whether to randomize the quiz questions",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": ""
+                        }
+                    },
+                    {
+                        "name": "question_limit",
+                        "in": "query",
+                        "description": "The maximum number of questions to include in the quiz",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": ""
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quiz retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Laravel Basics Quiz"
+                                                },
+                                                "questions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "question_id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "What is Laravel?"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "multiple_choice"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "option_id": {
+                                                                            "type": "integer",
+                                                                            "example": 101
+                                                                        },
+                                                                        "text": {
+                                                                            "type": "string",
+                                                                            "example": "A PHP framework"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - Access denied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this resource."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -9804,10 +9993,6 @@
                                     "is_randomized": {
                                         "type": "boolean",
                                         "example": true
-                                    },
-                                    "show_correct_answer": {
-                                        "type": "boolean",
-                                        "example": false
                                     },
                                     "allow_retake_after_pass": {
                                         "type": "boolean",
@@ -11596,8 +11781,8 @@
                 "tags": [
                     "setting"
                 ],
-                "summary": "This method is to update busuness setting (role: Admin only)",
-                "description": "This method is to update busuness setting",
+                "summary": "Update business settings (role: Admin/Owner/Lecturer only)",
+                "description": "Updates business settings. All fields are optional; only passed fields will be updated.",
                 "operationId": "updateBusinessSettings",
                 "requestBody": {
                     "required": true,
@@ -11605,19 +11790,173 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "STRIPE_KEY": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "STRIPE_KEY"
+                                    "general__main_color": {
+                                        "type": "string"
                                     },
-                                    "STRIPE_SECRET": {
-                                        "type": "string",
-                                        "format": "string",
-                                        "example": "STRIPE_SECRET"
+                                    "general__secondary_color": {
+                                        "type": "string"
+                                    },
+                                    "general__accent_color": {
+                                        "type": "string"
+                                    },
+                                    "general__danger_color": {
+                                        "type": "string"
+                                    },
+                                    "general__warning_color": {
+                                        "type": "string"
+                                    },
+                                    "general__success_color": {
+                                        "type": "string"
+                                    },
+                                    "general__featured_courses_count": {
+                                        "type": "integer"
+                                    },
+                                    "general__loading_animation": {
+                                        "type": "string"
+                                    },
+                                    "courses__import_demo_courses": {
+                                        "type": "boolean"
+                                    },
+                                    "courses__courses_page": {
+                                        "type": "string"
+                                    },
+                                    "courses__courses_page_layout": {
+                                        "type": "string"
+                                    },
+                                    "courses__courses_per_row": {
+                                        "type": "integer"
+                                    },
+                                    "courses__courses_per_page": {
+                                        "type": "integer"
+                                    },
+                                    "courses__load_more_type": {
+                                        "type": "string"
+                                    },
+                                    "courses__course_card_style": {
+                                        "type": "string"
+                                    },
+                                    "courses__course_card_info_position": {
+                                        "type": "string"
+                                    },
+                                    "courses__course_image_size": {
+                                        "type": "string"
+                                    },
+                                    "courses__lazy_loading": {
+                                        "type": "boolean"
+                                    },
+                                    "courses__category_slug": {
+                                        "type": "string"
+                                    },
+                                    "courses__show_featured_courses_on_top": {
+                                        "type": "boolean"
+                                    },
+                                    "courses__featured_courses_count": {
+                                        "type": "integer"
+                                    },
+                                    "courses__filters_on_archive_page": {
+                                        "type": "boolean"
+                                    },
+                                    "course__page_style": {
+                                        "type": "string"
+                                    },
+                                    "course__show_course_reviews": {
+                                        "type": "boolean"
+                                    },
+                                    "course__default_tab": {
+                                        "type": "string"
+                                    },
+                                    "course__use_emoji_in_quizzes": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_description_tab": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_curriculum_tab": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_faq_tab": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_notice_tab": {
+                                        "type": "boolean"
+                                    },
+                                    "course__course_levels": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "course__allow_presto_player": {
+                                        "type": "boolean"
+                                    },
+                                    "course__auto_enroll_free_courses": {
+                                        "type": "boolean"
+                                    },
+                                    "course__allow_reviews_non_enrolled": {
+                                        "type": "boolean"
+                                    },
+                                    "course__allow_basic_info_section": {
+                                        "type": "boolean"
+                                    },
+                                    "course__allow_course_requirements_section": {
+                                        "type": "boolean"
+                                    },
+                                    "course__allow_intended_audience_section": {
+                                        "type": "boolean"
+                                    },
+                                    "course__preferred_video_sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "course__preferred_audio_sources": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "course__bottom_sticky_panel": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_popular_courses": {
+                                        "type": "boolean"
+                                    },
+                                    "course__show_related_courses": {
+                                        "type": "boolean"
+                                    },
+                                    "course__disable_default_completion_image": {
+                                        "type": "boolean"
+                                    },
+                                    "course__failed_course_image": {
+                                        "type": "string"
+                                    },
+                                    "course__passed_course_image": {
+                                        "type": "string"
+                                    },
+                                    "certificate__threshold": {
+                                        "type": "integer"
+                                    },
+                                    "certificate__allow_instructor_create": {
+                                        "type": "boolean"
+                                    },
+                                    "certificate__use_current_student_name": {
+                                        "type": "boolean"
+                                    },
+                                    "certificate__builder_data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
                                     },
                                     "stripe_enabled": {
-                                        "type": "boolean",
-                                        "example": true
+                                        "type": "boolean"
+                                    },
+                                    "STRIPE_KEY": {
+                                        "type": "string"
+                                    },
+                                    "STRIPE_SECRET": {
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -11627,52 +11966,22 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Successful operation"
                     },
                     "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocesseble Content",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Forbidden"
                     },
                     "404": {
-                        "description": "not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     }
                 },
                 "security": [
@@ -13020,6 +13329,18 @@
                 "summary": "Get all users (role: Admin only)",
                 "description": "Retrieve a list of all users in the system",
                 "operationId": "getAllUsers",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "in": "query",
+                        "description": "Filter users by role name (e.g., admin, student, lecturer)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "student"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Users retrieved successfully",
@@ -13539,8 +13860,8 @@
             "description": "course_management.course"
         },
         {
-            "name": "trashed",
-            "description": "trashed"
+            "name": "Trash",
+            "description": "Trash"
         },
         {
             "name": "course_management.course_faq",
@@ -13565,10 +13886,6 @@
         {
             "name": "setting",
             "description": "setting"
-        },
-        {
-            "name": "Trash",
-            "description": "Trash"
         },
         {
             "name": "user_management",
