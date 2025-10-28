@@ -172,6 +172,13 @@ class Course extends Model
         }
 
     })
+    ->when(request()->filled('is_featured'), function ($q) {
+       $q->when(request()->boolean('is_featured'), function ($q) {
+            $q->where('is_featured', 1);
+        }, function ($q) {
+            $q->where('is_featured', 0);
+        });
+    })
     ->when(request()->filled('status'), function ($q) {
         $valid_status = array_values(Course::STATUS);
         $status = request('status');

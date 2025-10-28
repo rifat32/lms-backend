@@ -333,15 +333,8 @@ foreach ($file_fields as $field) {
     public function getBusinessSettingsClient(Request $request)
     {
         try {
-           if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
-
 
             $busunessSetting = BusinessSetting::first();
-
 
             if ($busunessSetting) {
                 $businessSettingArray = $busunessSetting->toArray();

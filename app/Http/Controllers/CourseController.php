@@ -122,6 +122,14 @@ public function getCourseByIdUnified($id)
  *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
  *         @OA\Schema(type="integer", example=1)
  *     ),
+ *      @OA\Parameter(
+ *         name="is_featured",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ * 
  *     @OA\Parameter(
  *         name="category_ids",
  *         in="query",
@@ -279,6 +287,13 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
  *         in="query",
  *         required=false,
  *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *  *      @OA\Parameter(
+ *         name="is_featured",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
  *         @OA\Schema(type="integer", example=1)
  *     ),
  *     @OA\Parameter(
@@ -685,6 +700,13 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled",
      *         @OA\Schema(type="string", default="", example="")
      *     ),
+     *  *      @OA\Parameter(
+ *         name="is_featured",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
      *     @OA\Parameter(
      *         name="searchKey",
      *         in="query",
@@ -815,6 +837,13 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
  *         in="query",
  *         required=false,
  *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *  *      @OA\Parameter(
+ *         name="is_featured",
+ *         in="query",
+ *         required=false,
+ *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
  *         @OA\Schema(type="integer", example=1)
  *     ),
  *     @OA\Parameter(
