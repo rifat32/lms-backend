@@ -174,6 +174,7 @@ class Course extends Model
     })
     ->when(request()->filled('is_featured'), function ($q) {
        $q->when(request()->boolean('is_featured'), function ($q) {
+
             $q->where('is_featured', 1);
         }, function ($q) {
             $q->where('is_featured', 0);

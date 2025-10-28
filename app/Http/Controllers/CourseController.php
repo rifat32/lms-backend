@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CoursePartialRequest;
 use App\Http\Requests\CourseRequest;
+use App\Models\BusinessSetting;
 use App\Models\Course;
 use App\Models\CourseFaq;
 use App\Models\Enrollment;
@@ -181,6 +182,12 @@ public function getCoursesClientUnified(Request $request)
          Auth::login($user);
     }
 
+
+// Usage for featured courses limit
+$business_settings = BusinessSetting::first();
+$featured_limit = $business_settings?->general__featured_courses_count;
+
+
   $query = Course::with([
         'categories:id,name',
         'sections.sectionables.sectionable:id,title',
@@ -188,6 +195,7 @@ public function getCoursesClientUnified(Request $request)
         "enrollment"
     ])
     ->where('status', 'published')
+    ->when(request()->boolean('is_featured') && $featured_limit, fn($q) => $q->limit($featured_limit))
     ->filters();
 
 
