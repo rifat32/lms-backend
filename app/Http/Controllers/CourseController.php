@@ -1480,6 +1480,109 @@ foreach (Course::STATUS as $status_key => $status_value) {
         }
     }
 
+/**
+ * @OA\Put(
+ *     path="/v1.0/courses/status",
+ *     tags={"course_management.course"},
+ *     operationId="updateCourseStatus",
+ *     summary="Update only the status of a course (role: Admin/Lecturer only)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"id","status"},
+ *             @OA\Property(property="id", type="integer", example=10),
+ *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="published"),
+ *             @OA\Property(property="status_start_date", type="string", format="date", example="2025-11-01"),
+ *             @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Course status updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Course status updated successfully"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=10),
+ *                 @OA\Property(property="status", type="string", example="published"),
+ *                 @OA\Property(property="status_start_date", type="string", example="2025-11-01"),
+ *                 @OA\Property(property="status_end_date", type="string", example="2025-12-31")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Course not found",
+ *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Course not found"))
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized",
+ *         @OA\JsonContent(@OA\Property(property="message", type="string", example="You can not perform this action"))
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The status field is required.")
+ *         )
+ *     )
+ * )
+ */
+public function updateCourseStatus(Request $request)
+{
+    try {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json(["message" => "You can not perform this action"], 401);
+        }
+
+        $validated = $request->validate([
+            'id' => 'required|integer|exists:courses,id',
+            'status' => 'required|string|in:draft,published,archived',
+            'status_start_date' => 'nullable|date',
+            'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
+        ]);
+
+        $course = Course::findOrFail($validated['id']);
+
+ // Business rule: cannot publish a course with no lessons
+        if ($validated['status'] === 'published') {
+            $has_lessons = $course->sections->flatMap(function ($section) {
+                return $section->sectionables->filter(function ($sectionable) {
+                    return $sectionable->sectionable_type === Lesson::class;
+                });
+            })->count() > 0;
+
+            if (!$has_lessons) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot publish a course without lessons'
+                ], 422);
+            }
+        }
+        
+
+        $course->update([
+            'status' => $validated['status'],
+            'status_start_date' => $validated['status_start_date'] ?? null,
+            'status_end_date' => $validated['status_end_date'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course status updated successfully',
+            'data' => $course->only(['id', 'status', 'status_start_date', 'status_end_date']),
+        ], 200);
+
+    } catch (\Throwable $th) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Internal server error',
+            'data' => ['error' => $th->getMessage()],
+        ], 500);
+    }
+}
 
 
     /**

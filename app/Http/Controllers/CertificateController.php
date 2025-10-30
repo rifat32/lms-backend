@@ -76,6 +76,7 @@ class CertificateController extends Controller
             'data' => $template
         ], 200);
     }
+    
     /**
      * @OA\Get(
      *     path="/v1.0/certificate-template/{id}",

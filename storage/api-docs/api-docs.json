@@ -2585,6 +2585,16 @@
                         }
                     },
                     {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter by is featured: 1 for featured, 0 for not non featured.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
                         "name": "category_ids",
                         "in": "query",
                         "description": "Filter by one or more category IDs (comma-separated). Example: 1,3,5",
@@ -2680,6 +2690,16 @@
                         "name": "is_enrolled",
                         "in": "query",
                         "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter by is featured: 1 for featured, 0 for not non featured.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -3178,6 +3198,16 @@
                         }
                     },
                     {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter by is featured: 1 for featured, 0 for not non featured.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
                         "name": "searchKey",
                         "in": "query",
                         "description": "Search by keyword in title only",
@@ -3381,6 +3411,16 @@
                         "name": "is_enrolled",
                         "in": "query",
                         "description": "Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter by is featured: 1 for featured, 0 for not non featured.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -4773,6 +4813,150 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Course not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/courses/status": {
+            "put": {
+                "tags": [
+                    "course_management.course"
+                ],
+                "summary": "Update only the status of a course (role: Admin/Lecturer only)",
+                "operationId": "updateCourseStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "published",
+                                            "archived"
+                                        ],
+                                        "example": "published"
+                                    },
+                                    "status_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-01"
+                                    },
+                                    "status_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course status updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "published"
+                                                },
+                                                "status_start_date": {
+                                                    "type": "string",
+                                                    "example": "2025-11-01"
+                                                },
+                                                "status_end_date": {
+                                                    "type": "string",
+                                                    "example": "2025-12-31"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You can not perform this action"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The status field is required."
                                         }
                                     },
                                     "type": "object"

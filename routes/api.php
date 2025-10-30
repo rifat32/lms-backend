@@ -77,6 +77,9 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
         Route::put('/', [CourseController::class, 'updateCourse']);
+        
+        Route::put('/status', [CourseController::class, 'updateCourseStatus']);
+
         Route::patch('/', [CourseController::class, 'updatePartialCourse']);
         Route::get('/', [CourseController::class, 'getCourses']);
         Route::get('/{id}', [CourseController::class, 'getCourseById']);

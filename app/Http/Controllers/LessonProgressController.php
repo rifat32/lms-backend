@@ -143,30 +143,28 @@ class LessonProgressController extends Controller
             // Get the course
             $course = Course::findOrFail($request->course_id);
 
-    // fetch or create progress row
-$progress = LessonProgress::firstOrCreate(
-    [
-        'user_id' => auth()->user()->id,
-        'course_id' => $course->id,
-        'lesson_id' => $lesson->id,
-    ],
-    [
-        'total_time_spent' => 0,
-        'is_completed' => false,
-        'last_accessed' => now(),
-    ]
-);
+            // fetch or create progress row
+            $progress = LessonProgress::firstOrCreate(
+                [
+                    'user_id' => auth()->user()->id,
+                    'course_id' => $course->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
+                    'total_time_spent' => 0,
+                    'is_completed' => false,
+                    'last_accessed' => now(),
+                ]
+            );
 
-// update progress with new info
-$progress->update([
-    'is_completed' => $request->is_completed,
-    'last_accessed' => now(),
+            // update progress with new info
+            $progress->update([
+                'is_completed' => $request->is_completed,
+                'last_accessed' => now(),
 
-]);
+            ]);
 
-
-
-            $this->recalculateCourseProgress( $course->id);
+            $this->recalculateCourseProgress($course->id);
 
             DB::commit();
 
@@ -239,7 +237,7 @@ $progress->update([
     {
         DB::beginTransaction();
         try {
-            
+
             if (!auth()->user()->hasAnyRole(['student'])) {
                 return response()->json([
                     "message" => "You can not perform this action"
