@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseFaqController;
 use App\Http\Controllers\CourseReviewController;
 use App\Http\Controllers\CustomWebhookController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
@@ -77,7 +78,7 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);
         Route::put('/', [CourseController::class, 'updateCourse']);
-        
+
         Route::put('/status', [CourseController::class, 'updateCourseStatus']);
 
         Route::patch('/', [CourseController::class, 'updatePartialCourse']);
@@ -223,6 +224,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
 
       Route::get('/v1.0/client/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsByIdClient']);
+// routes/api.php
+Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
 
 
 });
@@ -251,3 +254,5 @@ Route::get('/v1.0/client/business-settings', [SettingController::class, "getBusi
 
 
 Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");
+Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
+Route::patch('/forgetpassword/reset/{token}', [AuthController::class, "changePasswordByToken"]);

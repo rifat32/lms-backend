@@ -941,14 +941,31 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
             ], 401);
         }
 
-        $query = Course::with(['categories' => function ($q) {
-            $q->select('course_categories.id', 'course_categories.name');
-        }])->filters();
+     $query = Course::with([
+        'categories:id,name',
+    ])
+    ->withCount([
+        'enrollments as enrollments_count',
+        'enrollments as students_count' => function ($q) {
+            $q->select(DB::raw('COUNT(DISTINCT user_id)'));
+        },
+    ])
+    ->withAvg('enrollments as completion_rate', 'progress')
+    ->withSum([
+        'payments as revenue' => function ($q) {
+            $q->where('status', 'completed'); // include only successful payments
+        }
+    ], 'amount')
+    ->filters();
+
+
 
         $courses = retrieve_data($query, 'created_at', 'courses');
 
         // Remove pivot from all categories
         $courses['data'] = $courses['data']->each(function ($course) {
+            $course->completion_rate = round($course->completion_rate ?? 0, 2);
+    $course->revenue = $course->revenue ?? 0;
             return $course->categories->makeHidden('pivot');
         });
 

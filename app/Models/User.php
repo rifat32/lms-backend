@@ -41,4 +41,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Business::class, 'business_id');
     }
+
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class, 'user_id', 'id');
+    }
 }

@@ -20,8 +20,6 @@ class QuizAttempt extends Model
         'completed_at',
         "time_spent",
         'is_expired',
-
-       
     ];
 
     public function quiz()

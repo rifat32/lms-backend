@@ -19,7 +19,6 @@ class Business extends Model
         'email',
         'phone',
         'registration_date',
-
         'about',
         'web_page',
         'additional_information',
@@ -28,7 +27,6 @@ class Business extends Model
         'city',
         'postcode',
         'currency',
-
         'status',
         'is_active',
         'logo',
