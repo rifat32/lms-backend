@@ -43,7 +43,7 @@ class UpdateBusinessSettingRequest extends FormRequest
             'courses__courses_per_page' => 'sometimes|integer|min:1',
             'courses__load_more_type' => 'sometimes|string|in:button,infinite_scroll|nullable',
             'courses__course_card_style' => 'sometimes|string|in:default,price_on_hover,scale_on_hover|nullable',
-            'courses__course_card_info_position' => 'sometimes|string|in:center,right|nullable',
+            'courses__course_card_info_position' => 'sometimes|string|in:left,center,right|nullable',
             'courses__course_image_size' => 'sometimes|string|nullable',
             'courses__lazy_loading' => 'sometimes|boolean',
             'courses__category_slug' => 'sometimes|string|nullable',
@@ -100,7 +100,7 @@ class UpdateBusinessSettingRequest extends FormRequest
             'courses__courses_per_page.min' => 'The courses per page must be at least 1.',
             'courses__load_more_type.in' => 'The selected courses load more type is invalid. Valid options: button, infinite_scroll.',
             'courses__course_card_style.in' => 'The selected courses course card style is invalid. Valid options: default, price_on_hover, scale_on_hover.',
-            'courses__course_card_info_position.in' => 'The selected courses course card info position is invalid. Valid options: center, right.',
+            'courses__course_card_info_position.in' => 'The selected courses course card info position is invalid. Valid options:left, center, right.',
         ];
     }
 

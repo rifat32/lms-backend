@@ -199,10 +199,8 @@ $featured_limit = $business_settings?->general__featured_courses_count;
     ->filters();
 
 
-
-
     $courses = retrieve_data($query, 'created_at', 'courses');
-    $courses['data']->each(fn($c) => $c->categories->makeHidden('pivot'));
+ 
 
     $summary = [];
 
@@ -412,10 +410,7 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
         //
         $courses = retrieve_data($query, 'created_at', 'courses');
 
-        // Remove pivot from all categories
-        $courses['data'] = $courses['data']->each(function ($course) {
-            return $course->categories->makeHidden('pivot');
-        });
+      
 
         // SEND RESPONSE
         return response()->json([
