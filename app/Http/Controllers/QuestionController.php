@@ -470,19 +470,21 @@ class QuestionController extends Controller
 }
 
         // GET ALL QUESTIONS
-     $questions = Question::with(['options', 'categories'])
-    ->filters()
-    ->get()
-    ->map(function ($question) {
-        // Check if the question is in any quiz with attempts
-        $question->has_attempt = $question->quizzes()
-            ->whereHas('quiz_attempts')
-            ->exists();
+    $query = Question::with([
+            'options',
+            'categories:id,title',
+        ])
+        ->withCount([
+            'quizzes as has_attempt' => function ($q) {
+                $q->whereHas('quiz_attempts');
+            }
+        ])
+        ->filters();
 
-        return $question;
-    });
+    // Retrieve data with pagination and sorting
+    $questions = retrieve_data($query, 'created_at', 'questions');
 
-        $questions = retrieve_data($query, 'created_at', 'questions');
+  
 
         // SEND RESPONSE
         return response()->json([
