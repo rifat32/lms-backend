@@ -110,7 +110,7 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i)->format('M');
             $months[] = $month;
-            $revenue_trend[] = Payment::whereMonth('paid_at', now()->subMonths($i)->month)->where('status', 'completed')->sum('amount');
+            $revenue_trend[] = Payment::whereMonth('created_at', now()->subMonths($i)->month)->where('status', 'completed')->sum('amount');
             $enrollment_trend[] = Enrollment::whereMonth('enrolled_at', now()->subMonths($i)->month)->count();
         }
 

@@ -349,7 +349,7 @@ class StripePaymentController extends Controller
      *                     @OA\Property(property="amount", type="number", format="float", example=73.99),
      *                     @OA\Property(property="method", type="string", example="credit_card"),
      *                     @OA\Property(property="status", type="string", example="completed"),
-     *                     @OA\Property(property="paid_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
      *                     @OA\Property(
      *                         property="course",
      *                         type="object",
@@ -406,11 +406,16 @@ class StripePaymentController extends Controller
         $query = Payment::with([
             'course:id,title',
             'student:id,first_name,last_name,email'
-        ]);
+        ])
+        ->where([
+            "status" => "completed"
+        ])
+        
+        ;
 
         $this->applyFilters($query, $request);
 
-        $payments = retrieve_data($query, 'paid_at', 'payments', 'desc');
+        $payments = retrieve_data($query, 'created_at', 'payments', 'desc');
         $summary = $this->getPaymentSummary();
 
         return response()->json([
@@ -446,11 +451,11 @@ class StripePaymentController extends Controller
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('paid_at', '>=', $request->date_from);
+            $query->whereDate('created_at', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('paid_at', '<=', $request->date_to);
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
     }
 
@@ -458,20 +463,33 @@ class StripePaymentController extends Controller
      * Get payment summary statistics
      */
     private function getPaymentSummary()
-    {
-        $totalEarnings = (float) Payment::where('status', 'completed')->sum('amount');
+{
+    $now = now();
 
-        $thisMonthEarnings = (float) Payment::where('status', 'completed')
-            ->whereYear('paid_at', now()->year)
-            ->whereMonth('paid_at', now()->month)
-            ->sum('amount');
+    $total_earnings = (float) Payment::where('status', 'completed')->sum('amount');
 
-        return [
-            'total_earnings' => $totalEarnings,
-            'this_month_earnings' => $thisMonthEarnings,
-            'available_balance' => $totalEarnings
-        ];
-    }
+    $this_month_earnings = (float) Payment::where('status', 'completed')
+        ->whereYear('created_at', $now->year)
+        ->whereMonth('created_at', $now->month)
+        ->sum('amount');
+
+    $this_week_earnings = (float) Payment::where('status', 'completed')
+        ->whereBetween('created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
+        ->sum('amount');
+
+    $today_earnings = (float) Payment::where('status', 'completed')
+        ->whereDate('created_at', $now->copy()->toDateString())
+        ->sum('amount');
+
+    return [
+        'total_earnings' => $total_earnings,
+        'this_month_earnings' => $this_month_earnings,
+        'this_week_earnings' => $this_week_earnings,
+        'today_earnings' => $today_earnings,
+        'available_balance' => $total_earnings
+    ];
+}
+
 
     /**
      * @OA\Get(
@@ -502,7 +520,7 @@ class StripePaymentController extends Controller
      *                 @OA\Property(property="method", type="string", example="credit_card"),
      *                 @OA\Property(property="status", type="string", example="completed"),
      *                 @OA\Property(property="payment_intent_id", type="string", example="pi_123456789"),
-     *                 @OA\Property(property="paid_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
      *                 @OA\Property(
      *                     property="course",
      *                     type="object",

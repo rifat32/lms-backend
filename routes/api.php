@@ -240,7 +240,7 @@ Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'v
 
 
 
-Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategory']);
+Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategoryClient']);
 
 // Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 // Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
