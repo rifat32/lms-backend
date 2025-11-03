@@ -16,10 +16,10 @@ class CouponUpdateRequest extends FormRequest
         $coupon_id = $this->route('id');
 
         return [
-            'course_id' => 'nullable|exists:courses,id',
+
             'name' => 'sometimes|required|string|max:255',
             'code' => 'sometimes|required|string|max:255|unique:coupons,code,' . $coupon_id,
-            'discount_type' => 'sometimes|required|in:percentage,amount',
+            'discount_type' => 'sometimes|required|in:percentage,fixed',
             'discount_amount' => 'sometimes|required|numeric|min:0',
             'min_total' => 'nullable|numeric|min:0',
             'max_total' => 'nullable|numeric|min:0',

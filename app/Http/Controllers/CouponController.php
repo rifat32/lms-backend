@@ -22,7 +22,7 @@ class CouponController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *            required={"name","code","discount_type","discount_amount","coupon_start_date","coupon_end_date"},
-     *            @OA\Property(property="course_id", type="integer", example=1),
+
      *            @OA\Property(property="name", type="string", example="New Year Offer"),
      *            @OA\Property(property="code", type="string", example="NY2025"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
@@ -66,7 +66,7 @@ class CouponController extends Controller
      *      @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *            @OA\Property(property="course_id", type="integer", example=1),
+
      *            @OA\Property(property="name", type="string", example="Summer Sale"),
      *            @OA\Property(property="code", type="string", example="SUMMER25"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),

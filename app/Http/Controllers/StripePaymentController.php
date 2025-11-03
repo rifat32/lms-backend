@@ -108,22 +108,30 @@ class StripePaymentController extends Controller
         // Calculate total and handle coupon
         // -------------------------------------
         $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
+
         $discount_amount = 0;
         $coupon_code = $request->coupon_code;
 
         if (!empty($coupon_code)) {
             $coupon = Coupon::where('code', $coupon_code)
                 ->where('is_active', true)
-                ->whereDate('start_date', '<=', now())
-                ->whereDate('end_date', '>=', now())
-                ->first();
+                ->where(function ($query) {
+                    $query->whereNull('start_date')
+                         ->orWhereDate('start_date', '<=', now());
+                })
+              ->where(function ($query) {
+                    $query->whereNull('end_date')
+                          ->orWhereDate('end_date', '>=', now());
+                })
+             
+              ->first();
 
             if (!$coupon) {
                 return response()->json(['message' => 'Invalid or expired coupon code'], 422);
             }
 
             // Calculate discount based on type (flat or percent)
-            if ($coupon->discount_type === 'percent') {
+            if ($coupon->discount_type === 'percentage') {
                 $discount_amount = ($total_amount * $coupon->discount_value) / 100;
             } else {
                 $discount_amount = $coupon->discount_value;
