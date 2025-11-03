@@ -21,7 +21,9 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'phone',
         'password',
+        'profile_photo',
         'email_verified_at',
         'business_id',
     ];
@@ -36,6 +38,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+
+    // Single file accessors (your existing code)
+    public function getProfilePhotoAttribute($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+        $folder_path = "business_1/profile_photo_{$this->id}";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 
     public function business(): BelongsTo
     {
