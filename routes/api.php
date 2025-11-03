@@ -224,22 +224,15 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/v1.0/client/courses/secure', [CourseController::class, 'getCoursesClientSecure']);
 
-      Route::get('/v1.0/client/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsByIdClient']);
-// routes/api.php
-Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
+    Route::get('/v1.0/client/quizzes/{id}', [QuizController::class, 'getQuizWithQuestionsByIdClient']);
+    // routes/api.php
+    Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
 
-Route::post('/v1.0/coupons', [CouponController::class, 'createCoupon']);
-Route::put('/v1.0/coupons/{id}', [CouponController::class, 'updateCoupon']);
-Route::get('/v1.0/coupons', [CouponController::class, 'getAllCoupons']);
-Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
-Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
-
-
-
-
-
-
-
+    Route::post('/v1.0/coupons', [CouponController::class, 'createCoupon']);
+    Route::put('/v1.0/coupons/{id}', [CouponController::class, 'updateCoupon']);
+    Route::get('/v1.0/coupons', [CouponController::class, 'getAllCoupons']);
+    Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
+    Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
 });
 
 // Get all reviews (auth optional)
@@ -251,15 +244,15 @@ Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCou
 Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verifyCertificate']);
 
 
-
+// 
 Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategoryClient']);
 
 // Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 // Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
 
 
- Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
- Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClientUnified']);
+Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
+Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClientUnified']);
 
 
 

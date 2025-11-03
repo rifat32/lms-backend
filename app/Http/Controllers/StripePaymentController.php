@@ -116,14 +116,13 @@ class StripePaymentController extends Controller
             $coupon = Coupon::where('code', $coupon_code)
                 ->where('is_active', true)
                 ->where(function ($query) {
-                    $query->whereNull('start_date')
-                         ->orWhereDate('start_date', '<=', now());
+                    $query->whereNull('coupon_start_date')
+                         ->orWhereDate('coupon_start_date', '<=', now());
                 })
               ->where(function ($query) {
-                    $query->whereNull('end_date')
-                          ->orWhereDate('end_date', '>=', now());
+                    $query->whereNull('coupon_end_date')
+                          ->orWhereDate('coupon_end_date', '>=', now());
                 })
-             
               ->first();
 
             if (!$coupon) {
