@@ -34,8 +34,8 @@ class UserUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->id), // ignore current user's email
             ],
-            'profile_image' => 'nullable|string|max:255',
-            'password' => 'nullable|string|min:8',
+            'profile_photo_path' => 'nullable',
+            'phone' => 'required|string|max:11',
         ];
 
         return $rules;

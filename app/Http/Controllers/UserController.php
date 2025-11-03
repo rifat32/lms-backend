@@ -6,11 +6,36 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    /**
+     * Store a single uploaded file and optionally delete the previous filename.
+     * Returns the stored filename (basename only).
+     */
+    private function putSingleFile(?UploadedFile $file, string $folderPath, ?string $oldFilename = null): ?string
+    {
+        if (!$file) {
+            return $oldFilename;
+        }
+
+        $new = $file->hashName();
+        $file->storeAs($folderPath, $new, 'public');
+
+        if ($oldFilename) {
+            $old = "{$folderPath}/{$oldFilename}";
+            if (Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+        }
+
+        return $new;
+    }
+
     /**
      * @OA\Get(
      *     path="/v1.0/users/{id}",
@@ -77,11 +102,11 @@ class UserController extends Controller
 
     public function getUserById($id)
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $query = User::find($id);
         if (empty($query)) {
@@ -107,98 +132,126 @@ class UserController extends Controller
         ]);
     }
 
-
     /**
      * @OA\Put(
-     *     path="/v1.0/users",
-     *     operationId="updateUser",
-     *     tags={"user_management"},
-     *     summary="Update user profile (role: Admin only)",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"id", "title", "first_name", "last_name", "email"},
-     *             @OA\Property(property="id", type="integer", example="1"),
-     *             @OA\Property(property="title", type="string", example="Mr."),
-     *             @OA\Property(property="first_name", type="string", example="John"),
-     *             @OA\Property(property="last_name", type="string", example="Doe"),
-     *             @OA\Property(property="email", type="string", example="john@example.com"),
-     *             @OA\Property(property="password", type="string", format="password", example="newpassword")
+     *   path="/v1.0/users",
+     *   operationId="updateUser",
+     *   tags={"user_management"},
+     *   summary="Update user profile (role: Admin only)",
+     *   security={{"bearerAuth":{}}},
+     *
+     *   @OA\RequestBody(
+     *     required=true,
+     *     description="Upload a file via multipart OR pass a string path via JSON, both using the same key: profile_photo.",
+     *     @OA\MediaType(
+     *       mediaType="multipart/form-data",
+     *       @OA\Schema(
+     *         type="object",
+     *         required={"id"},
+     *         @OA\Property(property="id", type="integer", example=1),
+     *         @OA\Property(property="title", type="string", example="Mr."),
+     *         @OA\Property(property="first_name", type="string", example="John"),
+     *         @OA\Property(property="last_name", type="string", example="Doe"),
+     *         @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *         @OA\Property(property="phone", type="string", example="+1 555 123 4567"),
+     *
+     *         @OA\Property(
+     *           property="profile_photo",
+     *           type="string",
+     *           format="binary",
+     *           description="Image file (jpg, jpeg, png, webp, avif, gif), max 5MB"
      *         )
+     *       )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="User profile updated successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="title", type="string", example="Mr."),
-     *             @OA\Property(property="first_name", type="string", example="John"),
-     *             @OA\Property(property="last_name", type="string", example="Doe"),
-     *             @OA\Property(property="email", type="string", example="john@example.com"),
-     *             @OA\Property(property="role", type="string", example="student")
+     *     @OA\MediaType(
+     *       mediaType="application/json",
+     *       @OA\Schema(
+     *         type="object",
+     *         required={"id"},
+     *         @OA\Property(property="id", type="integer", example=1),
+     *         @OA\Property(property="title", type="string", example="Mr."),
+     *         @OA\Property(property="first_name", type="string", example="John"),
+     *         @OA\Property(property="last_name", type="string", example="Doe"),
+     *         @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *         @OA\Property(property="phone", type="string", example="+1 555 123 4567"),
+     *
+     *         @OA\Property(
+     *           property="profile_photo",
+     *           type="string",
+     *           example="https://cdn.example.com/avatars/john.jpg",
+     *           description="Alternative to file upload: provide an existing path/URL; server stores the basename under users/{id}/"
      *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request - Invalid input",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Invalid request payload")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized - Invalid or missing token",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthorized access")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - Insufficient permissions",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="You do not have permission to update this user")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="User not found")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=409,
-     *         description="Conflict - Email already exists",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Email is already in use")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The email field must be a valid email address")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="An unexpected error occurred while updating the user profile")
-     *         )
+     *       )
      *     )
+     *   ),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="User profile updated successfully",
+     *     @OA\JsonContent(
+     *       type="object",
+     *       @OA\Property(property="success", type="boolean", example=true),
+     *       @OA\Property(property="message", type="string", example="User profile updated successfully"),
+     *       @OA\Property(
+     *         property="data",
+     *         type="object",
+     *         @OA\Property(property="id", type="integer", example=1),
+     *         @OA\Property(property="title", type="string", example="Mr."),
+     *         @OA\Property(property="first_name", type="string", example="John"),
+     *         @OA\Property(property="last_name", type="string", example="Doe"),
+     *         @OA\Property(property="email", type="string", example="john@example.com"),
+     *         @OA\Property(property="role", type="string", example="student"),
+     *
+     *         @OA\Property(
+     *           property="profile_photo",
+     *           type="string",
+     *           example="users/1/2a3b4c5d6e7f.jpg",
+     *           description="Stored relative path in DB (column: profile_photo)"
+     *         ),
+     *         @OA\Property(
+     *           property="profile_photo_url",
+     *           type="string",
+     *           example="https://static.example.com/storage/users/1/2a3b4c5d6e7f.jpg",
+     *           description="Public URL derived from storage (accessor)"
+     *         )
+     *       )
+     *     )
+     *   ),
+     *
+     *   @OA\Response(response=400, description="Bad request",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="Invalid request payload"))
+     *   ),
+     *   @OA\Response(response=401, description="Unauthorized",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthorized access"))
+     *   ),
+     *   @OA\Response(response=403, description="Forbidden",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="You do not have permission to update this user"))
+     *   ),
+     *   @OA\Response(response=404, description="User not found",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="User not found"))
+     *   ),
+     *   @OA\Response(response=409, description="Conflict",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="Email is already in use"))
+     *   ),
+     *   @OA\Response(response=422, description="Validation error",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="The email field must be a valid email address"))
+     *   ),
+     *   @OA\Response(response=500, description="Internal server error",
+     *     @OA\JsonContent(@OA\Property(property="message", type="string", example="An unexpected error occurred while updating the user profile"))
+     *   )
      * )
      */
+
+
 
     public function updateUser(UserUpdateRequest $request)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             // Start a database transaction
             DB::beginTransaction();
@@ -215,8 +268,19 @@ class UserController extends Controller
                 ], 404);
             }
 
-            if ($request->filled('password')) {
-                $request_payload['password'] = Hash::make($request->password);
+            $folder_path = "business_1/profile_photo_{$user->id}";
+            if ($request->hasFile('profile_photo')) {
+                $photo_filename = $this->putSingleFile(
+                    $request->file('profile_photo'),
+                    $folder_path,
+                    $user->getRawOriginal('profile_photo')
+                );
+                $request_payload['profile_photo'] = $photo_filename;
+            } elseif ($request->filled('profile_photo') && is_string($request->input('profile_photo'))) {
+                $request_payload['profile_photo'] = basename($request->input('profile_photo'));
+            } else {
+                // Remove from update data if not provided (keep existing)
+                unset($request_payload['profile_photo']);
             }
 
             $user->update($request_payload);
@@ -227,14 +291,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User profile updated successfully',
-                'data' => [
-                    'id'            => $user->id,
-                    'title'          => $user->title,
-                    'first_name'          => $user->first_name,
-                    'last_name'          => $user->last_name,
-                    'email'         => $user->email,
-                    'role'          => $user->roles->pluck('name')->first(),
-                ]
+                'data' => $user
             ]);
         } catch (\Throwable $th) {
             // Rollback the transaction in case of error
@@ -252,12 +309,12 @@ class UserController extends Controller
      *     description="Retrieve a list of all users in the system",
      *     security={{"bearerAuth":{}}},
      * *     @OA\Parameter(
- *         name="role",
- *         in="query",
- *         required=false,
- *         description="Filter users by role name (e.g., admin, student, lecturer)",
- *         @OA\Schema(type="string", example="student")
- *     ),
+     *         name="role",
+     *         in="query",
+     *         required=false,
+     *         description="Filter users by role name (e.g., admin, student, lecturer)",
+     *         @OA\Schema(type="string", example="student")
+     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -329,20 +386,20 @@ class UserController extends Controller
 
     public function getAllUsers()
     {
-        if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json([
+                "message" => "You can not perform this action"
+            ], 401);
+        }
 
         $query = User::query();
 
-         // ROLE FILTER (Spatie relationship-based)
-    if (request()->filled('role')) {
-        $query->whereHas('roles', function ($q)  {
-            $q->where('roles.name', request()->role);
-        });
-    }
+        // ROLE FILTER (Spatie relationship-based)
+        if (request()->filled('role')) {
+            $query->whereHas('roles', function ($q) {
+                $q->where('roles.name', request()->role);
+            });
+        }
 
         $users = retrieve_data($query, 'created_at', 'users');
 
@@ -350,8 +407,8 @@ class UserController extends Controller
 
         $summary = [];
 
-    $summary["total_users"] =   User::get()->count();
-     $summary["total_students"] =   User::whereHas('roles', function ($q)  {
+        $summary["total_users"] =   User::get()->count();
+        $summary["total_students"] =   User::whereHas('roles', function ($q) {
             $q->where('roles.name', 'student');
         })->count();
 
@@ -363,8 +420,6 @@ class UserController extends Controller
             'data' => $users['data'],
             "summary" => $summary
         ], 200);
-
-
     }
 
     /**
@@ -402,11 +457,11 @@ class UserController extends Controller
     public function deleteUsers($ids)
     {
         try {
-            if (!auth()->user()->hasAnyRole([ 'owner', 'admin', 'lecturer'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
             DB::beginTransaction();
 
