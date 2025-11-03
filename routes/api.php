@@ -23,6 +23,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StripePaymentController;
+use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\TrashController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -234,6 +235,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
     Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
     Route::post('/v1.0/coupons/apply', [CouponController::class, 'applyCoupon']);
+
+    Route::patch('/v1.0/student-profile', [StudentProfileController::class, 'updateStudentProfile']);
 });
 
 // Get all reviews (auth optional)

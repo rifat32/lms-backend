@@ -341,11 +341,7 @@ class BusinessController extends Controller
         try {
             $request_data = $request->validated();
 
-            // Validate business ID exists
-            if (empty($request_data['id'])) {
-                throw new Exception("Business ID is required", 400);
-            }
-
+            // Validate business owner
             $business = $this->businessOwnerCheck($request_data["id"]);
             $folder_path = "business_1/business_{$business->id}";
 
