@@ -25,39 +25,53 @@ class RegisterUserWithBusinessRequest extends FormRequest
      */
     public function rules()
     {
+        // list of user.* fields that should travel together
+        $u = [
+            'user.title',
+            'user.first_name',
+            'user.last_name',
+            'user.email',
+            'user.password',
+        ];
+        $list = implode(',', $u);
+
+        // for each field, require it if any other user.* field is present
+        // and, if you’re creating a NEW user (no user.id), require the set
         return [
-            // USER INFORMATION
-            'user.title' => 'required|string|max:255',
-            'user.first_name' => 'required|string|max:255',
-            'user.last_name' => 'required|string|max:255',
-            'user.email' => ['required', 'string', 'email', 'max:255', new UniqueUserEmail()],
-            'user.password' => 'nullable|string|min:8',
+            // ── USER INFORMATION ────────────────────────────────────────────────
+            'user.id'         => ['nullable', 'integer', 'exists:users,id'],
 
-            // BUSINESS INFORMATION
+            'user.title'      => ['nullable', 'string', 'max:255', "required_with:{$list}", 'required_without:user.id'],
+            'user.first_name' => ['nullable', 'string', 'max:255', "required_with:{$list}", 'required_without:user.id'],
+            'user.last_name'  => ['nullable', 'string', 'max:255', "required_with:{$list}", 'required_without:user.id'],
+            'user.email'      => ['nullable', 'string', 'email', 'max:255', new UniqueUserEmail(), "required_with:{$list}", 'required_without:user.id'],
+            'user.password'   => ['nullable', 'string', 'min:8', "required_with:{$list}", 'required_without:user.id'],
 
-'business.name' => 'required|string|max:255',
-'business.about' => 'nullable|string',
-'business.web_page' => 'nullable|string',
-'business.pin_code' => 'nullable|string', // optional, maps to postcode
-'business.phone' => 'nullable|string',
-'business.email' => 'nullable|string|unique:businesses,email,' . $this->business["id"] . ',id',
-'business.additional_information' => 'nullable|string', // extra info, not in migration
-'business.lat' => 'nullable|string',
-'business.long' => 'nullable|string',
-'business.currency' => 'nullable|string',
-'business.country' => 'required|string',
-'business.city' => 'required|string',
-'business.postcode' => 'nullable|string',
-'business.address_line_1' => 'required|string',
-'business.address_line_2' => 'nullable|string',
-'business.logo' => 'nullable|string',
-'business.image' => 'nullable|string',
-'business.background_image' => 'nullable|string',
-'business.theme' => 'nullable|string',
-'business.images' => 'nullable|array',
-'business.images.*' => 'nullable|string',
+            // ── BUSINESS INFORMATION (your existing rules) ─────────────────────
+            'business.name' => 'required|string|max:255',
+            'business.about' => 'nullable|string',
+            'business.web_page' => 'nullable|string',
+            'business.pin_code' => 'nullable|string',
+            'business.phone' => 'nullable|string',
+            'business.email' => 'nullable|string|unique:businesses,email,' . ($this->business['id'] ?? 'NULL') . ',id',
+            'business.additional_information' => 'nullable|string',
+            'business.lat' => 'nullable|string',
+            'business.long' => 'nullable|string',
+            'business.currency' => 'nullable|string',
+            'business.country' => 'required|string',
+            'business.city' => 'required|string',
+            'business.postcode' => 'nullable|string',
+            'business.address_line_1' => 'required|string',
+            'business.address_line_2' => 'nullable|string',
+            'business.logo' => 'nullable|string',
+            'business.image' => 'nullable|string',
+            'business.background_image' => 'nullable|string',
+            'business.theme' => 'nullable|string',
+            'business.images' => 'nullable|array',
+            'business.images.*' => 'nullable|string',
         ];
     }
+
 
     public function messages()
     {
@@ -102,7 +116,7 @@ class RegisterUserWithBusinessRequest extends FormRequest
             'business.registration_date.date' => 'Business registration date must be a valid date.',
             'business.registration_date.before_or_equal' => 'Business registration date cannot be in the future.',
 
-        
+
 
             'business.about.string' => 'Business about must be a string.',
             'business.web_page.string' => 'Business web page must be a string.',

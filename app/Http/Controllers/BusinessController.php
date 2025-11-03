@@ -11,9 +11,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class BusinessController extends Controller
 {
+
+    /**
+     * Store a single uploaded file and optionally delete the previous filename.
+     * Returns the stored filename (basename only).
+     */
+    private function putSingleFile(?UploadedFile $file, string $folderPath, ?string $oldFilename = null): ?string
+    {
+        if (!$file) {
+            return $oldFilename;
+        }
+
+        $new = $file->hashName();
+        $file->storeAs($folderPath, $new, 'public');
+
+        if ($oldFilename) {
+            $old = "{$folderPath}/{$oldFilename}";
+            if (Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+        }
+
+        return $new;
+    }
+
 
     /**
      * @OA\Post(
@@ -109,10 +135,10 @@ class BusinessController extends Controller
             DB::beginTransaction();
 
 
-            if(!auth()->user()->hasRole('super_admin')) {
-              return response()->json([
-                "message" => "You can not perform this action"
-              ], 401);
+            if (!auth()->user()->hasRole('super_admin')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
             }
 
 
@@ -158,129 +184,143 @@ class BusinessController extends Controller
     }
 
 
+    /**
+     * @OA\Put(
+     *     path="/v1.0/businesses",
+     *     operationId="updateBusiness",
+     *     tags={"business_management"},
+     *     summary="Update an existing business (role: Super Admin only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id", "country", "city", "address_line_1"},
+     *             @OA\Property(property="id", type="integer", example=1, description="Business ID (must exist in businesses table)"),
+     *             @OA\Property(property="name", type="string", example="Acme Corporation", description="Business name"),
+     *             @OA\Property(property="about", type="string", example="We provide tech solutions worldwide.", description="About the business"),
+     *             @OA\Property(property="web_page", type="string", example="https://acme.com", description="Website URL"),
+     *             @OA\Property(property="pin_code", type="string", example="1207", description="Optional pin code"),
+     *             @OA\Property(property="phone", type="string", example="+8801765432109", description="Business phone number"),
+     *             @OA\Property(property="email", type="string", format="email", example="contact@acme.com", description="Business email (must be unique)"),
+     *             @OA\Property(property="additional_information", type="string", example="24/7 support available", description="Additional information"),
+     *             @OA\Property(property="lat", type="number", format="float", example=23.7808875, description="Latitude coordinate"),
+     *             @OA\Property(property="long", type="number", format="float", example=90.2792371, description="Longitude coordinate"),
+     *             @OA\Property(property="currency", type="string", example="BDT", description="Currency code (e.g., USD, BDT, EUR)"),
+     *             @OA\Property(property="country", type="string", example="Bangladesh", description="Country name"),
+     *             @OA\Property(property="city", type="string", example="Dhaka", description="City name"),
+     *             @OA\Property(property="postcode", type="string", example="1207", description="Postal/ZIP code"),
+     *             @OA\Property(property="address_line_1", type="string", example="123 Business Street", description="Primary address line"),
+     *             @OA\Property(property="address_line_2", type="string", example="2nd Floor, Suite 5", description="Secondary address line (optional)"),
+     *             @OA\Property(property="theme", type="string", example="dark", description="UI theme preference"),
+     *             @OA\Property(property="logo", type="string", example="https://cdn.acme.com/logo.png", description="Logo URL or file upload"),
+     *             @OA\Property(property="image", type="string", example="https://cdn.acme.com/cover.jpg", description="Cover image URL or file upload"),
+     *             @OA\Property(property="background_image", type="string", example="https://cdn.acme.com/bg.jpg", description="Background image URL or file upload"),
+     *             @OA\Property(
+     *                 property="images",
+     *                 type="array",
+     *                 description="Gallery images (URLs or file uploads)",
+     *                 @OA\Items(type="string", example="https://cdn.acme.com/gallery/img1.jpg")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Business updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Business updated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Acme Corporation"),
+     *                 @OA\Property(property="about", type="string", example="We provide tech solutions worldwide."),
+     *                 @OA\Property(property="web_page", type="string", example="https://acme.com"),
+     *                 @OA\Property(property="pin_code", type="string", example="1207"),
+     *                 @OA\Property(property="phone", type="string", example="+8801765432109"),
+     *                 @OA\Property(property="email", type="string", example="contact@acme.com"),
+     *                 @OA\Property(property="additional_information", type="string", example="24/7 support available"),
+     *                 @OA\Property(property="lat", type="number", example=23.7808875),
+     *                 @OA\Property(property="long", type="number", example=90.2792371),
+     *                 @OA\Property(property="currency", type="string", example="BDT"),
+     *                 @OA\Property(property="country", type="string", example="Bangladesh"),
+     *                 @OA\Property(property="city", type="string", example="Dhaka"),
+     *                 @OA\Property(property="postcode", type="string", example="1207"),
+     *                 @OA\Property(property="address_line_1", type="string", example="123 Business Street"),
+     *                 @OA\Property(property="address_line_2", type="string", example="2nd Floor, Suite 5"),
+     *                 @OA\Property(property="theme", type="string", example="dark"),
+     *                 @OA\Property(property="logo", type="string", example="http://yourapp.com/storage-proxy/business_1/business_1/abc123def456.png"),
+     *                 @OA\Property(property="image", type="string", example="http://yourapp.com/storage-proxy/business_1/business_1/def456ghi789.jpg"),
+     *                 @OA\Property(property="background_image", type="string", example="http://yourapp.com/storage-proxy/business_1/business_1/ghi789jkl012.jpg"),
+     *                 @OA\Property(
+     *                     property="images",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="http://yourapp.com/storage-proxy/business_1/business_1/jkl012mno345.jpg")
+     *                 ),
+     *                 @OA\Property(property="status", type="string", example="active"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-22T12:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-11-03T15:30:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Business ID is required"))
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthenticated."))
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="You do not have permission to perform this action."))
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Business not found",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="No business found with this id"))
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The id field is required. (and 3 more errors)"),
+     *             @OA\Property(property="errors", type="object",
+     *                 @OA\Property(property="id", type="array", @OA\Items(type="string", example="The business ID field is required.")),
+     *                 @OA\Property(property="name", type="array", @OA\Items(type="string", example="The name field may not be greater than 255 characters.")),
+     *                 @OA\Property(property="email", type="array", @OA\Items(type="string", example="The email has already been taken.")),
+     *                 @OA\Property(property="web_page", type="array", @OA\Items(type="string", example="The web page must be a valid URL.")),
+     *                 @OA\Property(property="lat", type="array", @OA\Items(type="string", example="The latitude must be a number.")),
+     *                 @OA\Property(property="long", type="array", @OA\Items(type="string", example="The longitude must be a number.")),
+     *                 @OA\Property(property="country", type="array", @OA\Items(type="string", example="The country field is required.")),
+     *                 @OA\Property(property="city", type="array", @OA\Items(type="string", example="The city field is required.")),
+     *                 @OA\Property(property="address_line_1", type="array", @OA\Items(type="string", example="The address line 1 field is required.")),
+     *                 @OA\Property(property="images", type="array", @OA\Items(type="string", example="The images field must be an array.")),
+     *                 @OA\Property(property="images.0", type="array", @OA\Items(type="string", example="Each image must be an image file (jpg, jpeg, png, gif, webp)."))
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="An error occurred while updating the business."))
+     *     )
+     * )
+     */
 
-/**
- * @OA\Put(
- *     path="/v1.0/businesses",
- *     operationId="updateBusiness",
- *     tags={"business_management"},
- *     summary="Update an existing business (role: Super Admin only)",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             @OA\Property(
- *                 property="user",
- *                 type="object",
- *                 required={"id", "first_name", "last_Name", "email"},
- *                 @OA\Property(property="id", type="integer", example=5, description="User ID (must exist in users table)"),
- *                 @OA\Property(property="first_name", type="string", example="John", description="User first name"),
- *                 @OA\Property(property="last_Name", type="string", example="Doe", description="User last name"),
- *                 @OA\Property(property="email", type="string", example="admin@yopmail.com", description="User email"),
- *                 @OA\Property(property="password", type="string", example="secret123", description="Optional user password (min 6 chars)")
- *             ),
- *             @OA\Property(
- *                 property="business",
- *                 type="object",
- *                 required={"id", "name", "country", "city", "address_line_1"},
- *                 @OA\Property(property="id", type="integer", example=1, description="Business ID (must exist in businesses table)"),
- *                 @OA\Property(property="name", type="string", example="Acme Corporation", description="Business name"),
- *                 @OA\Property(property="about", type="string", example="We provide tech solutions worldwide.", description="About the business"),
- *                 @OA\Property(property="web_page", type="string", example="https://acme.com", description="Website URL"),
- *                 @OA\Property(property="pin_code", type="string", example="1207", description="Optional pin code"),
- *                 @OA\Property(property="phone", type="string", example="+8801765432109", description="Business phone number"),
- *                 @OA\Property(property="email", type="string", example="contact@acme.com", description="Business email"),
- *                 @OA\Property(property="additional_information", type="string", example="24/7 support available", description="Additional info"),
- *                 @OA\Property(property="lat", type="string", example="23.7808875", description="Latitude"),
- *                 @OA\Property(property="long", type="string", example="90.2792371", description="Longitude"),
- *                 @OA\Property(property="currency", type="string", example="BDT", description="Currency code"),
- *                 @OA\Property(property="country", type="string", example="Bangladesh", description="Country name"),
- *                 @OA\Property(property="city", type="string", example="Dhaka", description="City name"),
- *                 @OA\Property(property="postcode", type="string", example="1207", description="Postal code"),
- *                 @OA\Property(property="address_line_1", type="string", example="123 Business Street", description="Primary address line"),
- *                 @OA\Property(property="address_line_2", type="string", example="2nd Floor, Suite 5", description="Secondary address line"),
- *                 @OA\Property(property="logo", type="string", example="https://cdn.acme.com/logo.png", description="Logo URL"),
- *                 @OA\Property(property="image", type="string", example="https://cdn.acme.com/cover.jpg", description="Image URL"),
- *                 @OA\Property(property="background_image", type="string", example="https://cdn.acme.com/bg.jpg", description="Background image URL"),
- *                 @OA\Property(property="theme", type="string", example="dark", description="Business theme"),
- *                 @OA\Property(
- *                     property="images",
- *                     type="array",
- *                     description="Optional image list",
- *                     @OA\Items(type="string", example="https://cdn.acme.com/gallery/img1.jpg")
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Business updated successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Business updated successfully"),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="name", type="string", example="Acme Corporation"),
- *                 @OA\Property(property="email", type="string", example="contact@acme.com"),
- *                 @OA\Property(property="phone", type="string", example="+8801765432109"),
- *                 @OA\Property(property="country", type="string", example="Bangladesh"),
- *                 @OA\Property(property="city", type="string", example="Dhaka"),
- *                 @OA\Property(property="status", type="string", example="active"),
- *                 @OA\Property(property="created_at", type="string", format="date-time", example="2025-09-22T12:00:00Z"),
- *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2025-09-22T12:00:00Z")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Bad Request",
- *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Invalid request."))
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthenticated",
- *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthenticated."))
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Forbidden",
- *         @OA\JsonContent(@OA\Property(property="message", type="string", example="You do not have permission to perform this action."))
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The name field is required."),
- *             @OA\Property(property="errors", type="object",
- *                 @OA\Property(property="user.id", type="array", @OA\Items(type="string", example="The user ID field is required.")),
- *                 @OA\Property(property="user.first_name", type="array", @OA\Items(type="string", example="The user.first name field is required.")),
- *                 @OA\Property(property="user.last_Name", type="array", @OA\Items(type="string", example="The last name field is required.")),
- *                 @OA\Property(property="user.email", type="array", @OA\Items(type="string", example="The email field is required.")),
- *                 @OA\Property(property="business.id", type="array", @OA\Items(type="string", example="The business ID field is required.")),
- *                 @OA\Property(property="business.name", type="array", @OA\Items(type="string", example="The name field is required.")),
- *                 @OA\Property(property="business.country", type="array", @OA\Items(type="string", example="The country field is required.")),
- *                 @OA\Property(property="business.city", type="array", @OA\Items(type="string", example="The city field is required.")),
- *                 @OA\Property(property="business.address_line_1", type="array", @OA\Items(type="string", example="The address line 1 field is required."))
- *             )
- *         )
- *     )
- * )
- */
 
-
- public function businessOwnerCheck($business_id)
+    public function businessOwnerCheck($business_id)
     {
 
         $business = Business::where('id', $business_id)
             ->when(
-                 !request()->user()->hasRole('superadmin'),
+                !request()->user()->hasRole('superadmin'),
                 function ($query) {
                     $query->where(function ($query) {
                         $query
 
-                            ->where('owner_id', auth()->user()->id)
-
-                        ;
+                            ->where('owner_id', auth()->user()->id);
                     });
                 },
             )
@@ -295,83 +335,105 @@ class BusinessController extends Controller
 
 
 
-   public function updateBusiness(BusinessUpdateRequest $request)
+    public function updateBusiness(BusinessUpdateRequest $request)
     {
-
         DB::beginTransaction();
         try {
-
-
             $request_data = $request->validated();
 
-            $business = $this->businessOwnerCheck($request_data['business']["id"]);
-
-
-
-            //    user email check
-            $userPrev = User::where([
-                "id" => $request_data["user"]["id"]
-            ])->first();
-
-            if (!$userPrev) {
-                throw new Exception("no user found with this id", 404);
+            // Validate business ID exists
+            if (empty($request_data['id'])) {
+                throw new Exception("Business ID is required", 400);
             }
 
+            $business = $this->businessOwnerCheck($request_data["id"]);
+            $folder_path = "business_1/business_{$business->id}";
 
-
-            if (!empty($request_data['user']['password'])) {
-                $request_data['user']['password'] = Hash::make($request_data['user']['password']);
+            // ========================
+            // HANDLE LOGO
+            // ========================
+            if ($request->hasFile('logo')) {
+                $logo_filename = $this->putSingleFile(
+                    $request->file('logo'),
+                    $folder_path,
+                    $business->getRawOriginal('logo')
+                );
+                $request_data['logo'] = $logo_filename;
+            } elseif ($request->filled('logo') && is_string($request->input('logo'))) {
+                $request_data['logo'] = basename($request->input('logo'));
             } else {
-                unset($request_data['user']['password']);
+                // Remove from update data if not provided (keep existing)
+                unset($request_data['logo']);
             }
 
-
-            $request_data['user']['is_active'] = true;
-            $request_data['user']['remember_token'] = Str::random(10);
-            $request_data['user']['address_line_1'] = $request_data['business']['address_line_1'];
-            $request_data['user']['address_line_2'] = $request_data['business']['address_line_2'];
-            $request_data['user']['country'] = $request_data['business']['country'];
-            $request_data['user']['city'] = $request_data['business']['city'];
-            $request_data['user']['postcode'] = $request_data['business']['postcode'];
-            $request_data['user']['latitude'] = $request_data['business']['latitude']??"";
-            $request_data['user']['longitude'] = $request_data['business']['longitude']??"";
-
-
-            $user = User::where([
-                "id" => $request_data['user']["id"]
-            ])
-            ->first();
-
-               if (!$user) {
-                throw new Exception("something went wrong updating user.", 500);
+            // ========================
+            // HANDLE IMAGE
+            // ========================
+            if ($request->hasFile('image')) {
+                $imageFilename = $this->putSingleFile(
+                    $request->file('image'),
+                    $folder_path,
+                    $business->getRawOriginal('image')
+                );
+                $request_data['image'] = $imageFilename;
+            } elseif ($request->filled('image') && is_string($request->input('image'))) {
+                $request_data['image'] = basename($request->input('image'));
+            } else {
+                unset($request_data['image']);
             }
 
-            $user->fill($request_data['user'] );
-            $user->save();
+            // ========================
+            // HANDLE BACKGROUND IMAGE
+            // ========================
+            if ($request->hasFile('background_image')) {
+                $bgFilename = $this->putSingleFile(
+                    $request->file('background_image'),
+                    $folder_path,
+                    $business->getRawOriginal('background_image')
+                );
+                $request_data['background_image'] = $bgFilename;
+            } elseif ($request->filled('background_image') && is_string($request->input('background_image'))) {
+                $request_data['background_image'] = basename($request->input('background_image'));
+            } else {
+                unset($request_data['background_image']);
+            }
 
-            $business->fill($request_data['business']);
+            // ========================
+            // HANDLE IMAGES (MULTIPLE)
+            // ========================
+            if ($request->hasFile('images')) {
+                $images = [];
+                foreach ($request->file('images') as $file) {
+                    $images[] = $this->putSingleFile($file, $folder_path, null);
+                }
+                $request_data['images'] = $images;
+            } elseif ($request->filled('images') && is_array($request->input('images'))) {
+                $images = [];
+                foreach ($request->input('images') as $image) {
+                    if (is_string($image) && $image !== '') {
+                        $images[] = basename($image);
+                    }
+                }
+                $request_data['images'] = $images;
+            } else {
+                unset($request_data['images']);
+            }
 
+            // ========================
+            // UPDATE BUSINESS - Now images won't be overwritten
+            // ========================
+            $business->fill($request_data);
             $business->save();
-
-
-            if (empty($business)) {
-                return response()->json([
-                    "massage" => "something went wrong"
-                ], 500);
-            }
-
-
-
 
             DB::commit();
 
             return response([
-                "user" => $user,
-                "business" => $business
-            ], 201);
+                "success" => true,
+                "message" => "Business updated successfully",
+                "data" => $business
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
-
             throw $e;
         }
     }
@@ -533,13 +595,13 @@ class BusinessController extends Controller
     public function getAllBusinesses(Request $request)
     {
 
-        if(!auth()->user()->hasRole('super_admin')) {
-              return response()->json([
+        if (!auth()->user()->hasRole('super_admin')) {
+            return response()->json([
                 "message" => "You can not perform this action"
-              ], 401);
-            }
+            ], 401);
+        }
 
-         $query = Business::query();
+        $query = Business::query();
 
         $businesses = retrieve_data($query, 'created_at', 'businesses');
 
@@ -588,10 +650,10 @@ class BusinessController extends Controller
     {
         try {
 
-            if(!auth()->user()->hasRole('super_admin')) {
-              return response()->json([
-                "message" => "You can not perform this action"
-              ], 401);
+            if (!auth()->user()->hasRole('super_admin')) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
             }
 
 

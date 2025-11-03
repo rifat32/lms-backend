@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UniqueUserEmail;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BusinessUpdateRequest extends FormRequest
@@ -25,144 +26,112 @@ class BusinessUpdateRequest extends FormRequest
 
     public function rules()
     {
-        $rules = [
-            
-            'user.id' => 'required|numeric|exists:users,id',
-            'user.first_name' => 'required|string|max:255',
-            'user.last_Name' => 'required|string|max:255',
-            'user.email' => 'required|string',
-            'user.password' => 'nullable|string|min:6',
+        return [
+            'id' => ['required', 'integer', 'exists:businesses,id'],
+            'name' => 'nullable|string|max:255', // or 'required' if mandatory
+            'about' => 'nullable|string',
+            'web_page' => 'nullable|url', // Added url validation
+            'pin_code' => 'nullable|string',
+            'phone' => 'nullable|string',
+            'email' => 'nullable|email|unique:businesses,email,' . ($this->id ?? 'NULL') . ',id', // Fixed
+            'additional_information' => 'nullable|string',
+            'lat' => 'nullable|string', // Should be numeric, not string
+            'long' => 'nullable|string', // Should be numeric, not string
+            'currency' => 'nullable|string|max:10',
+            'country' => 'nullable|string',
+            'city' => 'nullable|string',
+            'postcode' => 'nullable|string',
+            'address_line_1' => 'nullable|string',
+            'address_line_2' => 'nullable|string',
+            'theme' => 'nullable|string',
 
-
-            'business.id' => 'required|numeric|exists:businesses,id',
-            'business.name' => 'required|string|max:255',
-            'business.about' => 'nullable|string',
-            'business.web_page' => 'nullable|string',
-            'business.pin_code' => 'nullable|string', // optional, maps to postcode
-            'business.phone' => 'nullable|string',
-            'business.email' => 'nullable|string',
-            'business.additional_information' => 'nullable|string', // extra info, not in migration
-            'business.lat' => 'nullable|string',
-            'business.long' => 'nullable|string',
-            'business.currency' => 'nullable|string',
-            'business.country' => 'required|string',
-            'business.city' => 'required|string',
-            'business.postcode' => 'nullable|string',
-            'business.address_line_1' => 'required|string',
-            'business.address_line_2' => 'nullable|string',
-            'business.logo' => 'nullable|string',
-            'business.image' => 'nullable|string',
-            'business.background_image' => 'nullable|string',
-            'business.theme' => 'nullable|string',
-            'business.images' => 'nullable|array',
-            'business.images.*' => 'nullable|string',
-
+            // Image validations
+            'logo' => [
+                'nullable',
+                // function ($attribute, $value, $fail) {
+                //     if ($value instanceof \Illuminate\Http\UploadedFile) {
+                //         if (!in_array($value->extension(), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                //             $fail('The logo must be an image file (jpg, jpeg, png, gif, webp).');
+                //         }
+                //     } elseif (is_string($value) && !filter_var($value, FILTER_VALIDATE_URL)) {
+                //         $fail('The logo must be a valid URL or file upload.');
+                //     }
+                // }
+            ],
+            'image' => [
+                'nullable',
+                // function ($attribute, $value, $fail) {
+                //     if ($value instanceof \Illuminate\Http\UploadedFile) {
+                //         if (!in_array($value->extension(), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                //             $fail('The image must be an image file (jpg, jpeg, png, gif, webp).');
+                //         }
+                //     }
+                // }
+            ],
+            'background_image' => [
+                'nullable',
+                // function ($attribute, $value, $fail) {
+                //     if ($value instanceof \Illuminate\Http\UploadedFile) {
+                //         if (!in_array($value->extension(), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                //             $fail('The background image must be an image file (jpg, jpeg, png, gif, webp).');
+                //         }
+                //     }
+                // }
+            ],
+            'images' => 'nullable|array',
+            'images.*' => [
+                'nullable',
+                // function ($attribute, $value, $fail) {
+                //     if ($value instanceof \Illuminate\Http\UploadedFile) {
+                //         if (!in_array($value->extension(), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                //             $fail('Each image must be an image file (jpg, jpeg, png, gif, webp).');
+                //         }
+                //     }
+                // }
+            ],
         ];
-
-
-
-        return $rules;
-
-
-
     }
+
 
     public function messages()
     {
         return [
-            'user.id.required' => 'The user ID field is required.',
-            'user.id.numeric' => 'The user ID must be a numeric value.',
-            'user.id.exists' => 'The selected user ID is invalid.',
-
-            'user.first_Name.required' => 'The first name field is required.',
-            'user.first_Name.string' => 'The first name field must be a string.',
-            'user.first_Name.max' => 'The first name field may not be greater than :max characters.',
-
-            'user.title.required' => 'The title field is required.',
-            'user.title.string' => 'The title field must be a string.',
-            'user.title.max' => 'The title field may not be greater than :max characters.',
-
-            'user.last_Name.required' => 'The last name field is required.',
-            'user.last_Name.string' => 'The last name field must be a string.',
-            'user.last_Name.max' => 'The last name field may not be greater than :max characters.',
-
-            'user.email.required' => 'The email field is required.',
-            'user.email.email' => 'The email must be a valid email address.',
-            'user.email.string' => 'The email field must be a string.',
-            'user.email.unique' => 'The email has already been taken.',
-            'user.email.exists' => 'The selected email is invalid.',
-
-            'user.password.confirmed' => 'The password confirmation does not match.',
-            'user.password.string' => 'The password field must be a string.',
-            'user.password.min' => 'The password must be at least :min characters.',
-
-            // 'user.phone.required' => 'The phone field is required.',
-            'user.phone.string' => 'The phone field must be a string.',
-
-            'user.image.nullable' => 'The image field must be nullable.',
-            'user.gender.in' => 'The gender field must be in "male","female","other".',
-
-            'business.id.required' => 'The business ID field is required.',
-            'business.id.numeric' => 'The business ID must be a numeric value.',
-            'business.id.exists' => 'The selected business ID is invalid.',
-
-            'business.name.required' => 'The name field is required.',
-            'business.name.string' => 'The name field must be a string.',
-            'business.name.max' => 'The name field may not be greater than :max characters.',
-
-            'business.about.string' => 'The about field must be a string.',
-            'business.web_page.string' => 'The web page field must be a string.',
-            'business.identifier_prefix.string' => 'The identifier prefix field must be a string.',
-
-            'business.delete_read_notifications_after_30_days.required' => 'The delete_read_notifications_after_30_days field must be a required.',
-
-            'business.business_start_day.required' => 'The business_start_day field must be a required.',
-
-            'business.pin_code.string' => 'The pin code field must be a string.',
-
-            'business.phone.string' => 'The phone field must be a string.',
-            // 'business.email.required' => 'The email field is required.',
-            'business.email.email' => 'The email must be a valid email address.',
-            'business.email.string' => 'The email field must be a string.',
-            'business.email.unique' => 'The email has already been taken.',
-            'business.email.exists' => 'The selected email is invalid.',
-            'business.additional_information.string' => 'The additional information field must be a string.',
-
-            'business.lat.required' => 'The latitude field is required.',
-            'business.lat.string' => 'The latitude field must be a string.',
-
-
-            'business.long.required' => 'The longitude field is required.',
-            'business.long.string' => 'The longitude field must be a string.',
-
-            'business.country.required' => 'The country field is required.',
-            'business.country.string' => 'The country field must be a string.',
-
-            'business.city.required' => 'The city field is required.',
-            'business.city.string' => 'The city field must be a string.',
-
-            'business.currency.required' => 'The currency field is required.',
-            'business.currency.string' => 'The currency must be a string.',
-
-            'business.postcode.string' => 'The postcode field must be a string.',
-
-            'business.address_line_1.required' => 'The address line 1 field is required.',
-            'business.address_line_1.string' => 'The address line 1 field must be a string.',
-
-            'business.address_line_2.string' => 'The address line 2 field must be a string.',
-
-            'business.logo.string' => 'The logo field must be a string.',
-            'business.image.string' => 'The image field must be a string.',
-
-            'business.images.array' => 'The images field must be an array.',
-            'business.images.*.string' => 'Each image in the images field must be a string.',
-
-
-
-
-
-
+            'id.required' => 'The business ID field is required.',
+            'id.numeric' => 'The business ID must be a numeric value.',
+            'id.exists' => 'The selected business ID is invalid.',
+            'name.required' => 'The name field is required.',
+            'name.string' => 'The name field must be a string.',
+            'name.max' => 'The name field may not be greater than :max characters.',
+            'about.string' => 'The about field must be a string.',
+            'web_page.string' => 'The web page field must be a string.',
+            'identifier_prefix.string' => 'The identifier prefix field must be a string.',
+            'delete_read_notifications_after_30_days.required' => 'The delete_read_notifications_after_30_days field must be a required.',
+            'business_start_day.required' => 'The business_start_day field must be a required.',
+            'pin_code.string' => 'The pin code field must be a string.',
+            'phone.string' => 'The phone field must be a string.',
+            'email.email' => 'The email must be a valid email address.',
+            'email.string' => 'The email field must be a string.',
+            'email.unique' => 'The email has already been taken.',
+            'email.exists' => 'The selected email is invalid.',
+            'additional_information.string' => 'The additional information field must be a string.',
+            'lat.required' => 'The latitude field is required.',
+            'lat.string' => 'The latitude field must be a string.',
+            'long.required' => 'The longitude field is required.',
+            'long.string' => 'The longitude field must be a string.',
+            'country.required' => 'The country field is required.',
+            'country.string' => 'The country field must be a string.',
+            'city.required' => 'The city field is required.',
+            'city.string' => 'The city field must be a string.',
+            'currency.required' => 'The currency field is required.',
+            'currency.string' => 'The currency must be a string.',
+            'postcode.string' => 'The postcode field must be a string.',
+            'address_line_1.required' => 'The address line 1 field is required.',
+            'address_line_1.string' => 'The address line 1 field must be a string.',
+            'address_line_2.string' => 'The address line 2 field must be a string.',
+            'logo.string' => 'The logo field must be a string.',
+            'image.string' => 'The image field must be a string.',
+            'images.array' => 'The images field must be an array.',
+            'images.*.string' => 'Each image in the images field must be a string.',
         ];
     }
-
 }
