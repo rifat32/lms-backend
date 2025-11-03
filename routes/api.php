@@ -261,4 +261,4 @@ Route::get('/v1.0/client/business-settings', [SettingController::class, "getBusi
 
 Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");
 Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
-Route::patch('/forgetpassword/reset/{token}', [AuthController::class, "changePasswordByToken"]);
+Route::patch('/forgetpassword/reset/{token}', [AuthController::class, "changePasswordWithToken"]);

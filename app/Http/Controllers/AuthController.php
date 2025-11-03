@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @OA\Tag(
@@ -36,7 +37,7 @@ class AuthController extends Controller
         $payload = [
             'email' => $email,
             'random' => Str::random(32), // Randomness for uniqueness
-            'expires_at' => now()->addHours(1)->timestamp, // 1 hour expiry
+            'expires_at' => now()->addMinutes(5)->timestamp, // 1 hour expiry
         ];
 
         $encoded = base64_encode(json_encode($payload));
@@ -54,7 +55,9 @@ class AuthController extends Controller
             // Verify signature
             $expectedSignature = hash_hmac('sha256', $encoded, config('app.key'));
             if (!hash_equals($expectedSignature, $signature)) {
-                return null; // Tampered token
+                throw ValidationException::withMessages([
+                    'token' => 'Reset token is invalid or has been tampered with.',
+                ]);
             }
 
             // Decode payload
@@ -62,7 +65,9 @@ class AuthController extends Controller
 
             // Check expiry
             if ($payload['expires_at'] < now()->timestamp) {
-                return null; // Expired
+                throw ValidationException::withMessages([
+                    'token' => 'Reset link has expired. Please request a new one.',
+                ]);
             }
 
             return $payload;
@@ -237,7 +242,7 @@ class AuthController extends Controller
      */
 
 
-    public function changePasswordWithToken(ChangePasswordWithTokenRequest $request)
+    public function changePasswordWithToken(ChangePasswordWithTokenRequest $request, string $token = "")
     {
         $data = $request->validated();
 
@@ -245,7 +250,7 @@ class AuthController extends Controller
             DB::beginTransaction();
 
             // 1. Verify and decode the signed token
-            $payload = $this->verifySignedToken($data['token']);
+            $payload = $this->verifySignedToken($token);
             if (!$payload) {
                 return response()->json([
                     'message' => 'Invalid or expired reset token.'
@@ -266,7 +271,7 @@ class AuthController extends Controller
             }
 
             // 3. Verify the hashed token matches
-            if (!Hash::check($data['token'], $resetRecord->token)) {
+            if (!Hash::check($token, $resetRecord->token)) {
                 return response()->json([
                     'message' => 'Invalid or expired reset token.'
                 ], 400);

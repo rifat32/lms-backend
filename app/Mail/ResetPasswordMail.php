@@ -25,7 +25,7 @@ class ResetPasswordMail extends Mailable
         $this->user = $user;
 
         $front_end_url = env('FRONT_END_URL');
-        $base   = rtrim($front_end_url, '/') . '/auth/change-password';
+        $base   = rtrim($front_end_url, '/') . '/auth/reset-password';
         $params = array_filter([
             'token' => $user->resetPasswordToken ?? null,
             'email' => $user->email ?? null,

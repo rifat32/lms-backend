@@ -38,6 +38,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function getFullNameAttribute(): string
+    {
+        $name = collect([$this->title, $this->first_name, $this->last_name])
+            ->filter()              // drop null/empty parts
+            ->implode(' ');         // "Mr. John Doe"
+
+        return $name !== '' ? $name : ($this->email ?? 'User');
+    }
+
 
     // Single file accessors (your existing code)
     public function getProfilePhotoAttribute($value)

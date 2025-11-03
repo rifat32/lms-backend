@@ -113,7 +113,7 @@
                         <td class="inner">
                             <h1 class="h1">Reset Your Password</h1>
 
-                            <p class="p">Hello {{ $user->name ?? 'User' }},</p>
+                            <p class="p">Hello {{ $user->full_name ?? 'User' }},</p>
 
                             <p class="p">We received a request to reset your password. Click the button below to
                                 set a new one.</p>
