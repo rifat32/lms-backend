@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Payment;
 use App\Utils\BasicUtil;
@@ -23,96 +24,55 @@ class StripePaymentController extends Controller
 {
     use BasicUtil;
 
-    /**
-     * @OA\Post(
-     *     path="/v1.0/payments/intent",
-     *     operationId="createPaymentIntent",
-     *     tags={"Payments"},
-     *     summary="Create a Stripe Payment Intent for a course (role: Student only)",
-     *     description="Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"course_id"},
-     *             @OA\Property(property="course_id", type="integer", example=101, description="The ID of the course being purchased")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Payment intent created successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="clientSecret", type="string", example="pi_3OzFKa2LqWcU...secret_123")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad request",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Invalid request payload.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden - Stripe not enabled or settings missing",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Stripe is not enabled.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Course not found",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Course not found.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The course_id field is required."),
-     *             @OA\Property(property="errors", type="object",
-     *                 @OA\Property(property="course_id", type="array",
-     *                     @OA\Items(type="string", example="The course_id field is required.")
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Internal server error",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="An unexpected error occurred while creating the payment intent.")
-     *         )
-     *     )
-     * )
-     */
-    public function createPaymentIntent(Request $request)
-    {
+   /**
+ * @OA\Post(
+ *     path="/v1.0/payments/intent",
+ *     operationId="createPaymentIntent",
+ *     tags={"Payments"},
+ *     summary="Create a Stripe Payment Intent for one or more courses (role: Student only)",
+ *     description="Creates a Stripe Payment Intent for selected courses. Supports optional coupon codes.",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"course_ids"},
+ *             @OA\Property(property="course_ids", type="array", @OA\Items(type="integer"), example={101,102}),
+ *             @OA\Property(property="coupon_code", type="string", example="SAVE20")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Payment intent created successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="clientSecret", type="string", example="pi_3OzFKa2LqWcU...secret_123"),
+ *             @OA\Property(property="totalAmount", type="number", example=199.99),
+ *             @OA\Property(property="discountAmount", type="number", example=20.00),
+ *             @OA\Property(property="courses", type="array", @OA\Items(type="string"))
+ *         )
+ *     ),
+ *     @OA\Response(response=400, description="Bad request"),
+ *     @OA\Response(response=401, description="Unauthenticated"),
+ *     @OA\Response(response=403, description="Stripe not enabled"),
+ *     @OA\Response(response=404, description="Course not found"),
+ *     @OA\Response(response=422, description="Validation error"),
+ *     @OA\Response(response=500, description="Server error")
+ * )
+ */
 
-        try{
-  DB::beginTransaction();
+   public function createPaymentIntent(Request $request)
+{
+    try {
+        DB::beginTransaction();
 
         if (!auth()->user()->hasAnyRole(['student'])) {
-    return response()->json([
-        "message" => "You can not perform this action"
-    ], 401);
-}
+            return response()->json(["message" => "You cannot perform this action"], 401);
+        }
 
-        // Retrieve multiple courses
-        $course_ids = $request->course_ids; // array of IDs
+        $course_ids = $request->course_ids;
         if (empty($course_ids) || !is_array($course_ids)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No courses selected',
-                'error' => 'No courses selected'
             ], 400);
         }
 
@@ -121,7 +81,7 @@ class StripePaymentController extends Controller
             return response()->json(['error' => 'Courses not found'], 404);
         }
 
-        // Stripe settings
+        // Retrieve Stripe settings
         $stripe_setting = $this->get_business_setting();
         if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
             return response()->json(['error' => 'Stripe not enabled'], 403);
@@ -129,57 +89,74 @@ class StripePaymentController extends Controller
 
         $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
 
-        // -------------------------------
-        // Ensure webhook endpoint exists
-        // -------------------------------
+        // Ensure webhook endpoint exists (optional safety)
         try {
-            $webhookEndpoints = $stripe->webhookEndpoints->all();
-            $existingEndpoint = collect($webhookEndpoints->data)
+            $webhooks = $stripe->webhookEndpoints->all();
+            $exists = collect($webhooks->data)
                 ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
-
-            if (!$existingEndpoint) {
+            if (!$exists) {
                 $stripe->webhookEndpoints->create([
                     'url' => route('stripe.webhook'),
                     'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
                 ]);
             }
         } catch (\Exception $e) {
-            log_message([
-                'level' =>  $e->getMessage(),
-            ], "hook.txt");
+            log_message(['level' =>  $e->getMessage()], "hook.txt");
         }
 
-        // -------------------------------
-        // Calculate total amount
-        // -------------------------------
+        // -------------------------------------
+        // Calculate total and handle coupon
+        // -------------------------------------
         $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
+        $discount_amount = 0;
+        $coupon_code = $request->coupon_code;
 
-        // Prepare metadata with all course IDs and webhook URL
+        if (!empty($coupon_code)) {
+            $coupon = Coupon::where('code', $coupon_code)
+                ->where('is_active', true)
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now())
+                ->first();
+
+            if (!$coupon) {
+                return response()->json(['message' => 'Invalid or expired coupon code'], 422);
+            }
+
+            // Calculate discount based on type (flat or percent)
+            if ($coupon->discount_type === 'percent') {
+                $discount_amount = ($total_amount * $coupon->discount_value) / 100;
+            } else {
+                $discount_amount = $coupon->discount_value;
+            }
+
+            // Prevent over-discount
+            $discount_amount = min($discount_amount, $total_amount);
+            $total_amount -= $discount_amount;
+        }
+
+        // -------------------------------------
+        // Create PaymentIntent
+        // -------------------------------------
         $metadata = [
             'course_ids' => implode(',', $courses->pluck('id')->toArray()),
-            'webhook_url' => route('stripe.webhook'),
             'user_id' => auth()->user()->id,
+            'webhook_url' => route('stripe.webhook'),
+            'coupon_code' => $coupon_code ?? 'none',
         ];
 
-        // -------------------------------
-        // Create PaymentIntent
-        // -------------------------------
         $payment_intent = $stripe->paymentIntents->create([
-            'amount' => $total_amount * 100, // Stripe uses smallest currency unit
+            'amount' => max($total_amount, 0.50) * 100, // in cents
             'currency' => 'usd',
-            'automatic_payment_methods' => [
-                'enabled' => true,
-            ],
+            'automatic_payment_methods' => ['enabled' => true],
             'metadata' => $metadata,
         ]);
 
-        // -------------------------------
-        // Save payment for each course
-        // -------------------------------
+        // -------------------------------------
+        // Save payment records
+        // -------------------------------------
         foreach ($courses as $course) {
-
-            if(!empty($course->enrollment)) {
-              throw new Exception("Course Already Enrolled",409);
+            if (!empty($course->enrollment)) {
+                throw new Exception("Course Already Enrolled", 409);
             }
 
             Payment::create([
@@ -189,6 +166,8 @@ class StripePaymentController extends Controller
                 'method' => 'stripe',
                 'status' => 'pending',
                 'payment_intent_id' => $payment_intent->id,
+                'coupon_code' => $coupon_code,
+                'discount_amount' => $discount_amount / count($courses),
             ]);
 
             $course->update([
@@ -197,24 +176,22 @@ class StripePaymentController extends Controller
             ]);
         }
 
-        // -------------------------------
-        // Return client secret and info
-        // -------------------------------
+        DB::commit();
+
         return response()->json([
             'clientSecret' => $payment_intent->client_secret,
-            'totalAmount' => $total_amount,
+            'totalAmount' => round($total_amount, 2),
+            'discountAmount' => round($discount_amount, 2),
             'courses' => $courses->pluck('title'),
         ]);
-        } catch(Exception $e) {
-
-           return  response()->json([
+    } catch (Exception $e) {
+        DB::rollBack();
+        return response()->json([
             'success' => false,
             'message' => $e->getMessage(),
         ], 500);
-
-        }
-
     }
+}
 
 
     public function createRefund(Request $request)
@@ -271,7 +248,7 @@ class StripePaymentController extends Controller
     }
 
 
-     /**
+    /**
      * @OA\Get(
      *     path="/v1.0/payments",
      *     tags={"Payments"},
@@ -407,11 +384,9 @@ class StripePaymentController extends Controller
             'course:id,title',
             'student:id,first_name,last_name,email'
         ])
-        ->where([
-            "status" => "completed"
-        ])
-        
-        ;
+            ->where([
+                "status" => "completed"
+            ]);
 
         $this->applyFilters($query, $request);
 
@@ -463,32 +438,32 @@ class StripePaymentController extends Controller
      * Get payment summary statistics
      */
     private function getPaymentSummary()
-{
-    $now = now();
+    {
+        $now = now();
 
-    $total_earnings = (float) Payment::where('status', 'completed')->sum('amount');
+        $total_earnings = (float) Payment::where('status', 'completed')->sum('amount');
 
-    $this_month_earnings = (float) Payment::where('status', 'completed')
-        ->whereYear('created_at', $now->year)
-        ->whereMonth('created_at', $now->month)
-        ->sum('amount');
+        $this_month_earnings = (float) Payment::where('status', 'completed')
+            ->whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->sum('amount');
 
-    $this_week_earnings = (float) Payment::where('status', 'completed')
-        ->whereBetween('created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
-        ->sum('amount');
+        $this_week_earnings = (float) Payment::where('status', 'completed')
+            ->whereBetween('created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
+            ->sum('amount');
 
-    $today_earnings = (float) Payment::where('status', 'completed')
-        ->whereDate('created_at', $now->copy()->toDateString())
-        ->sum('amount');
+        $today_earnings = (float) Payment::where('status', 'completed')
+            ->whereDate('created_at', $now->copy()->toDateString())
+            ->sum('amount');
 
-    return [
-        'total_earnings' => $total_earnings,
-        'this_month_earnings' => $this_month_earnings,
-        'this_week_earnings' => $this_week_earnings,
-        'today_earnings' => $today_earnings,
-        'available_balance' => $total_earnings
-    ];
-}
+        return [
+            'total_earnings' => $total_earnings,
+            'this_month_earnings' => $this_month_earnings,
+            'this_week_earnings' => $this_week_earnings,
+            'today_earnings' => $today_earnings,
+            'available_balance' => $total_earnings
+        ];
+    }
 
 
     /**

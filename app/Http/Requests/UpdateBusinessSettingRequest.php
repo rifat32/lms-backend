@@ -33,6 +33,11 @@ class UpdateBusinessSettingRequest extends FormRequest
             'general__warning_color' => 'sometimes|string|nullable',
             'general__success_color' => 'sometimes|string|nullable',
             'general__featured_courses_count' => 'sometimes|integer|min:0',
+            'general__popular_courses_count' => 'sometimes|integer|min:0',
+            
+
+
+
             'general__loading_animation' => 'sometimes|nullable',
 
             // Courses Settings

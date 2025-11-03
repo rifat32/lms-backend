@@ -22,6 +22,7 @@ class BusinessSetting extends Model
         'general__warning_color',
         'general__success_color',
         'general__featured_courses_count',
+        'general__popular_courses_count',
         'general__loading_animation',
 
         // Courses Settings

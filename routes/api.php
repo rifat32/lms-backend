@@ -4,6 +4,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CourseCategoryController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseFaqController;
@@ -227,6 +228,17 @@ Route::middleware('auth:api')->group(function () {
 // routes/api.php
 Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
 
+Route::post('/v1.0/coupons', [CouponController::class, 'createCoupon']);
+Route::put('/v1.0/coupons/{id}', [CouponController::class, 'updateCoupon']);
+Route::get('/v1.0/coupons', [CouponController::class, 'getAllCoupons']);
+Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
+Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
+
+
+
+
+
+
 
 });
 
@@ -244,6 +256,7 @@ Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, '
 
 // Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
 // Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
+
 
  Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
  Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClientUnified']);

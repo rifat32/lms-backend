@@ -32,6 +32,8 @@ class SettingController extends Controller
  *              @OA\Property(property="general__warning_color", type="string"),
  *              @OA\Property(property="general__success_color", type="string"),
  *              @OA\Property(property="general__featured_courses_count", type="integer"),
+ *  *              @OA\Property(property="general__popular_courses_count", type="integer"),
+ * 
  *              @OA\Property(property="general__loading_animation", type="string"),
  *
  *

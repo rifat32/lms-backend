@@ -29,233 +29,226 @@ class CourseController extends Controller
 {
 
 
-/**
- * @OA\Get(
- *     path="/v1.0/client/courses/{id}",
- *     tags={"course_management.course"},
- *     operationId="getCourseByIdUnified",
- *     summary="Get a course by ID (Public or Authenticated)",
- *     description="For guests, shows limited info. For authenticated students enrolled in the course, shows full details.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         required=true,
- *         description="Course ID",
- *         @OA\Schema(type="integer")
- *     ),
- *     @OA\Response(response=200, description="Course retrieved successfully")
- * )
- */
-public function getCourseByIdUnified($id)
-{
-    $user = auth('api')->user();
+    /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses/{id}",
+     *     tags={"course_management.course"},
+     *     operationId="getCourseByIdUnified",
+     *     summary="Get a course by ID (Public or Authenticated)",
+     *     description="For guests, shows limited info. For authenticated students enrolled in the course, shows full details.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Course ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Course retrieved successfully")
+     * )
+     */
+    public function getCourseByIdUnified($id)
+    {
+        $user = auth('api')->user();
 
-    if($user){
-         Auth::login($user);
-    }
+        if ($user) {
+            Auth::login($user);
+        }
 
-    $query = Course::with([
-        'categories',
-        'sections.sectionables.sectionable',
-        'reviews',
-        'enrollment'
-    ])
-    ->where('status', 'published')
-    ->filters();
+        $query = Course::with([
+            'categories',
+            'sections.sectionables.sectionable',
+            'reviews',
+            'enrollment'
+        ])
+            ->where('status', 'published')
+            ->filters();
 
 
-    $course = $query->find($id);
+        $course = $query->find($id);
 
-    if (!$course) {
-        return response()->json(['success' => false, 'message' => 'Course not found'], 404);
-    }
+        if (!$course) {
+            return response()->json(['success' => false, 'message' => 'Course not found'], 404);
+        }
 
-    // For enrolled users, load more details
-    if ($user && $course->enrollment()->where('user_id', $user->id)->exists()) {
-        $course->sections->each(function ($section) {
-            $section->sectionables->each(function ($sectionable, $index) {
+        // For enrolled users, load more details
+        if ($user && $course->enrollment()->where('user_id', $user->id)->exists()) {
+            $course->sections->each(function ($section) {
+                $section->sectionables->each(function ($sectionable, $index) {
 
-                if ($sectionable->sectionable_type === Lesson::class) {
-                    $sectionable->sectionable->load('lesson_progress');
-                }
-                if ($sectionable->sectionable_type === Quiz::class) {
-                    $sectionable->sectionable->load(['questions.options',"quiz_attempts"]);
-                }
+                    if ($sectionable->sectionable_type === Lesson::class) {
+                        $sectionable->sectionable->load('lesson_progress');
+                    }
+                    if ($sectionable->sectionable_type === Quiz::class) {
+                        $sectionable->sectionable->load(['questions.options', "quiz_attempts"]);
+                    }
+                });
             });
-        });
-    }
+        }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Course retrieved successfully',
-        'data' => $course
-    ], 200);
-}
-
-
-/**
- * @OA\Get(
- *     path="/v1.0/client/courses",
- *     tags={"course_management.course"},
- *     operationId="getCoursesClientUnified",
- *     summary="Get all courses (Public and Authenticated users)",
- *     description="Retrieve all courses. If user is logged in, filter by enrolled status or show personalized data.",
- *     security={{"bearerAuth":{}}},
- *     @OA\Parameter(
- *         name="searchKey",
- *         in="query",
- *         required=false,
- *         description="Search by course title (case-insensitive, partial match)",
- *         @OA\Schema(type="string", example="Laravel")
- *     ),
- *     @OA\Parameter(
- *         name="status",
- *         in="query",
- *         required=false,
- *         description="Filter by course status. Allowed values: draft, published, archived.",
- *         @OA\Schema(type="string", example="published")
- *     ),
- *     @OA\Parameter(
- *         name="is_enrolled",
- *         in="query",
- *         required=false,
- *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *      @OA\Parameter(
- *         name="is_featured",
- *         in="query",
- *         required=false,
- *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- * 
- *     @OA\Parameter(
- *         name="category_ids",
- *         in="query",
- *         required=false,
- *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
- *         @OA\Schema(type="string", example="2,5,8")
- *     ),
- *     @OA\Parameter(
- *         name="level",
- *         in="query",
- *         required=false,
- *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
- *         @OA\Schema(type="string", example="beginner")
- *     ),
- *     @OA\Parameter(
- *         name="price_range",
- *         in="query",
- *         required=false,
- *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
- *         @OA\Schema(type="string", example="100,500")
- *     ),
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         required=false,
- *         description="Page number for pagination.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="per_page",
- *         in="query",
- *         required=false,
- *         description="Number of results per page.",
- *         @OA\Schema(type="integer", example=10)
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="List of courses"
- *     )
- * )
- */
-public function getCoursesClientUnified(Request $request)
-{
-
-
-    $user = auth('api')->user();
-
-         if($user){
-         Auth::login($user);
+        return response()->json([
+            'success' => true,
+            'message' => 'Course retrieved successfully',
+            'data' => $course
+        ], 200);
     }
 
 
-// Usage for featured courses limit
-$business_settings = BusinessSetting::first();
-$featured_limit = $business_settings?->general__featured_courses_count;
+    /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses",
+     *     tags={"course_management.course"},
+     *     operationId="getCoursesClientUnified",
+     *     summary="Get all courses (Public and Authenticated users)",
+     *     description="Retrieve all courses. If user is logged in, filter by enrolled status or show personalized data.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by course title (case-insensitive, partial match)",
+     *         @OA\Schema(type="string", example="Laravel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course status. Allowed values: draft, published, archived.",
+     *         @OA\Schema(type="string", example="published")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *      @OA\Parameter(
+     *         name="is_featured",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *    *      @OA\Parameter(
+     *         name="is_popular",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     * 
+     *     @OA\Parameter(
+     *         name="category_ids",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+     *         @OA\Schema(type="string", example="2,5,8")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+     *         @OA\Schema(type="string", example="beginner")
+     *     ),
+     *     @OA\Parameter(
+     *         name="price_range",
+     *         in="query",
+     *         required=false,
+     *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+     *         @OA\Schema(type="string", example="100,500")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of results per page.",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="List of courses"
+     *     )
+     * )
+     */
+    public function getCoursesClientUnified(Request $request)
+    {
 
 
-  $query = Course::with([
-        'categories:id,name',
-        'sections.sectionables.sectionable:id,title',
-        'reviews',
-        "enrollment"
-    ])
-    ->where('status', 'published')
-    ->when(request()->boolean('is_featured') && $featured_limit, fn($q) => $q->limit($featured_limit))
-    ->filters();
+        $user = auth('api')->user();
+
+        if ($user) {
+            Auth::login($user);
+        }
+
+        // Usage for featured courses limit
+       
+
+        $query = Course::with([
+            'categories:id,name',
+            'sections.sectionables.sectionable:id,title',
+            'reviews',
+            "enrollment"
+        ])
+            ->where('status', 'published')
+            
+            ->filters();
+
+        $courses = retrieve_data($query, 'created_at', 'courses');
+
+        $summary = [];
 
 
-    $courses = retrieve_data($query, 'created_at', 'courses');
- 
+        if (auth()->user()) {
+            $summary["enrolled_courses_count"] = Course::whereHas("enrollment")
+                ->count();
 
-    $summary = [];
+            $summary["completed_courses_count"] = Course::whereHas("enrollment", function ($query) {
+                $query->where("enrollments.progress", 100);
+            })
+                ->count();
 
+            $lesson_progress_seconds = LessonProgress::where(
+                [
+                    "user_id" => auth()->user()->id,
+                ]
+            )
+                ->sum("total_time_spent");
 
+            // Get all quizzes that the user has attempted
+            $quizzes = Quiz::whereHas('quiz_attempts')
+                ->get(['id', 'time_limit', 'time_unit']);
 
-    if(auth()->user()) {
-    $summary["enrolled_courses_count"] = Course::whereHas("enrollment")
-    ->count();
+            // Convert quiz time limits to seconds
+            $quiz_seconds = $quizzes->sum(function ($quiz) {
+                if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
+                    return $quiz->time_limit * 3600; // 1 hour = 3600 seconds
+                } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
+                    return $quiz->time_limit * 60;   // 1 minute = 60 seconds
+                }
+                return 0;
+            });
 
- $summary["completed_courses_count"] = Course::whereHas("enrollment", function($query) {
-        $query->where("enrollments.progress",100);
-    })
-    ->count();
+            $total_learning_seconds = $lesson_progress_seconds + $quiz_seconds;
+            $summary["total_learning_seconds"] = $total_learning_seconds;
+        }
 
-
-    $lesson_progress_seconds = LessonProgress::where(
-        [
-            "user_id" => auth()->user()->id,
-        ]
-    )
-    ->sum("total_time_spent");
-
-
-
-
-// Get all quizzes that the user has attempted
-$quizzes = Quiz::whereHas('quiz_attempts')
-    ->get(['id', 'time_limit', 'time_unit']);
-
-// Convert quiz time limits to seconds
-$quiz_seconds = $quizzes->sum(function ($quiz) {
-    if ($quiz->time_unit === Quiz::TIME_UNITS['HOURS']) {
-        return $quiz->time_limit * 3600; // 1 hour = 3600 seconds
-    } elseif ($quiz->time_unit === Quiz::TIME_UNITS['MINUTES']) {
-        return $quiz->time_limit * 60;   // 1 minute = 60 seconds
+        return response()->json([
+            'success' => true,
+            'message' => 'Courses retrieved successfully',
+            'meta' => $courses['meta'],
+            'data' => $courses['data'],
+            'summary' => $summary
+        ], 200);
     }
-    return 0;
-});
-
-$total_learning_seconds = $lesson_progress_seconds + $quiz_seconds;
-
-$summary["total_learning_seconds"] = $total_learning_seconds;
-
-
-
-    }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Courses retrieved successfully',
-        'meta' => $courses['meta'],
-        'data' => $courses['data'],
-        'summary' => $summary
-    ], 200);
-}
 
 
 
@@ -272,71 +265,71 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *     operationId="getCoursesClient",
 
      *  *     summary="Get all courses (Public - No authentication required) (role: Student only)",
- *     description="Retrieve all courses for non-logged in users. Never use for logged in users.",
+     *     description="Retrieve all courses for non-logged in users. Never use for logged in users.",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
- *         name="searchKey",
- *         in="query",
- *         required=false,
- *         description="Search by course title (case-insensitive, partial match)",
- *         @OA\Schema(type="string", example="Laravel")
- *     ),
- *     @OA\Parameter(
- *         name="status",
- *         in="query",
- *         required=false,
- *         description="Filter by course status. Allowed values: draft, published, archived.",
- *         @OA\Schema(type="string", example="published")
- *     ),
- *     @OA\Parameter(
- *         name="is_enrolled",
- *         in="query",
- *         required=false,
- *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *  *      @OA\Parameter(
- *         name="is_featured",
- *         in="query",
- *         required=false,
- *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="category_ids",
- *         in="query",
- *         required=false,
- *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
- *         @OA\Schema(type="string", example="2,5,8")
- *     ),
- *     @OA\Parameter(
- *         name="level",
- *         in="query",
- *         required=false,
- *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
- *         @OA\Schema(type="string", example="beginner")
- *     ),
- *     @OA\Parameter(
- *         name="price_range",
- *         in="query",
- *         required=false,
- *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
- *         @OA\Schema(type="string", example="100,500")
- *     ),
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         required=false,
- *         description="Page number for pagination.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="per_page",
- *         in="query",
- *         required=false,
- *         description="Number of results per page.",
- *         @OA\Schema(type="integer", example=10)
- *     ),
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by course title (case-insensitive, partial match)",
+     *         @OA\Schema(type="string", example="Laravel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course status. Allowed values: draft, published, archived.",
+     *         @OA\Schema(type="string", example="published")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *  *      @OA\Parameter(
+     *         name="is_featured",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="category_ids",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+     *         @OA\Schema(type="string", example="2,5,8")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+     *         @OA\Schema(type="string", example="beginner")
+     *     ),
+     *     @OA\Parameter(
+     *         name="price_range",
+     *         in="query",
+     *         required=false,
+     *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+     *         @OA\Schema(type="string", example="100,500")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of results per page.",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -410,7 +403,7 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
         //
         $courses = retrieve_data($query, 'created_at', 'courses');
 
-      
+
 
         // SEND RESPONSE
         return response()->json([
@@ -428,7 +421,7 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *     tags={"Trash"},
      *     operationId="getCourseByIdClient",
      *  *     summary="Get a single course by ID (Public or Non-enrolled users) (role: Student only)",
- *     description="Retrieve a course by its ID for non-logged in users OR for logged-in users viewing a non-enrolled course",
+     *     description="Retrieve a course by its ID for non-logged in users OR for logged-in users viewing a non-enrolled course",
 
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -541,8 +534,8 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *     tags={"Trash"},
      *     operationId="getCourseByIdSecureClient",
      *  *     summary="Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
- *     description="Retrieve detailed course information including lessons, quizzes, and progress.
- *     Authenticated and enrolled users only",
+     *     description="Retrieve detailed course information including lessons, quizzes, and progress.
+     *     Authenticated and enrolled users only",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -704,12 +697,12 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *         @OA\Schema(type="string", default="", example="")
      *     ),
      *  *      @OA\Parameter(
- *         name="is_featured",
- *         in="query",
- *         required=false,
- *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
+     *         name="is_featured",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
      *     @OA\Parameter(
      *         name="searchKey",
      *         in="query",
@@ -822,68 +815,68 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
      *     summary="Get all courses (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
- *         name="searchKey",
- *         in="query",
- *         required=false,
- *         description="Search by course title (case-insensitive, partial match)",
- *         @OA\Schema(type="string", example="Laravel")
- *     ),
- *     @OA\Parameter(
- *         name="status",
- *         in="query",
- *         required=false,
- *         description="Filter by course status. Allowed values: draft, published, archived.",
- *         @OA\Schema(type="string", example="published")
- *     ),
- *     @OA\Parameter(
- *         name="is_enrolled",
- *         in="query",
- *         required=false,
- *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *  *      @OA\Parameter(
- *         name="is_featured",
- *         in="query",
- *         required=false,
- *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="category_ids",
- *         in="query",
- *         required=false,
- *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
- *         @OA\Schema(type="string", example="2,5,8")
- *     ),
- *     @OA\Parameter(
- *         name="level",
- *         in="query",
- *         required=false,
- *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
- *         @OA\Schema(type="string", example="beginner")
- *     ),
- *     @OA\Parameter(
- *         name="price_range",
- *         in="query",
- *         required=false,
- *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
- *         @OA\Schema(type="string", example="100,500")
- *     ),
- *     @OA\Parameter(
- *         name="page",
- *         in="query",
- *         required=false,
- *         description="Page number for pagination.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\Parameter(
- *         name="per_page",
- *         in="query",
- *         required=false,
- *         description="Number of results per page.",
- *         @OA\Schema(type="integer", example=10)
- *     ),
+     *         name="searchKey",
+     *         in="query",
+     *         required=false,
+     *         description="Search by course title (case-insensitive, partial match)",
+     *         @OA\Schema(type="string", example="Laravel")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course status. Allowed values: draft, published, archived.",
+     *         @OA\Schema(type="string", example="published")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_enrolled",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by enrollment status: 1 for enrolled, 0 for not enrolled.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *  *      @OA\Parameter(
+     *         name="is_featured",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by is featured: 1 for featured, 0 for not non featured.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="category_ids",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by one or more category IDs (comma-separated). Example: 1,3,5",
+     *         @OA\Schema(type="string", example="2,5,8")
+     *     ),
+     *     @OA\Parameter(
+     *         name="level",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by course level (e.g., beginner, intermediate, advanced).",
+     *         @OA\Schema(type="string", example="beginner")
+     *     ),
+     *     @OA\Parameter(
+     *         name="price_range",
+     *         in="query",
+     *         required=false,
+     *         description="Filter courses by price range. Comma-separated values where the first value is min and the second is max. Example: 100,500 — start or end can be empty like ',500' or '100,'.",
+     *         @OA\Schema(type="string", example="100,500")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Page number for pagination.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Number of results per page.",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -941,22 +934,22 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
             ], 401);
         }
 
-     $query = Course::with([
-        'categories:id,name',
-    ])
-    ->withCount([
-        'enrollments as enrollments_count',
-        'enrollments as students_count' => function ($q) {
-            $q->select(DB::raw('COUNT(DISTINCT user_id)'));
-        },
-    ])
-    ->withAvg('enrollments as completion_rate', 'progress')
-    ->withSum([
-        'payments as revenue' => function ($q) {
-            $q->where('status', 'completed'); // include only successful payments
-        }
-    ], 'amount')
-    ->filters();
+        $query = Course::with([
+            'categories:id,name',
+        ])
+            ->withCount([
+                'enrollments as enrollments_count',
+                'enrollments as students_count' => function ($q) {
+                    $q->select(DB::raw('COUNT(DISTINCT user_id)'));
+                },
+            ])
+            ->withAvg('enrollments as completion_rate', 'progress')
+            ->withSum([
+                'payments as revenue' => function ($q) {
+                    $q->where('status', 'completed'); // include only successful payments
+                }
+            ], 'amount')
+            ->filters();
 
 
 
@@ -965,7 +958,7 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
         // Remove pivot from all categories
         $courses['data'] = $courses['data']->each(function ($course) {
             $course->completion_rate = round($course->completion_rate ?? 0, 2);
-    $course->revenue = $course->revenue ?? 0;
+            $course->revenue = $course->revenue ?? 0;
             return $course->categories->makeHidden('pivot');
         });
 
@@ -974,12 +967,12 @@ $summary["total_learning_seconds"] = $total_learning_seconds;
 
         $summary["total_courses_count"] = Course::get()->count();
 
-     // Loop through statuses and count each
-foreach (Course::STATUS as $status_key => $status_value) {
-    $summary["{$status_value}_count"] = Course::where('status', $status_value)->count();
-}
+        // Loop through statuses and count each
+        foreach (Course::STATUS as $status_key => $status_value) {
+            $summary["{$status_value}_count"] = Course::where('status', $status_value)->count();
+        }
 
- $summary["total_enrollments_count"] = Enrollment::get()->count();
+        $summary["total_enrollments_count"] = Enrollment::get()->count();
 
 
         // SEND RESPONSE
@@ -1430,7 +1423,7 @@ foreach (Course::STATUS as $status_key => $status_value) {
             // FIND COURSE
             $course = Course::findOrFail($request_payload['id']);
 
-              // ========================
+            // ========================
             // UPDATE COURSE
             // ========================
             $request_payload['cover'] = $request_payload['cover'] ?? null;
@@ -1497,109 +1490,108 @@ foreach (Course::STATUS as $status_key => $status_value) {
         }
     }
 
-/**
- * @OA\Put(
- *     path="/v1.0/courses/status",
- *     tags={"course_management.course"},
- *     operationId="updateCourseStatus",
- *     summary="Update only the status of a course (role: Admin/Lecturer only)",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"id","status"},
- *             @OA\Property(property="id", type="integer", example=10),
- *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="published"),
- *             @OA\Property(property="status_start_date", type="string", format="date", example="2025-11-01"),
- *             @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31")
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Course status updated successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Course status updated successfully"),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=10),
- *                 @OA\Property(property="status", type="string", example="published"),
- *                 @OA\Property(property="status_start_date", type="string", example="2025-11-01"),
- *                 @OA\Property(property="status_end_date", type="string", example="2025-12-31")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Course not found",
- *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Course not found"))
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthorized",
- *         @OA\JsonContent(@OA\Property(property="message", type="string", example="You can not perform this action"))
- *     ),
- *     @OA\Response(
- *         response=422,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="The status field is required.")
- *         )
- *     )
- * )
- */
-public function updateCourseStatus(Request $request)
-{
-    try {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json(["message" => "You can not perform this action"], 401);
-        }
-
-        $validated = $request->validate([
-            'id' => 'required|integer|exists:courses,id',
-            'status' => 'required|string|in:draft,published,archived',
-            'status_start_date' => 'nullable|date',
-            'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
-        ]);
-
-        $course = Course::findOrFail($validated['id']);
-
- // Business rule: cannot publish a course with no lessons
-        if ($validated['status'] === 'published') {
-            $has_lessons = $course->sections->flatMap(function ($section) {
-                return $section->sectionables->filter(function ($sectionable) {
-                    return $sectionable->sectionable_type === Lesson::class;
-                });
-            })->count() > 0;
-
-            if (!$has_lessons) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot publish a course without lessons'
-                ], 422);
+    /**
+     * @OA\Put(
+     *     path="/v1.0/courses/status",
+     *     tags={"course_management.course"},
+     *     operationId="updateCourseStatus",
+     *     summary="Update only the status of a course (role: Admin/Lecturer only)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id","status"},
+     *             @OA\Property(property="id", type="integer", example=10),
+     *             @OA\Property(property="status", type="string", enum={"draft","published","archived"}, example="published"),
+     *             @OA\Property(property="status_start_date", type="string", format="date", example="2025-11-01"),
+     *             @OA\Property(property="status_end_date", type="string", format="date", example="2025-12-31")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course status updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course status updated successfully"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=10),
+     *                 @OA\Property(property="status", type="string", example="published"),
+     *                 @OA\Property(property="status_start_date", type="string", example="2025-11-01"),
+     *                 @OA\Property(property="status_end_date", type="string", example="2025-12-31")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="Course not found"))
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(@OA\Property(property="message", type="string", example="You can not perform this action"))
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The status field is required.")
+     *         )
+     *     )
+     * )
+     */
+    public function updateCourseStatus(Request $request)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json(["message" => "You can not perform this action"], 401);
             }
+
+            $validated = $request->validate([
+                'id' => 'required|integer|exists:courses,id',
+                'status' => 'required|string|in:draft,published,archived',
+                'status_start_date' => 'nullable|date',
+                'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
+            ]);
+
+            $course = Course::findOrFail($validated['id']);
+
+            // Business rule: cannot publish a course with no lessons
+            if ($validated['status'] === 'published') {
+                $has_lessons = $course->sections->flatMap(function ($section) {
+                    return $section->sectionables->filter(function ($sectionable) {
+                        return $sectionable->sectionable_type === Lesson::class;
+                    });
+                })->count() > 0;
+
+                if (!$has_lessons) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot publish a course without lessons'
+                    ], 422);
+                }
+            }
+
+
+            $course->update([
+                'status' => $validated['status'],
+                'status_start_date' => $validated['status_start_date'] ?? null,
+                'status_end_date' => $validated['status_end_date'] ?? null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course status updated successfully',
+                'data' => $course->only(['id', 'status', 'status_start_date', 'status_end_date']),
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error',
+                'data' => ['error' => $th->getMessage()],
+            ], 500);
         }
-        
-
-        $course->update([
-            'status' => $validated['status'],
-            'status_start_date' => $validated['status_start_date'] ?? null,
-            'status_end_date' => $validated['status_end_date'] ?? null,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Course status updated successfully',
-            'data' => $course->only(['id', 'status', 'status_start_date', 'status_end_date']),
-        ], 200);
-
-    } catch (\Throwable $th) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Internal server error',
-            'data' => ['error' => $th->getMessage()],
-        ], 500);
     }
-}
 
 
     /**
@@ -1743,7 +1735,7 @@ public function updateCourseStatus(Request $request)
             // FIND BY ID
             $course = Course::findOrFail($request_payload['id']);
 
-              // SEND RESPONSE
+            // SEND RESPONSE
             if (empty($course)) {
                 return response()->json([
                     'success' => false,
@@ -1751,7 +1743,7 @@ public function updateCourseStatus(Request $request)
                 ], 404);
             }
 
-          // ========================
+            // ========================
             // UPDATE COURSE
             // ========================
             $request_payload['cover'] = $request_payload['cover'] ?? null;

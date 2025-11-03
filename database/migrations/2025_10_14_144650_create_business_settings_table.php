@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('general__danger_color')->default('rgba(255,57,69,1)');
             $table->string('general__warning_color')->default('rgba(255,168,0,1)');
             $table->string('general__success_color')->default('rgba(97,204,47,1)');
-            $table->integer('general__featured_courses_count')->default(1);
+            $table->integer('general__featured_courses_count')->default(10);
+            $table->integer('general__popular_courses_count')->default(10);
+
+
             $table->string('general__loading_animation')->nullable();
 
             // Courses Settings
@@ -82,6 +85,7 @@ return new class extends Migration
                 'general__warning_color',
                 'general__success_color',
                 'general__featured_courses_count',
+                "general__popular_courses_count",
                 'general__loading_animation',
                 'courses__import_demo_courses',
                 'courses__courses_page',

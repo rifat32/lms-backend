@@ -152,6 +152,7 @@ class Course extends Model
     ->when(request()->filled('searchKey'), function ($q) {
         $q->where('title', 'like', '%' . request('searchKey') . '%');
     })
+  
 
     ->when(request()->filled('is_enrolled'), function ($q) {
 
@@ -172,14 +173,40 @@ class Course extends Model
         }
 
     })
-    ->when(request()->filled('is_featured'), function ($q) {
-       $q->when(request()->boolean('is_featured'), function ($q) {
 
-            $q->where('is_featured', 1);
-        }, function ($q) {
-            $q->where('is_featured', 0);
+    ->when(request()->filled('is_featured') || request()->filled('is_popular'), function ($q) {
+    $business_settings = BusinessSetting::first();
+
+    $featured_limit = $business_settings?->general__featured_courses_count ?? 10;
+    $popular_limit  = $business_settings?->general__popular_courses_count ?? 10;
+
+    // Featured courses
+    $q->when(request()->filled('is_featured'), function ($q2) use ($featured_limit) {
+        $q2->when(request()->boolean('is_featured'), function ($q3) use ($featured_limit) {
+            $q3->where('is_featured', 1)
+                ->limit($featured_limit);
+        }, function ($q3) use ($featured_limit) {
+            $q3->where('is_featured', 0)
+                ->limit($featured_limit);
         });
-    })
+    });
+
+    // Popular courses
+    $q->when(request()->filled('is_popular'), function ($q2) use ($popular_limit) {
+        if (request()->boolean('is_popular')) {
+            $q2->withCount('enrollments')
+                ->orderByDesc('enrollments_count')
+                ->limit($popular_limit);
+        }
+    });
+})
+
+
+    
+
+
+
+   
     ->when(request()->filled('status'), function ($q) {
         $valid_status = array_values(Course::STATUS);
         $status = request('status');
