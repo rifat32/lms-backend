@@ -14,10 +14,10 @@ class CouponCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => 'nullable|exists:courses,id',
+         
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:255|unique:coupons,code',
-            'discount_type' => 'required|in:percentage,amount',
+            'discount_type' => 'required|in:percentage,fixed',
             'discount_amount' => 'required|numeric|min:0',
             'min_total' => 'nullable|numeric|min:0',
             'max_total' => 'nullable|numeric|min:0',
