@@ -24,232 +24,198 @@ class StripePaymentController extends Controller
 {
     use BasicUtil;
 
-   /**
- * @OA\Post(
- *     path="/v1.0/payments/intent",
- *     operationId="createPaymentIntent",
- *     tags={"Payments"},
- *     summary="Create a Stripe Payment Intent for one or more courses (role: Student only)",
- *     description="Creates a Stripe Payment Intent for selected courses. Supports optional coupon codes.",
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"course_ids"},
- *             @OA\Property(property="course_ids", type="array", @OA\Items(type="integer"), example={101,102}),
- *             @OA\Property(property="coupon_code", type="string", example="SAVE20")
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Payment intent created successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="clientSecret", type="string", example="pi_3OzFKa2LqWcU...secret_123"),
- *             @OA\Property(property="totalAmount", type="number", example=199.99),
- *             @OA\Property(property="discountAmount", type="number", example=20.00),
- *             @OA\Property(property="courses", type="array", @OA\Items(type="string"))
- *         )
- *     ),
- *     @OA\Response(response=400, description="Bad request"),
- *     @OA\Response(response=401, description="Unauthenticated"),
- *     @OA\Response(response=403, description="Stripe not enabled"),
- *     @OA\Response(response=404, description="Course not found"),
- *     @OA\Response(response=422, description="Validation error"),
- *     @OA\Response(response=500, description="Server error")
- * )
- */
+    /**
+     * @OA\Post(
+     *     path="/v1.0/payments/intent",
+     *     operationId="createPaymentIntent",
+     *     tags={"Payments"},
+     *     summary="Create a Stripe Payment Intent for one or more courses (role: Student only)",
+     *     description="Creates a Stripe Payment Intent for selected courses. Supports optional coupon codes.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"course_ids"},
+     *             @OA\Property(property="course_ids", type="array", @OA\Items(type="integer"), example={101,102}),
+     *             @OA\Property(property="coupon_code", type="string", example="SAVE20")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment intent created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="clientSecret", type="string", example="pi_3OzFKa2LqWcU...secret_123"),
+     *             @OA\Property(property="totalAmount", type="number", example=199.99),
+     *             @OA\Property(property="discountAmount", type="number", example=20.00),
+     *             @OA\Property(property="courses", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Bad request"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Stripe not enabled"),
+     *     @OA\Response(response=404, description="Course not found"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
+     */
 
-   public function createPaymentIntent(Request $request)
-{
-    try {
-        DB::beginTransaction();
-
-        if (!auth()->user()->hasAnyRole(['student'])) {
-            return response()->json(["message" => "You cannot perform this action"], 401);
-        }
-
-        $course_ids = $request->course_ids;
-        if (empty($course_ids) || !is_array($course_ids)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No courses selected',
-            ], 400);
-        }
-
-        $courses = Course::whereIn('id', $course_ids)->get();
-        if ($courses->isEmpty()) {
-            return response()->json(['error' => 'Courses not found'], 404);
-        }
-
-        // Retrieve Stripe settings
-        $stripe_setting = $this->get_business_setting();
-        if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
-            return response()->json(['error' => 'Stripe not enabled'], 403);
-        }
-
-        $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
-
-        // Ensure webhook endpoint exists (optional safety)
+    public function createPaymentIntent(Request $request)
+    {
         try {
-            $webhooks = $stripe->webhookEndpoints->all();
-            $exists = collect($webhooks->data)
-                ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
-            if (!$exists) {
-                $stripe->webhookEndpoints->create([
-                    'url' => route('stripe.webhook'),
-                    'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
+            DB::beginTransaction();
+
+            // Check if user has student role
+            if (!auth()->user()->hasAnyRole(['student'])) {
+                return response()->json([
+                    "success" => false,
+                    "message" => "You cannot perform this action"
+                ], 401);
+            }
+
+            // validate request
+            $request_payload = $request->validate([
+                'course_ids' => 'required|array|min:1',
+                'coupon_code' => 'nullable|string',
+            ]);
+
+
+            $course_ids = $request_payload['course_ids'];
+            if (empty($course_ids) || !is_array($course_ids)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No courses selected',
+                ], 400);
+            }
+
+            $courses = Course::whereIn('id', $course_ids)->get();
+            if ($courses->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Courses not found'
+                ], 404);
+            }
+
+            // Retrieve Stripe settings
+            $stripe_setting = $this->get_business_setting();
+            if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stripe not enabled'
+                ], 403);
+            }
+
+            $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
+
+            // Ensure webhook endpoint exists (optional safety)
+            try {
+                $webhooks = $stripe->webhookEndpoints->all();
+                $exists = collect($webhooks->data)
+                    ->first(fn($endpoint) => $endpoint->url === route('stripe.webhook'));
+                if (!$exists) {
+                    $stripe->webhookEndpoints->create([
+                        'url' => route('stripe.webhook'),
+                        'enabled_events' => ['payment_intent.succeeded', 'charge.refunded'],
+                    ]);
+                }
+            } catch (\Exception $e) {
+                log_message(['level' =>  $e->getMessage()], "payment_intent.log");
+            }
+
+            // -------------------------------------
+            // Calculate total and handle coupon
+            // -------------------------------------
+            $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
+
+            $discount_amount = 0;
+            $coupon_code = $request_payload['coupon_code'];
+
+            if (!empty($coupon_code)) {
+                $coupon = Coupon::where('code', $coupon_code)
+                    ->where('is_active', true)
+                    ->where(function ($query) {
+                        $query->whereNull('coupon_start_date')
+                            ->orWhereDate('coupon_start_date', '<=', now());
+                    })
+                    ->where(function ($query) {
+                        $query->whereNull('coupon_end_date')
+                            ->orWhereDate('coupon_end_date', '>=', now());
+                    })
+                    ->first();
+
+                if (!$coupon) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid or expired coupon code'
+                    ], 422);
+                }
+
+                // Calculate discount based on type (flat or percent)
+                if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
+                    $discount_amount = ($total_amount * $coupon->discount_value) / 100;
+                } else {
+                    $discount_amount = $coupon->discount_value;
+                }
+
+                // Prevent over-discount
+                $discount_amount = min($discount_amount, $total_amount);
+                $total_amount -= $discount_amount;
+            }
+
+            // -------------------------------------
+            // Create PaymentIntent
+            // -------------------------------------
+            $metadata = [
+                'course_ids' => implode(',', $courses->pluck('id')->toArray()),
+                'user_id' => auth()->user()->id,
+                'webhook_url' => route('stripe.webhook'),
+                'coupon_code' => $coupon_code ?? 'none',
+            ];
+
+            $payment_intent = $stripe->paymentIntents->create([
+                'amount' => max($total_amount, 0.50) * 100, // in cents
+                'currency' => 'usd',
+                'automatic_payment_methods' => ['enabled' => true],
+                'metadata' => $metadata,
+            ]);
+
+            // -------------------------------------
+            // Save payment records
+            // -------------------------------------
+            foreach ($courses as $course) {
+                if (!empty($course->enrollment)) {
+                    throw new Exception("Course Already Enrolled", 409);
+                }
+
+                Payment::create([
+                    'user_id' => auth()->user()->id,
+                    'course_id' => $course->id,
+                    'amount' => $course->computed_price,
+                    'method' => 'stripe',
+                    'status' => 'pending',
+                    'payment_intent_id' => $payment_intent->id,
+                    'coupon_code' => $coupon_code,
+                    'discount_amount' => $discount_amount / count($courses),
+                ]);
+
+                $course->update([
+                    'payment_status' => 'pending',
+                    'payment_method' => 'stripe',
                 ]);
             }
-        } catch (\Exception $e) {
-            log_message(['level' =>  $e->getMessage()], "hook.txt");
-        }
 
-        // -------------------------------------
-        // Calculate total and handle coupon
-        // -------------------------------------
-        $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
+            DB::commit();
 
-        $discount_amount = 0;
-        $coupon_code = $request->coupon_code;
-
-        if (!empty($coupon_code)) {
-            $coupon = Coupon::where('code', $coupon_code)
-                ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->whereNull('coupon_start_date')
-                         ->orWhereDate('coupon_start_date', '<=', now());
-                })
-              ->where(function ($query) {
-                    $query->whereNull('coupon_end_date')
-                          ->orWhereDate('coupon_end_date', '>=', now());
-                })
-              ->first();
-
-            if (!$coupon) {
-                return response()->json(['message' => 'Invalid or expired coupon code'], 422);
-            }
-
-            // Calculate discount based on type (flat or percent)
-            if ($coupon->discount_type === 'percentage') {
-                $discount_amount = ($total_amount * $coupon->discount_value) / 100;
-            } else {
-                $discount_amount = $coupon->discount_value;
-            }
-
-            // Prevent over-discount
-            $discount_amount = min($discount_amount, $total_amount);
-            $total_amount -= $discount_amount;
-        }
-
-        // -------------------------------------
-        // Create PaymentIntent
-        // -------------------------------------
-        $metadata = [
-            'course_ids' => implode(',', $courses->pluck('id')->toArray()),
-            'user_id' => auth()->user()->id,
-            'webhook_url' => route('stripe.webhook'),
-            'coupon_code' => $coupon_code ?? 'none',
-        ];
-
-        $payment_intent = $stripe->paymentIntents->create([
-            'amount' => max($total_amount, 0.50) * 100, // in cents
-            'currency' => 'usd',
-            'automatic_payment_methods' => ['enabled' => true],
-            'metadata' => $metadata,
-        ]);
-
-        // -------------------------------------
-        // Save payment records
-        // -------------------------------------
-        foreach ($courses as $course) {
-            if (!empty($course->enrollment)) {
-                throw new Exception("Course Already Enrolled", 409);
-            }
-
-            Payment::create([
-                'user_id' => auth()->user()->id,
-                'course_id' => $course->id,
-                'amount' => $course->computed_price,
-                'method' => 'stripe',
-                'status' => 'pending',
-                'payment_intent_id' => $payment_intent->id,
-                'coupon_code' => $coupon_code,
-                'discount_amount' => $discount_amount / count($courses),
-            ]);
-
-            $course->update([
-                'payment_status' => 'pending',
-                'payment_method' => 'stripe',
-            ]);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'clientSecret' => $payment_intent->client_secret,
-            'totalAmount' => round($total_amount, 2),
-            'discountAmount' => round($discount_amount, 2),
-            'courses' => $courses->pluck('title'),
-        ]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
-    }
-}
-
-
-    public function createRefund(Request $request)
-    {
-        $bookingId = $request->booking_id;
-        $booking = Booking::findOrFail($bookingId);
-
-        // Get the Stripe settings
-        $stripeSetting = $this->get_business_setting($booking->garage_id);
-
-
-        if (empty($stripeSetting)) {
-            throw new Exception("No stripe seting found", 403);
-        }
-
-        if (empty($stripeSetting->stripe_enabled)) {
-            throw new Exception("Stripe is not enabled", 403);
-        }
-        // Set Stripe API key
-        $stripe = new \Stripe\StripeClient($stripeSetting->STRIPE_SECRET);
-
-        // Find the payment intent or charge for the booking
-        $paymentIntent = $booking->payment_intent_id;
-
-        if (empty($paymentIntent)) {
             return response()->json([
-                "message" => "No payment record found for this booking."
-            ], 404);
-        }
-
-        // Create a refund for the payment intent
-        try {
-            $refund = $stripe->refunds->create([
-                'payment_intent' => $paymentIntent, // Reference the payment intent
-                'amount' => $booking->final_price * 100, // Refund full amount in cents
+                'clientSecret' => $payment_intent->client_secret,
+                'totalAmount' => round($total_amount, 2),
+                'discountAmount' => round($discount_amount, 2),
+                'courses' => $courses->pluck('title'),
             ]);
-
-            // Update the booking or any other record to reflect the refund
-            $booking->payment_status = 'refunded';
-            $booking->save();
-            JobPayment::where([
-                "booking_id" => $booking->id
-            ])
-                ->delete();
-            return response()->json([
-                "message" => "Refund successful",
-                "refund_id" => $refund->id
-            ], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json([
-                "message" => "Refund failed: " . $e->getMessage()
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

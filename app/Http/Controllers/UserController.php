@@ -116,14 +116,6 @@ class UserController extends Controller
             ], 404);
         }
 
-        $user = [
-            'id'            => $query->id,
-            'title'          => $query->title,
-            'first_name'          => $query->first_name,
-            'last_name'          => $query->last_name,
-            'email'         => $query->email,
-            'role'          => $query->roles->pluck('name')->first(),
-        ];
 
         return response()->json([
             'success' => true,

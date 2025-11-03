@@ -189,7 +189,7 @@ class BusinessController extends Controller
      *     path="/v1.0/businesses",
      *     operationId="updateBusiness",
      *     tags={"business_management"},
-     *     summary="Update an existing business (role: Super Admin only)",
+     *     summary="Update an existing business (role: Super Admin, owner, admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -315,7 +315,7 @@ class BusinessController extends Controller
 
         $business = Business::where('id', $business_id)
             ->when(
-                !request()->user()->hasRole('superadmin'),
+                !request()->user()->hasAnyRole(['owner', 'admin', 'super_admin']),
                 function ($query) {
                     $query->where(function ($query) {
                         $query

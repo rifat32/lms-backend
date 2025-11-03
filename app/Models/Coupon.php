@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Coupon extends Model
 {
     use HasFactory;
-       protected $fillable = [
+
+    public const DISCOUNT_TYPE = [
+        'PERCENTAGE' => 'percentage',
+        'FIXED' => 'fixed',
+    ];
+
+    protected $fillable = [
         'name',
         'code',
         'discount_type',      // 'percent' or 'flat'
@@ -22,6 +28,10 @@ class Coupon extends Model
         'is_active',
     ];
 
+    public static function getDiscountTypes(): array
+    {
+        return array_values(self::DISCOUNT_TYPE);
+    }
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'coupon_courses', 'coupon_id', 'course_id');

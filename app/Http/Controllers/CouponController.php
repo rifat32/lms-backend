@@ -87,7 +87,7 @@ class CouponController extends Controller
      */
     public function updateCoupon(CouponUpdateRequest $request, $id)
     {
-          if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
                 "message" => "You can not perform this action"
             ], 401);
@@ -156,13 +156,13 @@ class CouponController extends Controller
      */
     public function getAllCoupons()
     {
-          if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
                 "message" => "You can not perform this action"
             ], 401);
         }
 
-    
+
         $search = request()->input('search');
         $is_active = request()->input('is_active');
         $start_date = request()->input('start_date');
@@ -217,14 +217,14 @@ class CouponController extends Controller
     public function toggleActiveCoupon(CouponToggleActiveRequest $request)
     {
         try {
-           
-     
 
-           if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
+
+
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
             $data = $request->validated();
@@ -242,7 +242,7 @@ class CouponController extends Controller
                 'coupon' => $coupon
             ], 200);
         } catch (\Exception $e) {
-     return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -273,10 +273,10 @@ class CouponController extends Controller
         try {
 
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
             $coupon = Coupon::where('id', $id)
@@ -290,67 +290,102 @@ class CouponController extends Controller
 
             return response()->json(['ok' => true], 200);
         } catch (\Exception $e) {
-           
-             return response()->json(['message' => $e->getMessage()], 500);
+
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
 
+    /**
+     * Apply a coupon to calculate the final amount.
+     *
+     * @OA\Post(
+     *     path="/v1.0/coupons/apply",
+     *     operationId="applyCoupon",
+     *     tags={"coupon_management"},
+     *     summary="Apply coupon code to total amount",
+     *     description="Applies a valid coupon to the provided total amount and returns the discount and final amount.",
+     *     @OA\RequestBody(
+     *         description="Coupon application details",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"coupon_code", "total_amount"},
+     *             @OA\Property(property="coupon_code", type="string", example="DISCOUNT10", description="The coupon code to apply"),
+     *             @OA\Property(property="total_amount", type="number", format="float", example=100.00, description="The total amount before discount")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Coupon applied successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Coupon applied successfully"),
+     *             @OA\Property(property="discount_amount", type="number", format="float", example=10.00),
+     *             @OA\Property(property="final_amount", type="number", format="float", example=90.00)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Invalid or expired coupon code",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid or expired coupon code")
+     *         )
+     *     )
+     * )
+     */
 
 
+    public function applyCoupon(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'coupon_code' => 'required|string',
+            'total_amount' => 'required|numeric|min:0',
+        ]);
 
+        $total_amount = $request->total_amount;
+        $discount_amount = 0;
+        $coupon_code = $request->coupon_code;
 
+        if (!empty($coupon_code)) {
+            $coupon = Coupon::where('code', $coupon_code)
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('coupon_start_date')
+                        ->orWhereDate('coupon_start_date', '<=', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('coupon_end_date')
+                        ->orWhereDate('coupon_end_date', '>=', now());
+                })
+                ->first();
 
+            if (!$coupon) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired coupon code'
+                ], 422);
+            }
 
+            // Calculate discount based on type (flat or percent)
+            if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
+                $discount_amount = ($total_amount * $coupon->discount_value) / 100;
+            } else {
+                $discount_amount = $coupon->discount_value;
+            }
 
+            // Prevent over-discount
+            $discount_amount = min($discount_amount, $total_amount);
+            $total_amount -= $discount_amount;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // Return the final amount in the response
+        return response()->json([
+            'success' => true,
+            'message' => 'Coupon applied successfully',
+            'data' => [
+                'discount_amount' => $discount_amount,
+                'final_amount' => $total_amount
+            ]
+        ], 200);
+    }
 }

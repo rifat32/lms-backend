@@ -27,15 +27,17 @@ class UserUpdateRequest extends FormRequest
     {
         $rules = [
             'id' => ['required', 'integer', new ValidUser()],
-            'name' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->id), // ignore current user's email
             ],
             'profile_photo_path' => 'nullable',
-            'phone' => 'required|string|max:11',
+            'phone' => 'nullable|string|max:11',
         ];
 
         return $rules;
