@@ -25,7 +25,13 @@ class ResetPasswordMail extends Mailable
         $this->user = $user;
 
         $front_end_url = env('FRONT_END_URL');
-        $this->reset_url = $front_end_url . '/auth/change-password?token=' . ($user->resetPasswordToken ?? '');
+        $base   = rtrim($front_end_url, '/') . '/auth/change-password';
+        $params = array_filter([
+            'token' => $user->resetPasswordToken ?? null,
+            'email' => $user->email ?? null,
+        ], fn($v) => $v !== null && $v !== '');
+
+        $this->reset_url = $base . (str_contains($base, '?') ? '&' : '?') . http_build_query($params);
     }
 
     /**
@@ -38,10 +44,10 @@ class ResetPasswordMail extends Mailable
         $subject = "Reset Password Mail from " . ($this->user->business->name ?? config('app.name'));
 
         return $this->subject($subject)
-                    ->view('emails.reset_password_mail')
-                    ->with([
-                        'user' => $this->user,
-                        'url' => $this->reset_url
-                    ]);
+            ->view('emails.reset_password_mail')
+            ->with([
+                'user' => $this->user,
+                'url' => $this->reset_url
+            ]);
     }
 }
