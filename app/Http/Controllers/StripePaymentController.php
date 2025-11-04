@@ -151,9 +151,9 @@ class StripePaymentController extends Controller
 
                 // Calculate discount based on type (flat or percent)
                 if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
-                    $discount_amount = ($total_amount * $coupon->discount_value) / 100;
+                    $discount_amount = ($total_amount * $coupon->discount_amount) / 100;
                 } else {
-                    $discount_amount = $coupon->discount_value;
+                    $discount_amount = $coupon->discount_amount;
                 }
 
                 // Prevent over-discount
