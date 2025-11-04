@@ -56,7 +56,7 @@ Route::middleware('auth:api')->group(function () {
 
     // USER APIS
     Route::prefix('/v1.0/users')->group(function () {
-        Route::put('/', [UserController::class, 'updateUser']);
+        Route::put('/{id}', [UserController::class, 'updateUser']);
         Route::get('/', [UserController::class, 'getAllUsers']);
         Route::get('/{id}', [UserController::class, 'getUserById']);
         Route::delete('/{ids}', [UserController::class, 'deleteUsers']);
@@ -128,7 +128,7 @@ Route::middleware('auth:api')->group(function () {
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
-        Route::put('/', [BusinessController::class, 'updateBusiness']);
+        Route::put('/{id}', [BusinessController::class, 'updateBusiness']);
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
         Route::delete('/{ids}', [BusinessController::class, 'deleteBusiness']);

@@ -120,13 +120,13 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User details retrieved successfully',
-            'data' => $user
+            'data' => $query
         ]);
     }
 
     /**
      * @OA\Put(
-     *   path="/v1.0/users",
+     *   path="/v1.0/users/{id}",
      *   operationId="updateUser",
      *   tags={"user_management"},
      *   summary="Update user profile (role: Admin only)",
@@ -236,7 +236,7 @@ class UserController extends Controller
 
 
 
-    public function updateUser(UserUpdateRequest $request)
+    public function updateUser(UserUpdateRequest $request, $id)
     {
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
@@ -251,7 +251,7 @@ class UserController extends Controller
             // Validate the request payload
             $request_payload = $request->validated();
 
-            $user = User::find($request_payload['id']);
+            $user = User::find($id);
 
             if (empty($user)) {
                 return response()->json([

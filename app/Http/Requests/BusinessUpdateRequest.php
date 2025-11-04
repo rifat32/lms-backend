@@ -24,8 +24,14 @@ class BusinessUpdateRequest extends FormRequest
      */
 
 
+    public function prepareForValidation(): void
+    {
+        $this->merge(['id' => $this->route('id') ?? $this->input('id')]);
+    }
+
     public function rules()
     {
+        $id = $this->input('id');
         return [
             'id' => ['required', 'integer', 'exists:businesses,id'],
             'name' => 'nullable|string|max:255', // or 'required' if mandatory

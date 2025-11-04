@@ -18,6 +18,10 @@ class UserUpdateRequest extends FormRequest
         return true;
     }
 
+    public function prepareForValidation(): void
+    {
+        $this->merge(['id' => $this->route('id') ?? $this->input('id')]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
