@@ -236,7 +236,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
     Route::post('/v1.0/coupons/apply', [CouponController::class, 'applyCoupon']);
 
-    Route::patch('/v1.0/student-profile', [StudentProfileController::class, 'updateStudentProfile']);
+    Route::patch('/v1.0/student-profile/{id}', [StudentProfileController::class, 'updateStudentProfile']);
 });
 
 // Get all reviews (auth optional)

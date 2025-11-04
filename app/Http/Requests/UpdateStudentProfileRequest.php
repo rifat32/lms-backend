@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateStudentProfileRequest extends FormRequest
@@ -17,46 +18,62 @@ class UpdateStudentProfileRequest extends FormRequest
         return auth()->user()->hasRole('student');
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge(['id' => $this->route('id') ?? $this->input('id')]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array
      */
-    public function rules()
-    {
-        return [
-            'bio'             => ['nullable', 'string', 'max:500'],
-            'address_line_1'  => ['nullable', 'string', 'max:255'],
 
-            // learning_preferences as an object
+    public function rules(): array
+    {
+        $mimes = 'jpg,jpeg,png,webp,avif,gif';
+        $maxKB = 5120; // 5MB
+
+        return [
+            // StudentProfile fields
+            'id' => ['required', 'integer', new ValidUser()],
+            'bio'                         => ['nullable', 'string', 'max:500'],
+            'address_line_1'              => ['nullable', 'string', 'max:255'],
+
             'learning_preferences'                         => ['nullable', 'array'],
             'learning_preferences.preferred_learning_time' => ['nullable', 'string'],
             'learning_preferences.daily_goal'              => ['nullable', 'integer', 'min:1', 'max:24'],
 
-            // interests can be an array of strings (key-value also works since Laravel treats objects as arrays)
             'interests'   => ['nullable', 'array'],
             'interests.*' => ['nullable', 'string', 'max:100'],
 
-            // SOCIAL LINKS (object with optional URLs)
+            // Social links
             'social_links'          => ['nullable', 'array'],
             'social_links.web_site' => ['nullable', 'url'],
             'social_links.facebook' => ['nullable', 'url'],
             'social_links.linkedin' => ['nullable', 'url'],
             'social_links.github'   => ['nullable', 'url'],
             'social_links.twitter'  => ['nullable', 'url'],
+
+            // User updatable fields
+            'user'              => ['nullable', 'array'],
+            'user.title'        => ['nullable', 'string', 'max:50'],
+            'user.first_name'   => ['nullable', 'string', 'max:100'],
+            'user.last_name'    => ['nullable', 'string', 'max:100'],
+            'user.phone'        => ['nullable', 'string', 'max:50'],
+
+            // profile_photo can be a file OR omitted
+            'user.profile_photo' => ['nullable', 'file', "mimes:$mimes", "max:$maxKB"],
         ];
     }
 
-    /**
-     * Custom error messages (optional).
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
-            'learning_preferences.preferred_learning_time.in' => 'Invalid learning time preference.',
-            'learning_preferences.daily_goal.integer' => 'Daily goal must be a number of hours.',
+            'learning_preferences.preferred_learning_time.in' => 'Preferred learning time must be one of: morning, afternoon, evening, night.',
+            'user.profile_photo.file'  => 'Profile photo must be an image file.',
+            'user.profile_photo.mimes' => 'Profile photo must be one of: jpg, jpeg, png, webp, avif, gif.',
+            'user.profile_photo.max'   => 'Profile photo may not be greater than 5MB.',
         ];
     }
 }

@@ -135,6 +135,10 @@ class UserController extends Controller
      *   summary="Update user profile (role: Admin only)",
      *   security={{"bearerAuth":{}}},
      *
+     *   @OA\Parameter(
+     *     name="id", in="path", required=true, description="User ID",
+     *     @OA\Schema(type="integer"), example=1
+     *   ),
      *   @OA\RequestBody(
      *     required=true,
      *     description="Upload a file via multipart OR pass a string path via JSON, both using the same key: profile_photo.",
@@ -142,8 +146,6 @@ class UserController extends Controller
      *       mediaType="multipart/form-data",
      *       @OA\Schema(
      *         type="object",
-     *         required={"id"},
-     *         @OA\Property(property="id", type="integer", example=1),
      *         @OA\Property(property="title", type="string", example="Mr."),
      *         @OA\Property(property="first_name", type="string", example="John"),
      *         @OA\Property(property="last_name", type="string", example="Doe"),

@@ -68,4 +68,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Enrollment::class, 'user_id', 'id');
     }
+
+    public function student_profile()
+    {
+        return $this->hasOne(StudentProfile::class, 'user_id', 'id');
+    }
+
+    public function social_links()
+    {
+        return $this->hasMany(SocialLink::class, 'user_id', 'id');
+    }
 }
