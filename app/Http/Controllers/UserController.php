@@ -108,19 +108,22 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::find($id);
-        if (empty($query)) {
+        $user = User::with(['roles:id,name'])->find($id);
+        if (empty($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',
             ], 404);
         }
 
+        $user->roles->pluck('name');
+        // Hide pivot on each role before returning
+        $user->roles->each->setHidden(['pivot']);
 
         return response()->json([
             'success' => true,
             'message' => 'User details retrieved successfully',
-            'data' => $query
+            'data' => $user
         ]);
     }
 

@@ -305,6 +305,7 @@ class CouponController extends Controller
      *     tags={"coupon_management"},
      *     summary="Apply coupon code to total amount",
      *     description="Applies a valid coupon to the provided total amount and returns the discount and final amount.",
+     *     security={{"bearerAuth": {}}},
      *     @OA\RequestBody(
      *         description="Coupon application details",
      *         required=true,
