@@ -154,42 +154,48 @@ class CouponController extends Controller
      *      @OA\Response(response=401, description="Unauthorized")
      * )
      */
-    public function getAllCoupons()
+    public function getAllCoupons(Request $request)
     {
+        // AuthZ
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
+                'message' => 'You can not perform this action'
+            ], 403); // use 403 for forbidden
         }
 
 
-        $search = request()->input('search');
-        $is_active = request()->input('is_active');
-        $start_date = request()->input('start_date');
-        $end_date = request()->input('end_date');
+        // Base query with model scope
+        $query = Coupon::query()->filters();
 
-        $query = Coupon::query()
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%");
-                });
-            })
-            ->when(!is_null($is_active), function ($q) use ($is_active) {
-                $q->where('is_active', (bool) $is_active);
-            })
-            ->when($start_date, function ($q) use ($start_date) {
-                $q->whereDate('coupon_start_date', '>=', $start_date);
-            })
-            ->when($end_date, function ($q) use ($end_date) {
-                $q->whereDate('coupon_end_date', '<=', $end_date);
-            });
-
+        // Data list (keep your helper)
         $coupons = retrieve_data($query, 'created_at', 'coupons');
 
+        // For summary, reuse the same filters
+        $forSummary = clone $query;
 
-        return response()->json($coupons, 200);
+        $summary = [
+            // total under the same filters (ignores pagination)
+            'total_coupons'        => (clone $forSummary)->count(),
+
+            // active under the same filters + active scope (date-aware)
+            'active_coupons'       => (clone $forSummary)->active()->count(),
+
+            // sum only FIXED coupons' discount_amount under same filters
+            'fixed_discount_amount'   => (clone $forSummary)
+                ->where('discount_type', 'fixed')
+                ->sum('discount_amount'),
+        ];
+
+        // Fallback shape
+        return response()->json([
+            'success' => true,
+            'message' => 'All coupons retrieved successfully',
+            'summary' => $summary,
+            'meta'    => $coupons['meta'],
+            'data'    => $coupons['data'],
+        ], 200);
     }
+
 
 
 

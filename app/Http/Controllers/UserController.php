@@ -389,7 +389,7 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::query();
+        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links'])->query();
 
         // ROLE FILTER (Spatie relationship-based)
         if (request()->filled('role')) {
