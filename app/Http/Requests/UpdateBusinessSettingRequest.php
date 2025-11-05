@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBusinessSettingRequest extends FormRequest
 {
-      /**
+    /**
      * Determine if the user is authorized to make this request.
      *
      * @return bool
@@ -25,7 +25,7 @@ class UpdateBusinessSettingRequest extends FormRequest
     {
         return [
 
-       // General Settings
+            // General Settings
             'general__main_color' => 'sometimes|string|nullable',
             'general__secondary_color' => 'sometimes|string|nullable',
             'general__accent_color' => 'sometimes|string|nullable',
@@ -34,7 +34,7 @@ class UpdateBusinessSettingRequest extends FormRequest
             'general__success_color' => 'sometimes|string|nullable',
             'general__featured_courses_count' => 'sometimes|integer|min:0',
             'general__popular_courses_count' => 'sometimes|integer|min:0',
-            
+
 
 
 
@@ -86,6 +86,7 @@ class UpdateBusinessSettingRequest extends FormRequest
             'certificate__allow_instructor_create' => 'sometimes|boolean',
             'certificate__use_current_student_name' => 'sometimes|boolean',
             'certificate__builder_data' => 'sometimes|array|nullable',
+            'certificate__identifier_prefix' => 'sometimes|string|nullable',
 
             // Stripe (if still used)
             'stripe_enabled' => 'sometimes|boolean',
@@ -94,10 +95,9 @@ class UpdateBusinessSettingRequest extends FormRequest
 
 
         ];
-
     }
 
-          public function messages()
+    public function messages()
     {
         return [
             'courses__courses_page_layout.in' => 'The selected courses page layout is invalid. Valid options: grid, list, masonry.',
@@ -108,6 +108,4 @@ class UpdateBusinessSettingRequest extends FormRequest
             'courses__course_card_info_position.in' => 'The selected courses course card info position is invalid. Valid options:left, center, right.',
         ];
     }
-
-
 }

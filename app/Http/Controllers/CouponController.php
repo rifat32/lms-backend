@@ -27,13 +27,8 @@ class CouponController extends Controller
      *            @OA\Property(property="code", type="string", example="NY2025"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
      *            @OA\Property(property="discount_amount", type="number", example=15),
-     *            @OA\Property(property="min_total", type="number", example=50),
-     *            @OA\Property(property="max_total", type="number", example=500),
-     *            @OA\Property(property="redemptions", type="integer", example=10),
      *            @OA\Property(property="coupon_start_date", type="string", example="2025-01-01"),
      *            @OA\Property(property="coupon_end_date", type="string", example="2025-12-31"),
-     *            @OA\Property(property="is_auto_apply", type="boolean", example=true),
-     *            @OA\Property(property="is_active", type="boolean", example=true),
      *         )
      *      ),
      *      @OA\Response(response=201, description="Created"),
@@ -45,7 +40,14 @@ class CouponController extends Controller
     public function createCoupon(CouponCreateRequest $request)
     {
         $coupon = Coupon::create($request->validated());
-        return response()->json($coupon, 201);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Coupon created successfully',
+                'data' => $coupon
+            ],
+            201
+        );
     }
 
     /**
@@ -71,13 +73,8 @@ class CouponController extends Controller
      *            @OA\Property(property="code", type="string", example="SUMMER25"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
      *            @OA\Property(property="discount_amount", type="number", example=25),
-     *            @OA\Property(property="min_total", type="number", example=100),
-     *            @OA\Property(property="max_total", type="number", example=500),
-     *            @OA\Property(property="redemptions", type="integer", example=50),
      *            @OA\Property(property="coupon_start_date", type="string", example="2025-05-01"),
      *            @OA\Property(property="coupon_end_date", type="string", example="2025-08-31"),
-     *            @OA\Property(property="is_auto_apply", type="boolean", example=false),
-     *            @OA\Property(property="is_active", type="boolean", example=true),
      *         )
      *      ),
      *      @OA\Response(response=200, description="Updated successfully"),
@@ -87,21 +84,27 @@ class CouponController extends Controller
      */
     public function updateCoupon(CouponUpdateRequest $request,)
     {
-          if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
                 "message" => "You can not perform this action"
             ], 401);
         }
 
+        $request_payload = $request->validated();
+
         $coupon = Coupon::find($id);
 
         if (!$coupon) {
-            return response()->json(['message' => 'Coupon not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Coupon not found'
+            ], 404);
         }
 
-        $coupon->update($request->validated());
+        $coupon->update($request_payload);
 
         return response()->json([
+            'success' => true,
             'message' => 'Coupon updated successfully',
             'coupon' => $coupon
         ], 200);
@@ -154,42 +157,48 @@ class CouponController extends Controller
      *      @OA\Response(response=401, description="Unauthorized")
      * )
      */
-    public function getAllCoupons()
+    public function getAllCoupons(Request $request)
     {
-          if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        // AuthZ
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
+                'message' => 'You can not perform this action'
+            ], 403); // use 403 for forbidden
         }
 
-    
-        $search = request()->input('search');
-        $is_active = request()->input('is_active');
-        $start_date = request()->input('start_date');
-        $end_date = request()->input('end_date');
 
-        $query = Coupon::query()
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%");
-                });
-            })
-            ->when(!is_null($is_active), function ($q) use ($is_active) {
-                $q->where('is_active', (bool) $is_active);
-            })
-            ->when($start_date, function ($q) use ($start_date) {
-                $q->whereDate('coupon_start_date', '>=', $start_date);
-            })
-            ->when($end_date, function ($q) use ($end_date) {
-                $q->whereDate('coupon_end_date', '<=', $end_date);
-            });
+        // Base query with model scope
+        $query = Coupon::query()->filters();
 
+        // Data list (keep your helper)
         $coupons = retrieve_data($query, 'created_at', 'coupons');
 
+        // For summary, reuse the same filters
+        $forSummary = clone $query;
 
-        return response()->json($coupons, 200);
+        $summary = [
+            // total under the same filters (ignores pagination)
+            'total_coupons'        => (clone $forSummary)->count(),
+
+            // active under the same filters + active scope (date-aware)
+            'active_coupons'       => (clone $forSummary)->active()->count(),
+
+            // sum only FIXED coupons' discount_amount under same filters
+            'fixed_discount_amount'   => (clone $forSummary)
+                ->where('discount_type', 'fixed')
+                ->sum('discount_amount'),
+        ];
+
+        // Fallback shape
+        return response()->json([
+            'success' => true,
+            'message' => 'All coupons retrieved successfully',
+            'summary' => $summary,
+            'meta'    => $coupons['meta'],
+            'data'    => $coupons['data'],
+        ], 200);
     }
+
 
 
 
@@ -237,12 +246,13 @@ class CouponController extends Controller
             $coupon->save();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Coupon status updated successfully',
                 'coupon' => $coupon
             ], 200);
 
         } catch (\Exception $e) {
-     return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -250,7 +260,7 @@ class CouponController extends Controller
 
     /**
      * @OA\Delete(
-     *      path="/v1.0/coupons/{garage_id}/{id}",
+     *      path="/v1.0/coupons/{id}",
      *      operationId="deleteCouponById",
      *      tags={"coupon_management"},
      *      summary="Delete coupon by id",
@@ -273,84 +283,126 @@ class CouponController extends Controller
         try {
 
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
             $coupon = Coupon::where('id', $id)
                 ->first();
 
             if (!$coupon) {
-                return response()->json(['message' => 'Coupon not found'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Coupon not found'
+                ], 404);
             }
 
             $coupon->delete();
 
-            return response()->json(['ok' => true], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon deleted successfully',
+            ], 200);
         } catch (\Exception $e) {
-           
-             return response()->json(['message' => $e->getMessage()], 500);
+
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
 
+    /**
+     * Apply a coupon to calculate the final amount.
+     *
+     * @OA\Post(
+     *     path="/v1.0/coupons/apply",
+     *     operationId="applyCoupon",
+     *     tags={"coupon_management"},
+     *     summary="Apply coupon code to total amount",
+     *     description="Applies a valid coupon to the provided total amount and returns the discount and final amount.",
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         description="Coupon application details",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"coupon_code", "total_amount"},
+     *             @OA\Property(property="coupon_code", type="string", example="DISCOUNT10", description="The coupon code to apply"),
+     *             @OA\Property(property="total_amount", type="number", format="float", example=100.00, description="The total amount before discount")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Coupon applied successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Coupon applied successfully"),
+     *             @OA\Property(property="discount_amount", type="number", format="float", example=10.00),
+     *             @OA\Property(property="final_amount", type="number", format="float", example=90.00)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Invalid or expired coupon code",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid or expired coupon code")
+     *         )
+     *     )
+     * )
+     */
 
 
+    public function applyCoupon(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'coupon_code' => 'required|string',
+            'total_amount' => 'required|numeric|min:0',
+        ]);
 
+        $total_amount = $request->total_amount;
+        $discount_amount = 0;
+        $coupon_code = $request->coupon_code;
 
+        if (!empty($coupon_code)) {
+            $coupon = Coupon::where('code', $coupon_code)
+                ->where('is_active', true)
+                ->where(function ($query) {
+                    $query->whereNull('coupon_start_date')
+                        ->orWhereDate('coupon_start_date', '<=', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('coupon_end_date')
+                        ->orWhereDate('coupon_end_date', '>=', now());
+                })
+                ->first();
 
+            if (!$coupon) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired coupon code'
+                ], 422);
+            }
 
+            // Calculate discount based on type (flat or percent)
+            if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
+                $discount_amount = ($total_amount * $coupon->discount_amount) / 100;
+            } else {
+                $discount_amount = $coupon->discount_amount;
+            }
 
+            // Prevent over-discount
+            $discount_amount = min($discount_amount, $total_amount);
+            $total_amount -= $discount_amount;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // Return the final amount in the response
+        return response()->json([
+            'success' => true,
+            'message' => 'Coupon applied successfully',
+            'data' => [
+                'discount_amount' => $discount_amount,
+                'final_amount' => $total_amount
+            ]
+        ], 200);
+    }
 }

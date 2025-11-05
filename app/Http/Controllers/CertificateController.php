@@ -10,9 +10,10 @@ use App\Models\Course;
 use App\Models\User;
 use App\Rules\ValidCourse;
 use App\Rules\ValidUser;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use PDF; // Use barryvdh/laravel-dompdf
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * @OA\Tag(
@@ -76,7 +77,7 @@ class CertificateController extends Controller
             'data' => $template
         ], 200);
     }
-    
+
     /**
      * @OA\Get(
      *     path="/v1.0/certificate-template/{id}",
@@ -260,14 +261,15 @@ class CertificateController extends Controller
      *     )
      * )
      */
+
     public function generateDynamicCertificate(Request $request)
     {
         $request->validate([
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'user_id'   => ['required', 'integer', 'exists:users,id'],
             'course_id' => ['required', 'integer', 'exists:courses,id'],
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user   = User::findOrFail($request->user_id);
         $course = Course::findOrFail($request->course_id);
 
         $enrollment = Enrollment::where('user_id', $user->id)
@@ -281,36 +283,21 @@ class CertificateController extends Controller
             ], 400);
         }
 
-        $template = CertificateTemplate::where('is_active', true)->first();
+        $certificateCode = strtoupper(Str::random(10));
+        $issueDate       = Carbon::now();
+        $renewalDate     = (clone $issueDate)->addYear();
 
-        if (!$template) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No active certificate template found.'
-            ], 404);
-        }
+        $html = view('certificates.template', [
+            'user'            => $user,
+            'course'          => $course,
+            'issueDate'       => $issueDate,
+            'renewalDate'     => $renewalDate,
+            'certificateCode' => $certificateCode,
+        ])->render();
 
-        // 🪄 Replace placeholders
-        $certificate_code = strtoupper(Str::random(10));
-        $issued_date = now()->format('F d, Y');
-        $html = str_replace(
-            ['{user_name}', '{course_name}', '{issued_date}', '{certificate_code}'],
-            [$user->name, $course->title, $issued_date, $certificate_code],
-            $template->html_content
-        );
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('a4', 'landscape');
 
-        // ✨ Wrap with an optional professional background and styling
-        $final_html = '
-    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f0f8ff, #ffffff); padding: 60px;">
-        <div style="max-width: 800px; margin: auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.15); border-radius: 12px;">
-            ' . $html . '
-            <p style="margin-top: 40px; font-size: 12px; color: #777;">This certificate is generated digitally and does not require a signature.</p>
-        </div>
-    </div>
-    ';
-
-        // 🧾 Generate and stream PDF
-        $pdf = Pdf::loadHTML($final_html)->setPaper('a4', 'landscape');
-        return $pdf->stream("certificate_{$certificate_code}.pdf");
+        return $pdf->stream("certificate_{$certificateCode}.pdf");
     }
 }

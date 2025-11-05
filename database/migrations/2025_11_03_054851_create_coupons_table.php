@@ -11,13 +11,13 @@ class CreateCouponsTable extends Migration
      *
      * @return void
      */
-     public function up(): void
+    public function up(): void
     {
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
             $table->string('code')->unique();
-            $table->enum('discount_type', ['fixed', 'percentage'])->default('percent');
+            $table->enum('discount_type', ['fixed', 'percentage'])->default('percentage');
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('min_total', 10, 2)->nullable();
             $table->decimal('max_total', 10, 2)->nullable();

@@ -14,7 +14,7 @@ class BusinessSetting extends Model
         'STRIPE_KEY',
         "STRIPE_SECRET",
         'stripe_enabled',
-          // General Settings
+        // General Settings
         'general__main_color',
         'general__secondary_color',
         'general__accent_color',
@@ -71,9 +71,10 @@ class BusinessSetting extends Model
         'certificate__allow_instructor_create',
         'certificate__use_current_student_name',
         'certificate__builder_data',
+        'certificate__identifier_prefix',
     ];
 
-     protected $casts = [
+    protected $casts = [
         // Boolean fields
         'courses__import_demo_courses' => 'boolean',
         'courses__lazy_loading' => 'boolean',
@@ -111,23 +112,23 @@ class BusinessSetting extends Model
     ];
 
     public function getCourseFailedCourseImageAttribute($value)
-{
-    if (empty($value)) return null;
-    $folder_path = "business_1/course__failed_course_image";
-    return asset("storage-proxy/{$folder_path}/{$value}");
-}
+    {
+        if (empty($value)) return null;
+        $folder_path = "business_1/course__failed_course_image";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 
-public function getCoursePassedCourseImageAttribute($value)
-{
-    if (empty($value)) return null;
-    $folder_path = "business_1/course__passed_course_image";
-    return asset("storage-proxy/{$folder_path}/{$value}");
-}
+    public function getCoursePassedCourseImageAttribute($value)
+    {
+        if (empty($value)) return null;
+        $folder_path = "business_1/course__passed_course_image";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 
-public function getGeneralLoadingAnimationAttribute($value)
-{
-    if (empty($value)) return null;
-    $folder_path = "business_1/general__loading_animation";
-    return asset("storage-proxy/{$folder_path}/{$value}");
-}
+    public function getGeneralLoadingAnimationAttribute($value)
+    {
+        if (empty($value)) return null;
+        $folder_path = "business_1/general__loading_animation";
+        return asset("storage-proxy/{$folder_path}/{$value}");
+    }
 }

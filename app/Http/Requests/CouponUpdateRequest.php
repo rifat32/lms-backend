@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCoupon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CouponUpdateRequest extends FormRequest
@@ -9,6 +10,13 @@ class CouponUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    public function prepareForValidation(): void
+    {
+        $this->merge([
+            'id' => $this->route('id'),
+        ]);
     }
 
     public function rules(): array
@@ -26,8 +34,8 @@ class CouponUpdateRequest extends FormRequest
             'redemptions' => 'nullable|integer|min:0',
             'coupon_start_date' => 'nullable|date',
             'coupon_end_date' => 'nullable|date|after_or_equal:coupon_start_date',
-            'is_auto_apply' => 'boolean',
-            'is_active' => 'boolean',
+            'is_auto_apply' => 'nullable|boolean',
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

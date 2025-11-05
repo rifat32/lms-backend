@@ -108,22 +108,17 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::find($id);
-        if (empty($query)) {
+        $user = User::with(['roles:id,name'])->find($id);
+        if (empty($user)) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',
             ], 404);
         }
 
-        $user = [
-            'id'            => $query->id,
-            'title'          => $query->title,
-            'first_name'          => $query->first_name,
-            'last_name'          => $query->last_name,
-            'email'         => $query->email,
-            'role'          => $query->roles->pluck('name')->first(),
-        ];
+        $user->roles->pluck('name');
+        // Hide pivot on each role before returning
+        $user->roles->each->setHidden(['pivot']);
 
         return response()->json([
             'success' => true,
@@ -134,12 +129,16 @@ class UserController extends Controller
 
     /**
      * @OA\Put(
-     *   path="/v1.0/users",
+     *   path="/v1.0/users/{id}",
      *   operationId="updateUser",
      *   tags={"user_management"},
      *   summary="Update user profile (role: Admin only)",
      *   security={{"bearerAuth":{}}},
      *
+     *   @OA\Parameter(
+     *     name="id", in="path", required=true, description="User ID",
+     *     @OA\Schema(type="integer"), example=1
+     *   ),
      *   @OA\RequestBody(
      *     required=true,
      *     description="Upload a file via multipart OR pass a string path via JSON, both using the same key: profile_photo.",
@@ -147,8 +146,6 @@ class UserController extends Controller
      *       mediaType="multipart/form-data",
      *       @OA\Schema(
      *         type="object",
-     *         required={"id"},
-     *         @OA\Property(property="id", type="integer", example=1),
      *         @OA\Property(property="title", type="string", example="Mr."),
      *         @OA\Property(property="first_name", type="string", example="John"),
      *         @OA\Property(property="last_name", type="string", example="Doe"),
@@ -244,7 +241,7 @@ class UserController extends Controller
 
 
 
-    public function updateUser(UserUpdateRequest $request)
+    public function updateUser(UserUpdateRequest $request, $id)
     {
         try {
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
@@ -259,7 +256,7 @@ class UserController extends Controller
             // Validate the request payload
             $request_payload = $request->validated();
 
-            $user = User::find($request_payload['id']);
+            $user = User::find($id);
 
             if (empty($user)) {
                 return response()->json([
@@ -392,7 +389,7 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::query();
+        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links'])->query();
 
         // ROLE FILTER (Spatie relationship-based)
         if (request()->filled('role')) {

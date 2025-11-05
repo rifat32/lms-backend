@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangePasswordWithTokenRequest;
 use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use App\Utils\BasicUtil;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @OA\Tag(
@@ -28,6 +30,51 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     use BasicUtil;
+
+    // Helper method to create signed token
+    private function createSignedToken(string $email): string
+    {
+        $payload = [
+            'email' => $email,
+            'random' => Str::random(32), // Randomness for uniqueness
+            'expires_at' => now()->addMinutes(5)->timestamp, // 1 hour expiry
+        ];
+
+        $encoded = base64_encode(json_encode($payload));
+        $signature = hash_hmac('sha256', $encoded, config('app.key'));
+
+        return "{$encoded}.{$signature}";
+    }
+
+    // Helper method to verify and decode token
+    private function verifySignedToken(string $token): ?array
+    {
+        try {
+            [$encoded, $signature] = explode('.', $token, 2);
+
+            // Verify signature
+            $expectedSignature = hash_hmac('sha256', $encoded, config('app.key'));
+            if (!hash_equals($expectedSignature, $signature)) {
+                throw ValidationException::withMessages([
+                    'token' => 'Reset token is invalid or has been tampered with.',
+                ]);
+            }
+
+            // Decode payload
+            $payload = json_decode(base64_decode($encoded), true);
+
+            // Check expiry
+            if ($payload['expires_at'] < now()->timestamp) {
+                throw ValidationException::withMessages([
+                    'token' => 'Reset link has expired. Please request a new one.',
+                ]);
+            }
+
+            return $payload;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
 
     /**
      * @OA\Post(
@@ -156,9 +203,10 @@ class AuthController extends Controller
      *  @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *            required={"password"},
+     *            required={"password","password_confirmation"},
      *
      *     @OA\Property(property="password", type="string", format="string",* example="aaaaaaaa"),
+     *     @OA\Property(property="password_confirmation", type="string", format="string",* example="aaaaaaaa"),
 
      *         ),
      *      ),
@@ -174,7 +222,7 @@ class AuthController extends Controller
      *      ),
      *        @OA\Response(
      *          response=422,
-     *          description="Unprocesseble Content",
+     *          description="Unprocessable Content",
      *    @OA\JsonContent(),
      *      ),
      *      @OA\Response(
@@ -194,65 +242,71 @@ class AuthController extends Controller
      */
 
 
-    public function changePasswordByToken($token, Request $request)
+    public function changePasswordWithToken(ChangePasswordWithTokenRequest $request, string $token = "")
     {
-        // Validate inputs (no email-exists check to avoid enumeration)
-        $data = $request->validate([
-            'email'                 => ['required', 'email'],
-            'password'              => ['required', 'string', 'min:8', 'confirmed'], // requires password_confirmation
-        ]);
+        $data = $request->validated();
 
-        // Fetch reset record for email
-        $record = DB::table('password_resets')->where('email', $data['email'])->first();
-        if (!$record) {
-            return response()->json(['message' => 'Invalid or expired token.'], 400);
-        }
-
-        // Check token hash + expiry
-        $validToken = Hash::check($token, $record->token);
-        $minutes    = (int) config('auth.passwords.users.expire', 60);
-        $expired    = Carbon::parse($record->created_at)->addMinutes($minutes)->isPast();
-
-        if (!$validToken || $expired) {
-            return response()->json(['message' => 'Invalid or expired token.'], 400);
-        }
-
-        // Load user (don’t leak details if missing)
-        $user = User::where('email', $data['email'])->first();
-        if (!$user) {
-            return response()->json(['message' => 'Invalid or expired token.'], 400);
-        }
-
-        DB::beginTransaction();
         try {
-            // Update password and reset lockout counters if present
+            DB::beginTransaction();
+
+            // 1. Verify and decode the signed token
+            $payload = $this->verifySignedToken($token);
+            if (!$payload) {
+                return response()->json([
+                    'message' => 'Invalid or expired reset token.'
+                ], 400);
+            }
+
+            $email = $payload['email']; // ✅ Extract email from token
+
+            // 2. Check if token exists in database
+            $resetRecord = DB::table('password_resets')
+                ->where('email', $email)
+                ->first();
+
+            if (!$resetRecord) {
+                return response()->json([
+                    'message' => 'Invalid or expired reset token.'
+                ], 400);
+            }
+
+            // 3. Verify the hashed token matches
+            if (!Hash::check($token, $resetRecord->token)) {
+                return response()->json([
+                    'message' => 'Invalid or expired reset token.'
+                ], 400);
+            }
+
+            // 4. Check database expiry (double check)
+            if ($resetRecord->expires_at && Carbon::parse($resetRecord->expires_at)->isPast()) {
+                DB::table('password_resets')->where('email', $email)->delete();
+                return response()->json([
+                    'message' => 'Reset token has expired.'
+                ], 400);
+            }
+
+            // 5. Find user and update password
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found.'
+                ], 404);
+            }
+
             $user->password = Hash::make($data['password']);
-
-            if (Schema::hasColumn($user->getTable(), 'login_attempts')) {
-                $user->login_attempts = 0;
-            }
-            if (Schema::hasColumn($user->getTable(), 'last_failed_login_attempt_at')) {
-                $user->last_failed_login_attempt_at = null;
-            }
-            if (Schema::hasColumn($user->getTable(), 'remember_token')) {
-                $user->setRememberToken(Str::random(60));
-            }
-
             $user->save();
 
-            // Revoke existing OAuth tokens (if using Passport)
-            if (Schema::hasTable('oauth_access_tokens')) {
-                DB::table('oauth_access_tokens')->where('user_id', $user->id)->delete();
-            }
-
-            // Consume the reset token
-            DB::table('password_resets')->where('email', $data['email'])->delete();
+            // 6. Delete used token
+            DB::table('password_resets')->where('email', $email)->delete();
 
             DB::commit();
-            return response()->json(['message' => 'Password changed'], 200);
-        } catch (Exception $e) {
+
+            return response()->json([
+                'message' => 'Password has been reset successfully.'
+            ], 200);
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return $this->sendError($e);
+            throw $e;
         }
     }
 
@@ -308,62 +362,60 @@ class AuthController extends Controller
      *     )
      */
 
+
+
     public function storeToken(Request $request)
     {
-        // Validate format only (don’t leak existence)
         $data = $request->validate([
-            'email'       => ['required', 'email'],
-            'client_site' => ['nullable', 'url'], // ignored by your current Mailable; see note below
+            'email' => ['required', 'email'],
+            'client_site' => ['nullable', 'url'],
         ]);
 
-        // Always return the same outward message
-        $genericOk = response()->json([
-            'message' => 'If an account exists for that address, we’ve sent reset instructions.',
-        ], 200);
-
-        // Look up user; if missing, return generic OK (no enumeration)
         $user = User::where('email', $data['email'])->first();
         if (!$user) {
-            return response()->json(['message' => 'user not found'], 404);
+            // Return generic message (prevent email enumeration)
+            return response()->json([
+                'message' => 'If an account exists for that address, we have sent reset instructions.',
+            ], 200);
         }
-
-        // Create raw+hashed token (store hash, email raw)
-        $rawToken    = Str::random(64);
-        $hashedToken = Hash::make($rawToken);
 
         try {
             DB::beginTransaction();
 
-            // Upsert hashed token into password_resets
+            // Create signed token with email embedded
+            $signedToken = $this->createSignedToken($user->email);
+
+            // Hash for storage (additional security layer)
+            $hashedToken = Hash::make($signedToken);
+            $expiresAt = now()->addHour(); // 1 hour expiry
+
+            // Store hashed token
             DB::table('password_resets')->updateOrInsert(
                 ['email' => $user->email],
                 [
-                    'token'      => $hashedToken,
-                    'created_at' => Carbon::now(),
+                    'token' => $hashedToken,
+                    'created_at' => now(),
+                    'expires_at' => $expiresAt,
                 ]
             );
 
-            // Your ResetPasswordMail reads $user->resetPasswordToken for the URL.
-            // Set it TEMPORARILY on the model instance (do NOT save to DB).
-            $user->setAttribute('resetPasswordToken', $rawToken);
+            // Send raw signed token in email (not hashed)
+            $user->setAttribute('resetPasswordToken', $signedToken);
 
-            // Send email (let exceptions signal failure; no Mail::failures()).
             if (env("SEND_EMAIL") == true) {
                 Mail::to($user->email)->send(new ResetPasswordMail($user));
             }
 
             DB::commit();
+
             return response()->json([
                 "message" => "Please check your email."
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
-
             throw $e;
         }
     }
-
-
 
 
 
