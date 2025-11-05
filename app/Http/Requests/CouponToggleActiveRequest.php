@@ -17,7 +17,6 @@ class CouponToggleActiveRequest extends FormRequest
     {
         return [
             'id' => 'required|numeric|exists:coupons,id',
-            'id' => ['required', 'integer', new ValidCoupon()],
         ];
     }
 
