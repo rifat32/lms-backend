@@ -212,6 +212,8 @@ Route::middleware('auth:api')->group(function () {
 
     // Enrollments report
     Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollments']);
+    // REPORT API
+    Route::get('/v1.0/reports/revenue', [ReportController::class, 'revenueReport']);
 
 
 
