@@ -211,7 +211,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/reports/sales', [ReportController::class, 'sales']);
 
     // Enrollments report
-    Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollments']);
+    Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollmentAnalytics']);
     // REPORT API
     Route::get('/v1.0/reports/revenue', [ReportController::class, 'revenueReport']);
 

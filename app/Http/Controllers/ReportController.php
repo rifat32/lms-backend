@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -98,54 +99,71 @@ class ReportController extends Controller
     /**
      * @OA\Get(
      *     path="/v1.0/reports/enrollments",
-     *     operationId="enrollmentReport",
+     *     operationId="enrollmentAnalytics",
      *     tags={"Reports"},
-     *     summary="Get enrollment count per course (role: Admin only)",
+     *     summary="Get enrollment analytics (role: Owner/Admin/Lecturer)",
+     *     description="Returns total enrollments, average daily enrollments, daily trends and course performance within an optional date range.",
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Start date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="End date (YYYY-MM-DD)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Enrollment report retrieved successfully",
+     *         description="Analytics retrieved successfully",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Enrollment report retrieved successfully"),
+     *             @OA\Property(property="message", type="string", example="Enrollment analytics retrieved successfully"),
      *             @OA\Property(
      *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="course_id", type="integer", example=1),
-     *                     @OA\Property(property="title", type="string", example="Laravel Basics"),
-     *                     @OA\Property(property="enrolled_students_count", type="integer", example=25)
+     *                 type="object",
+     *                 @OA\Property(property="totalEnrollments", type="integer", example=2847),
+     *                 @OA\Property(property="avgDailyEnrollments", type="number", format="float", example=94.0),
+     *                 @OA\Property(
+     *                     property="enrollmentTrends",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="date", type="string", format="date", example="2025-02-01"),
+     *                         @OA\Property(property="count", type="integer", example=80)
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="coursePerformance",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="course_id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="React Fundamentals"),
+     *                         @OA\Property(property="enrolled_students_count", type="integer", example=234)
+     *                     )
      *                 )
      *             )
      *         )
      *     ),
      *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request - Invalid parameters",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized - Authentication required",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     ),
-     *     @OA\Response(
      *         response=403,
-     *         description="Forbidden - Only admin users can access this report",
+     *         description="Forbidden – insufficient privileges",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="You do not have permission to access this report.")
      *         )
      *     ),
      *     @OA\Response(
-     *         response=404,
-     *         description="Resource not found",
+     *         response=400,
+     *         description="Bad Request",
      *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Resource not found.")
+     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
      *         )
      *     ),
      *     @OA\Response(
@@ -158,30 +176,61 @@ class ReportController extends Controller
      * )
      */
 
-    public function enrollments()
+
+    public function enrollmentAnalytics(Request $request)
     {
+        // Authorise only owners, admins or lecturers
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
+                'message' => 'You do not have permission to access this report.'
+            ], 403); // 403 Forbidden – authenticated but lacks privileges:contentReference[oaicite:3]{index=3}
         }
 
-        $courses = Course::with('enrollments')->get();
+        // Determine the reporting period; defaults to current month
+        $start = $request->query('start_date')
+            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            : Carbon::now()->startOfMonth();
 
-        $enrollment_courses = $courses->map(function ($course) {
-            $enrolled_students_count = $course->enrollments()->count();
+        $end   = $request->query('end_date')
+            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfDay();
 
-            return [
-                'course_id' => $course->id,
-                'title' => $course->title,
-                'enrolled_students_count' => $enrolled_students_count,
-            ];
-        });
+        // Total enrollments in the period
+        $totalEnrollments = Enrollment::whereBetween('created_at', [$start, $end])->count();
+
+        // Number of days in the period for averaging
+        $days = $start->diffInDays($end) + 1;
+        $avgDailyEnrollments = $days > 0 ? round($totalEnrollments / $days, 2) : 0;
+
+        // Enrollment trends: group by date and count
+        $trends = Enrollment::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('date')
+            ->get();
+
+        // Course performance: count enrollments per course efficiently
+        $coursePerformance = Course::withCount(['enrollments' => function ($query) use ($start, $end) {
+            $query->whereBetween('created_at', [$start, $end]);
+        }])
+            ->get()
+            ->map(function ($course) {
+                return [
+                    'course_id' => $course->id,
+                    'title'     => $course->title,
+                    'enrolled_students_count' => $course->enrollments_count,
+                ];
+            });
 
         return response()->json([
             'success' => true,
-            'message' => 'Enrollment courses retrieved successfully',
-            'data' => $enrollment_courses
+            'message' => 'Enrollment analytics retrieved successfully',
+            'data' => [
+                'totalEnrollments'      => $totalEnrollments,
+                'avgDailyEnrollments'   => $avgDailyEnrollments,
+                'enrollmentTrends'      => $trends,
+                'coursePerformance'     => $coursePerformance,
+            ],
         ]);
     }
 
