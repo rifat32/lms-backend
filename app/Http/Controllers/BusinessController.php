@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BusinessController extends Controller
@@ -304,20 +305,44 @@ class BusinessController extends Controller
             // ========================
             // HANDLE LOGO
             // ========================
+            // if ($request->hasFile('logo')) {
+            //     $logo_filename = $this->putSingleFile(
+            //         $request->file('logo'),
+            //         $folder_path,
+            //         $business->getRawOriginal('logo')
+            //     );
+            //     $request_data['logo'] = $logo_filename;
+            // } elseif ($request->filled('logo') && is_string($request->input('logo'))) {
+            //     $request_data['logo'] = basename($request->input('logo'));
+            // }
+            // If uploaded file
+            // Add debug logging to find the issue
+            $cover_filename = $business->getRawOriginal('logo');
+            $folder_path = "business_1/business_{$business->id}";
+
+            // If uploaded file
             if ($request->hasFile('logo')) {
-                $logo_filename = $this->putSingleFile(
-                    $request->file('logo'),
-                    $folder_path,
-                    $business->getRawOriginal('logo')
-                );
-                $request_data['logo'] = $logo_filename;
-            } elseif ($request->filled('logo') && is_string($request->input('logo'))) {
-                $request_data['logo'] = basename($request->input('logo'));
-            } else {
-                // Remove from update data if not provided (keep existing)
-                unset($request_data['logo']);
+                $file = $request->file('logo');
+                $new_filename = $file->hashName();
+                $file->storeAs($folder_path, $new_filename, 'public');
+
+                // Delete old cover if exists
+                if ($cover_filename) {
+                    $old_path = "{$folder_path}/{$cover_filename}";
+                    if (Storage::disk('public')->exists($old_path)) {
+                        Storage::disk('public')->delete($old_path);
+                    }
+                }
+
+                $cover_filename = $new_filename;
+                $request_data['logo'] = $cover_filename;
             }
 
+            // If string file path provided instead of upload
+            if ($request->filled('logo') && is_string($request->input('logo'))) {
+                $cover_filename = basename($request->input('logo'));
+                $request_data['logo'] = $cover_filename;
+            }
             // ========================
             // HANDLE IMAGE
             // ========================
@@ -330,8 +355,6 @@ class BusinessController extends Controller
                 $request_data['image'] = $imageFilename;
             } elseif ($request->filled('image') && is_string($request->input('image'))) {
                 $request_data['image'] = basename($request->input('image'));
-            } else {
-                unset($request_data['image']);
             }
 
             // ========================
@@ -346,8 +369,6 @@ class BusinessController extends Controller
                 $request_data['background_image'] = $bgFilename;
             } elseif ($request->filled('background_image') && is_string($request->input('background_image'))) {
                 $request_data['background_image'] = basename($request->input('background_image'));
-            } else {
-                unset($request_data['background_image']);
             }
 
             // ========================
@@ -367,15 +388,12 @@ class BusinessController extends Controller
                     }
                 }
                 $request_data['images'] = $images;
-            } else {
-                unset($request_data['images']);
             }
 
             // ========================
             // UPDATE BUSINESS - Now images won't be overwritten
             // ========================
-            $business->fill($request_data);
-            $business->save();
+            $business->update($request_data);
 
             DB::commit();
 

@@ -159,10 +159,16 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "password"
+                                    "password",
+                                    "password_confirmation"
                                 ],
                                 "properties": {
                                     "password": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "aaaaaaaa"
+                                    },
+                                    "password_confirmation": {
                                         "type": "string",
                                         "format": "string",
                                         "example": "aaaaaaaa"
@@ -191,7 +197,7 @@
                         }
                     },
                     "422": {
-                        "description": "Unprocesseble Content",
+                        "description": "Unprocessable Content",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -632,537 +638,6 @@
                 ]
             }
         },
-        "/v1.0/businesses": {
-            "get": {
-                "tags": [
-                    "business_management"
-                ],
-                "summary": "Get list of all businesses (role: Super Admin only)",
-                "operationId": "getAllBusinesses",
-                "responses": {
-                    "200": {
-                        "description": "Businesses fetched successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Businesses fetched successfully"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Tech Corp Ltd"
-                                                    },
-                                                    "email": {
-                                                        "type": "string",
-                                                        "example": "info@techcorp.com"
-                                                    },
-                                                    "phone": {
-                                                        "type": "string",
-                                                        "example": "+880123456789"
-                                                    },
-                                                    "registration_date": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2025-09-22"
-                                                    },
-                                                    "status": {
-                                                        "type": "string",
-                                                        "example": "active"
-                                                    },
-                                                    "created_at": {
-                                                        "type": "string",
-                                                        "format": "date-time",
-                                                        "example": "2025-09-22T12:00:00Z"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to perform this action."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Something went wrong on the server."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "business_management"
-                ],
-                "summary": "Update an existing business (role: Super Admin only)",
-                "operationId": "updateBusiness",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "user": {
-                                        "required": [
-                                            "id",
-                                            "first_name",
-                                            "last_Name",
-                                            "email"
-                                        ],
-                                        "properties": {
-                                            "id": {
-                                                "description": "User ID (must exist in users table)",
-                                                "type": "integer",
-                                                "example": 5
-                                            },
-                                            "first_name": {
-                                                "description": "User first name",
-                                                "type": "string",
-                                                "example": "John"
-                                            },
-                                            "last_Name": {
-                                                "description": "User last name",
-                                                "type": "string",
-                                                "example": "Doe"
-                                            },
-                                            "email": {
-                                                "description": "User email",
-                                                "type": "string",
-                                                "example": "admin@yopmail.com"
-                                            },
-                                            "password": {
-                                                "description": "Optional user password (min 6 chars)",
-                                                "type": "string",
-                                                "example": "secret123"
-                                            }
-                                        },
-                                        "type": "object"
-                                    },
-                                    "business": {
-                                        "required": [
-                                            "id",
-                                            "name",
-                                            "country",
-                                            "city",
-                                            "address_line_1"
-                                        ],
-                                        "properties": {
-                                            "id": {
-                                                "description": "Business ID (must exist in businesses table)",
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "description": "Business name",
-                                                "type": "string",
-                                                "example": "Acme Corporation"
-                                            },
-                                            "about": {
-                                                "description": "About the business",
-                                                "type": "string",
-                                                "example": "We provide tech solutions worldwide."
-                                            },
-                                            "web_page": {
-                                                "description": "Website URL",
-                                                "type": "string",
-                                                "example": "https://acme.com"
-                                            },
-                                            "pin_code": {
-                                                "description": "Optional pin code",
-                                                "type": "string",
-                                                "example": "1207"
-                                            },
-                                            "phone": {
-                                                "description": "Business phone number",
-                                                "type": "string",
-                                                "example": "+8801765432109"
-                                            },
-                                            "email": {
-                                                "description": "Business email",
-                                                "type": "string",
-                                                "example": "contact@acme.com"
-                                            },
-                                            "additional_information": {
-                                                "description": "Additional info",
-                                                "type": "string",
-                                                "example": "24/7 support available"
-                                            },
-                                            "lat": {
-                                                "description": "Latitude",
-                                                "type": "string",
-                                                "example": "23.7808875"
-                                            },
-                                            "long": {
-                                                "description": "Longitude",
-                                                "type": "string",
-                                                "example": "90.2792371"
-                                            },
-                                            "currency": {
-                                                "description": "Currency code",
-                                                "type": "string",
-                                                "example": "BDT"
-                                            },
-                                            "country": {
-                                                "description": "Country name",
-                                                "type": "string",
-                                                "example": "Bangladesh"
-                                            },
-                                            "city": {
-                                                "description": "City name",
-                                                "type": "string",
-                                                "example": "Dhaka"
-                                            },
-                                            "postcode": {
-                                                "description": "Postal code",
-                                                "type": "string",
-                                                "example": "1207"
-                                            },
-                                            "address_line_1": {
-                                                "description": "Primary address line",
-                                                "type": "string",
-                                                "example": "123 Business Street"
-                                            },
-                                            "address_line_2": {
-                                                "description": "Secondary address line",
-                                                "type": "string",
-                                                "example": "2nd Floor, Suite 5"
-                                            },
-                                            "logo": {
-                                                "description": "Logo URL",
-                                                "type": "string",
-                                                "example": "https://cdn.acme.com/logo.png"
-                                            },
-                                            "image": {
-                                                "description": "Image URL",
-                                                "type": "string",
-                                                "example": "https://cdn.acme.com/cover.jpg"
-                                            },
-                                            "background_image": {
-                                                "description": "Background image URL",
-                                                "type": "string",
-                                                "example": "https://cdn.acme.com/bg.jpg"
-                                            },
-                                            "theme": {
-                                                "description": "Business theme",
-                                                "type": "string",
-                                                "example": "dark"
-                                            },
-                                            "images": {
-                                                "description": "Optional image list",
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string",
-                                                    "example": "https://cdn.acme.com/gallery/img1.jpg"
-                                                }
-                                            }
-                                        },
-                                        "type": "object"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Business updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Business updated successfully"
-                                        },
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "Acme Corporation"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "example": "contact@acme.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "+8801765432109"
-                                                },
-                                                "country": {
-                                                    "type": "string",
-                                                    "example": "Bangladesh"
-                                                },
-                                                "city": {
-                                                    "type": "string",
-                                                    "example": "Dhaka"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "example": "active"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-22T12:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2025-09-22T12:00:00Z"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to perform this action."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The name field is required."
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "user.id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The user ID field is required."
-                                                    }
-                                                },
-                                                "user.first_name": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The user.first name field is required."
-                                                    }
-                                                },
-                                                "user.last_Name": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The last name field is required."
-                                                    }
-                                                },
-                                                "user.email": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The email field is required."
-                                                    }
-                                                },
-                                                "business.id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The business ID field is required."
-                                                    }
-                                                },
-                                                "business.name": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The name field is required."
-                                                    }
-                                                },
-                                                "business.country": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The country field is required."
-                                                    }
-                                                },
-                                                "business.city": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The city field is required."
-                                                    }
-                                                },
-                                                "business.address_line_1": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The address line 1 field is required."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
         "/v1.0/businesses/{id}": {
             "get": {
                 "tags": [
@@ -1327,6 +802,341 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Business not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Something went wrong on the server."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "Update an existing business (files only for logo/image/background_image/images)",
+                "operationId": "updateBusiness",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Business ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "description": "Send fields as multipart/form-data.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Acme Corporation"
+                                    },
+                                    "about": {
+                                        "type": "string",
+                                        "example": "We provide tech solutions worldwide."
+                                    },
+                                    "web_page": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://acme.com"
+                                    },
+                                    "pin_code": {
+                                        "type": "string",
+                                        "example": "1207"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+8801765432109"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "contact@acme.com"
+                                    },
+                                    "additional_information": {
+                                        "type": "string",
+                                        "example": "24/7 support available"
+                                    },
+                                    "lat": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 23.7808875
+                                    },
+                                    "long": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 90.2792371
+                                    },
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "BDT"
+                                    },
+                                    "country": {
+                                        "type": "string",
+                                        "example": "Bangladesh"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Dhaka"
+                                    },
+                                    "postcode": {
+                                        "type": "string",
+                                        "example": "1207"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string",
+                                        "example": "123 Business Street"
+                                    },
+                                    "address_line_2": {
+                                        "type": "string",
+                                        "example": "2nd Floor, Suite 5"
+                                    },
+                                    "theme": {
+                                        "type": "string",
+                                        "example": "dark"
+                                    },
+                                    "logo": {
+                                        "description": "Image file only (jpg, jpeg, png, webp, avif, gif). Max 5MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "image": {
+                                        "description": "Image file only (jpg, jpeg, png, webp, avif, gif). Max 5MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "background_image": {
+                                        "description": "Image file only (jpg, jpeg, png, webp, avif, gif). Max 5MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "images[]": {
+                                        "description": "Multiple image files. Use key images[] for each file.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Business updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Business updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "logo": {
+                                                    "type": "string",
+                                                    "example": "http://yourapp.com/storage-proxy/business_1/business_1/logo123.png"
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://yourapp.com/storage-proxy/business_1/business_1/cover.jpg"
+                                                },
+                                                "background_image": {
+                                                    "type": "string",
+                                                    "example": "http://yourapp.com/storage-proxy/business_1/business_1/bg.jpg"
+                                                },
+                                                "images": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "http://yourapp.com/storage-proxy/business_1/business_1/gallery1.jpg"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/businesses": {
+            "get": {
+                "tags": [
+                    "business_management"
+                ],
+                "summary": "Get list of all businesses (role: Super Admin only)",
+                "operationId": "getAllBusinesses",
+                "responses": {
+                    "200": {
+                        "description": "Businesses fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Businesses fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Tech Corp Ltd"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "info@techcorp.com"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "+880123456789"
+                                                    },
+                                                    "registration_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-09-22"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2025-09-22T12:00:00Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to perform this action."
                                         }
                                     },
                                     "type": "object"
@@ -1770,6 +1580,391 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Course not completed yet."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/coupons": {
+            "get": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Get all coupons with filters and pagination",
+                "description": "Fetch all coupons for the LMS system, filtered and paginated",
+                "operationId": "getAllCoupons",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by coupon name or code",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Filter by active status (1 or 0)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Filter coupons starting after this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Filter coupons ending before this date",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page (default 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Operation"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Create a new coupon",
+                "description": "Create a new LMS coupon",
+                "operationId": "createCoupon",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "code",
+                                    "discount_type",
+                                    "discount_amount",
+                                    "coupon_start_date",
+                                    "coupon_end_date"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "New Year Offer"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "NY2025"
+                                    },
+                                    "discount_type": {
+                                        "type": "string",
+                                        "example": "percentage"
+                                    },
+                                    "discount_amount": {
+                                        "type": "number",
+                                        "example": 15
+                                    },
+                                    "coupon_start_date": {
+                                        "type": "string",
+                                        "example": "2025-01-01"
+                                    },
+                                    "coupon_end_date": {
+                                        "type": "string",
+                                        "example": "2025-12-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/coupons/{id}": {
+            "put": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Update an existing coupon",
+                "description": "Update an existing LMS coupon",
+                "operationId": "updateCoupon",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Coupon ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Summer Sale"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "SUMMER25"
+                                    },
+                                    "discount_type": {
+                                        "type": "string",
+                                        "example": "percentage"
+                                    },
+                                    "discount_amount": {
+                                        "type": "number",
+                                        "example": 25
+                                    },
+                                    "coupon_start_date": {
+                                        "type": "string",
+                                        "example": "2025-05-01"
+                                    },
+                                    "coupon_end_date": {
+                                        "type": "string",
+                                        "example": "2025-08-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated successfully"
+                    },
+                    "404": {
+                        "description": "Coupon not found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Delete coupon by id",
+                "description": "Deletes a coupon for a specific garage (requires coupon_delete permission)",
+                "operationId": "deleteCouponById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Coupon ID",
+                        "required": true,
+                        "example": 6
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Coupon not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/coupons/toggle-active": {
+            "put": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Toggle coupon active status",
+                "description": "Toggle the is_active flag of a coupon (requires coupon_update permission)",
+                "operationId": "toggleActiveCoupon",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "description": "Coupon id",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon status updated successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Coupon not found"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/coupons/apply": {
+            "post": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Apply coupon code to total amount",
+                "description": "Applies a valid coupon to the provided total amount and returns the discount and final amount.",
+                "operationId": "applyCoupon",
+                "requestBody": {
+                    "description": "Coupon application details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "coupon_code",
+                                    "total_amount"
+                                ],
+                                "properties": {
+                                    "coupon_code": {
+                                        "description": "The coupon code to apply",
+                                        "type": "string",
+                                        "example": "DISCOUNT10"
+                                    },
+                                    "total_amount": {
+                                        "description": "The total amount before discount",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Coupon applied successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Coupon applied successfully"
+                                        },
+                                        "discount_amount": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 10
+                                        },
+                                        "final_amount": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 90
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Invalid or expired coupon code",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid or expired coupon code"
                                         }
                                     },
                                     "type": "object"
@@ -2732,6 +2927,16 @@
                         }
                     },
                     {
+                        "name": "is_popular",
+                        "in": "query",
+                        "description": "Filter by is featured: 1 for featured, 0 for not non featured.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
                         "name": "category_ids",
                         "in": "query",
                         "description": "Filter by one or more category IDs (comma-separated). Example: 1,3,5",
@@ -3169,7 +3374,7 @@
                     "Trash"
                 ],
                 "summary": "Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
-                "description": "Retrieve detailed course information including lessons, quizzes, and progress.\r\n *     Authenticated and enrolled users only",
+                "description": "Retrieve detailed course information including lessons, quizzes, and progress.\r\n     *     Authenticated and enrolled users only",
                 "operationId": "getCourseByIdSecureClient",
                 "parameters": [
                     {
@@ -10578,11 +10783,34 @@
                 "tags": [
                     "Reports"
                 ],
-                "summary": "Get enrollment count per course (role: Admin only)",
-                "operationId": "enrollmentReport",
+                "summary": "Get enrollment analytics (role: Owner/Admin/Lecturer)",
+                "description": "Returns total enrollments, average daily enrollments, daily trends and course performance within an optional date range.",
+                "operationId": "enrollmentAnalytics",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Enrollment report retrieved successfully",
+                        "description": "Analytics retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -10593,27 +10821,74 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Enrollment report retrieved successfully"
+                                            "example": "Enrollment analytics retrieved successfully"
                                         },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "course_id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "title": {
-                                                        "type": "string",
-                                                        "example": "Laravel Basics"
-                                                    },
-                                                    "enrolled_students_count": {
-                                                        "type": "integer",
-                                                        "example": 25
+                                            "properties": {
+                                                "totalEnrollments": {
+                                                    "type": "integer",
+                                                    "example": 2847
+                                                },
+                                                "avgDailyEnrollments": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 94
+                                                },
+                                                "enrollmentTrends": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-02-01"
+                                                            },
+                                                            "count": {
+                                                                "type": "integer",
+                                                                "example": 80
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     }
                                                 },
-                                                "type": "object"
-                                            }
+                                                "coursePerformance": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "React Fundamentals"
+                                                            },
+                                                            "enrolled_students_count": {
+                                                                "type": "integer",
+                                                                "example": 234
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – insufficient privileges",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to access this report."
                                         }
                                     },
                                     "type": "object"
@@ -10622,7 +10897,167 @@
                         }
                     },
                     "400": {
-                        "description": "Bad Request - Invalid parameters",
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while retrieving the report."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/reports/revenue": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get revenue report per course (role: Admin only)",
+                "description": "Returns total revenue, average order value, daily revenue trends and per-course performance. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+                "operationId": "revenueReport",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date for the report (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date for the report (YYYY-MM-DD)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Revenue report retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Revenue report retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "totalRevenue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 142560
+                                                },
+                                                "averageOrderValue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 195
+                                                },
+                                                "revenueTrends": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-02-01"
+                                                            },
+                                                            "revenue": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 22500
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "coursePerformance": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "course_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "React Fundamentals"
+                                                            },
+                                                            "revenue": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 45600
+                                                            },
+                                                            "enrollments": {
+                                                                "type": "integer",
+                                                                "example": 234
+                                                            },
+                                                            "aov": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 195
+                                                            },
+                                                            "change": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 18,
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request – Invalid parameters",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -10638,7 +11073,7 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized - Authentication required",
+                        "description": "Unauthorized – Authentication required",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -10654,7 +11089,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - Only admin users can access this report",
+                        "description": "Forbidden – Only admin users can access this report",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -10678,6 +11113,294 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Resource not found."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while retrieving the report."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/reports/overview": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get overview and student analytics metrics (roles: owner, admin, lecturer)",
+                "description": "Returns total students, course completions, total revenue, enrollment trends, active students and new enrollments. Accepts optional start_date and end_date parameters (YYYY-MM-DD).",
+                "operationId": "overviewReport",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date for the report (YYYY-MM-DD). Defaults to start of current month for overview metrics and last 7 days for active/new enrollments if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date for the report (YYYY-MM-DD). Defaults to end of current day if not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Overview metrics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Overview metrics retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "totalStudents": {
+                                                    "type": "integer",
+                                                    "example": 1234
+                                                },
+                                                "courseCompletions": {
+                                                    "type": "integer",
+                                                    "example": 892
+                                                },
+                                                "totalRevenue": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 48650
+                                                },
+                                                "enrollmentTrends": {
+                                                    "description": "Daily enrollment counts within the selected period",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-01-01"
+                                                            },
+                                                            "count": {
+                                                                "type": "integer",
+                                                                "example": 100
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "activeStudents": {
+                                                    "type": "integer",
+                                                    "example": 1045
+                                                },
+                                                "newEnrollments": {
+                                                    "type": "integer",
+                                                    "example": 234
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks required role",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request – invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while retrieving the report."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/reports/course-performance": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get course performance metrics (roles: owner, admin, lecturer)",
+                "description": "Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+                "operationId": "coursePerformanceReport",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Start date for the report (YYYY-MM-DD). Defaults to the start of the current month.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "End date for the report (YYYY-MM-DD). Defaults to the end of the current day.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course performance metrics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Course performance metrics retrieved successfully"
+                                        },
+                                        "data": {
+                                            "description": "List of courses with performance metrics",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "course_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "React Fundamentals"
+                                                    },
+                                                    "enrollments": {
+                                                        "type": "integer",
+                                                        "example": 456
+                                                    },
+                                                    "completion_rate": {
+                                                        "type": "string",
+                                                        "example": "80%"
+                                                    },
+                                                    "revenue": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 45600
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – user lacks required role",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request – invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
                                         }
                                     },
                                     "type": "object"
@@ -12270,6 +12993,9 @@
                                     "general__featured_courses_count": {
                                         "type": "integer"
                                     },
+                                    "general__popular_courses_count": {
+                                        "type": "integer"
+                                    },
                                     "general__loading_animation": {
                                         "type": "string"
                                     },
@@ -12564,8 +13290,8 @@
                 "tags": [
                     "Payments"
                 ],
-                "summary": "Create a Stripe Payment Intent for a course (role: Student only)",
-                "description": "Creates a Stripe Payment Intent for the authenticated user to pay for a course. Discount and coupon logic are currently disabled.",
+                "summary": "Create a Stripe Payment Intent for one or more courses (role: Student only)",
+                "description": "Creates a Stripe Payment Intent for selected courses. Supports optional coupon codes.",
                 "operationId": "createPaymentIntent",
                 "requestBody": {
                     "required": true,
@@ -12573,13 +13299,22 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "course_id"
+                                    "course_ids"
                                 ],
                                 "properties": {
-                                    "course_id": {
-                                        "description": "The ID of the course being purchased",
-                                        "type": "integer",
-                                        "example": 101
+                                    "course_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            101,
+                                            102
+                                        ]
+                                    },
+                                    "coupon_code": {
+                                        "type": "string",
+                                        "example": "SAVE20"
                                     }
                                 },
                                 "type": "object"
@@ -12597,6 +13332,20 @@
                                         "clientSecret": {
                                             "type": "string",
                                             "example": "pi_3OzFKa2LqWcU...secret_123"
+                                        },
+                                        "totalAmount": {
+                                            "type": "number",
+                                            "example": 199.99
+                                        },
+                                        "discountAmount": {
+                                            "type": "number",
+                                            "example": 20
+                                        },
+                                        "courses": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -12605,112 +13354,22 @@
                         }
                     },
                     "400": {
-                        "description": "Bad request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request payload."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Bad request"
                     },
                     "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     },
                     "403": {
-                        "description": "Forbidden - Stripe not enabled or settings missing",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Stripe is not enabled."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Stripe not enabled"
                     },
                     "404": {
-                        "description": "Course not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Course not found."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Course not found"
                     },
                     "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The course_id field is required."
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "course_id": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "The course_id field is required."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     },
                     "500": {
-                        "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An unexpected error occurred while creating the payment intent."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Server error"
                     }
                 },
                 "security": [
@@ -12849,7 +13508,7 @@
                                                         "type": "string",
                                                         "example": "completed"
                                                     },
-                                                    "paid_at": {
+                                                    "created_at": {
                                                         "type": "string",
                                                         "format": "date-time",
                                                         "example": "2024-01-13T12:00:00Z"
@@ -13023,7 +13682,7 @@
                                                     "type": "string",
                                                     "example": "pi_123456789"
                                                 },
-                                                "paid_at": {
+                                                "created_at": {
                                                     "type": "string",
                                                     "format": "date-time",
                                                     "example": "2024-01-13T12:00:00Z"
@@ -13090,6 +13749,253 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/student-profile/{id}": {
+            "patch": {
+                "tags": [
+                    "student_management.profile"
+                ],
+                "summary": "Update student profile (and basic user fields)",
+                "description": "Partial updates supported. multipart/form-data allows profile_photo upload.",
+                "operationId": "updateStudentProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID to update",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "bio": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "Passionate learner in tech and science"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "123 Main St, City"
+                                    },
+                                    "learning_preferences[preferred_learning_time]": {
+                                        "type": "string",
+                                        "enum": [
+                                            "morning",
+                                            "afternoon",
+                                            "evening",
+                                            "night"
+                                        ],
+                                        "example": "morning"
+                                    },
+                                    "learning_preferences[daily_goal]": {
+                                        "type": "integer",
+                                        "maximum": 24,
+                                        "minimum": 1,
+                                        "example": 8
+                                    },
+                                    "interests[]": {
+                                        "description": "Send multiple interests[] parts",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "maxLength": 100
+                                        },
+                                        "example": [
+                                            "AI",
+                                            "Reading"
+                                        ]
+                                    },
+                                    "social_links[web_site]": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://myportfolio.example"
+                                    },
+                                    "social_links[facebook]": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://facebook.com/username"
+                                    },
+                                    "social_links[linkedin]": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://linkedin.com/in/username"
+                                    },
+                                    "social_links[github]": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://github.com/username"
+                                    },
+                                    "social_links[twitter]": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://twitter.com/username"
+                                    },
+                                    "user[title]": {
+                                        "type": "string",
+                                        "example": "Mr."
+                                    },
+                                    "user[first_name]": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "user[last_name]": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "user[phone]": {
+                                        "type": "string",
+                                        "example": "+8801765432109"
+                                    },
+                                    "user[profile_photo]": {
+                                        "description": "Image file (jpg, jpeg, png, webp, avif, gif). Max 5MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "title": {
+                                                            "type": "string",
+                                                            "example": "Mr."
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "John"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "Doe"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "+8801765432109"
+                                                        },
+                                                        "profile_photo": {
+                                                            "type": "string",
+                                                            "example": "http://yourapp.com/storage/users/1/abc123.jpg"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "profile": {
+                                                    "properties": {
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "bio": {
+                                                            "type": "string",
+                                                            "example": "Passionate learner in tech and science"
+                                                        },
+                                                        "address_line_1": {
+                                                            "type": "string",
+                                                            "example": "123 Main St, City"
+                                                        },
+                                                        "learning_preferences": {
+                                                            "properties": {
+                                                                "preferred_learning_time": {
+                                                                    "type": "string",
+                                                                    "example": "morning"
+                                                                },
+                                                                "daily_goal": {
+                                                                    "type": "integer",
+                                                                    "example": 8
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "interests": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "string"
+                                                            },
+                                                            "example": [
+                                                                "AI",
+                                                                "Reading"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "social_links": {
+                                                    "properties": {
+                                                        "web_site": {
+                                                            "type": "string",
+                                                            "format": "uri"
+                                                        },
+                                                        "facebook": {
+                                                            "type": "string",
+                                                            "format": "uri"
+                                                        },
+                                                        "linkedin": {
+                                                            "type": "string",
+                                                            "format": "uri"
+                                                        },
+                                                        "github": {
+                                                            "type": "string",
+                                                            "format": "uri"
+                                                        },
+                                                        "twitter": {
+                                                            "type": "string",
+                                                            "format": "uri"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -13778,6 +14684,282 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "put": {
+                "tags": [
+                    "user_management"
+                ],
+                "summary": "Update user profile (role: Admin only)",
+                "operationId": "updateUser",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "description": "Upload a file via multipart OR pass a string path via JSON, both using the same key: profile_photo.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Mr."
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1 555 123 4567"
+                                    },
+                                    "profile_photo": {
+                                        "description": "Image file (jpg, jpeg, png, webp, avif, gif), max 5MB",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Mr."
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+1 555 123 4567"
+                                    },
+                                    "profile_photo": {
+                                        "description": "Alternative to file upload: provide an existing path/URL; server stores the basename under users/{id}/",
+                                        "type": "string",
+                                        "example": "https://cdn.example.com/avatars/john.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Mr."
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "John"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "student"
+                                                },
+                                                "profile_photo": {
+                                                    "description": "Stored relative path in DB (column: profile_photo)",
+                                                    "type": "string",
+                                                    "example": "users/1/2a3b4c5d6e7f.jpg"
+                                                },
+                                                "profile_photo_url": {
+                                                    "description": "Public URL derived from storage (accessor)",
+                                                    "type": "string",
+                                                    "example": "https://static.example.com/storage/users/1/2a3b4c5d6e7f.jpg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request payload"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized access"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have permission to update this user"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email is already in use"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email field must be a valid email address"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred while updating the user profile"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/v1.0/users": {
@@ -13977,212 +15159,6 @@
                         "bearerAuth": []
                     }
                 ]
-            },
-            "put": {
-                "tags": [
-                    "user_management"
-                ],
-                "summary": "Update user profile (role: Admin only)",
-                "operationId": "updateUser",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "id",
-                                    "title",
-                                    "first_name",
-                                    "last_name",
-                                    "email"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "integer",
-                                        "example": "1"
-                                    },
-                                    "title": {
-                                        "type": "string",
-                                        "example": "Mr."
-                                    },
-                                    "first_name": {
-                                        "type": "string",
-                                        "example": "John"
-                                    },
-                                    "last_name": {
-                                        "type": "string",
-                                        "example": "Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "example": "john@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "newpassword"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "User profile updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "title": {
-                                            "type": "string",
-                                            "example": "Mr."
-                                        },
-                                        "first_name": {
-                                            "type": "string",
-                                            "example": "John"
-                                        },
-                                        "last_name": {
-                                            "type": "string",
-                                            "example": "Doe"
-                                        },
-                                        "email": {
-                                            "type": "string",
-                                            "example": "john@example.com"
-                                        },
-                                        "role": {
-                                            "type": "string",
-                                            "example": "student"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request - Invalid input",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invalid request payload"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing token",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized access"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden - Insufficient permissions",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "You do not have permission to update this user"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User not found"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict - Email already exists",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Email is already in use"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "The email field must be a valid email address"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "An unexpected error occurred while updating the user profile"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/v1.0/users/{ids}": {
@@ -14315,6 +15291,10 @@
             "description": "business_management"
         },
         {
+            "name": "coupon_management",
+            "description": "coupon_management"
+        },
+        {
             "name": "course_management.course_category",
             "description": "course_management.course_category"
         },
@@ -14349,6 +15329,10 @@
         {
             "name": "setting",
             "description": "setting"
+        },
+        {
+            "name": "student_management.profile",
+            "description": "student_management.profile"
         },
         {
             "name": "user_management",

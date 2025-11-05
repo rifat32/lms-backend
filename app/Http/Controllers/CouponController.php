@@ -27,13 +27,8 @@ class CouponController extends Controller
      *            @OA\Property(property="code", type="string", example="NY2025"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
      *            @OA\Property(property="discount_amount", type="number", example=15),
-     *            @OA\Property(property="min_total", type="number", example=50),
-     *            @OA\Property(property="max_total", type="number", example=500),
-     *            @OA\Property(property="redemptions", type="integer", example=10),
      *            @OA\Property(property="coupon_start_date", type="string", example="2025-01-01"),
      *            @OA\Property(property="coupon_end_date", type="string", example="2025-12-31"),
-     *            @OA\Property(property="is_auto_apply", type="boolean", example=true),
-     *            @OA\Property(property="is_active", type="boolean", example=true),
      *         )
      *      ),
      *      @OA\Response(response=201, description="Created"),
@@ -45,7 +40,14 @@ class CouponController extends Controller
     public function createCoupon(CouponCreateRequest $request)
     {
         $coupon = Coupon::create($request->validated());
-        return response()->json($coupon, 201);
+        return response()->json(
+            [
+                'success' => true,
+                'message' => 'Coupon created successfully',
+                'data' => $coupon
+            ],
+            201
+        );
     }
 
     /**
@@ -71,13 +73,8 @@ class CouponController extends Controller
      *            @OA\Property(property="code", type="string", example="SUMMER25"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
      *            @OA\Property(property="discount_amount", type="number", example=25),
-     *            @OA\Property(property="min_total", type="number", example=100),
-     *            @OA\Property(property="max_total", type="number", example=500),
-     *            @OA\Property(property="redemptions", type="integer", example=50),
      *            @OA\Property(property="coupon_start_date", type="string", example="2025-05-01"),
      *            @OA\Property(property="coupon_end_date", type="string", example="2025-08-31"),
-     *            @OA\Property(property="is_auto_apply", type="boolean", example=false),
-     *            @OA\Property(property="is_active", type="boolean", example=true),
      *         )
      *      ),
      *      @OA\Response(response=200, description="Updated successfully"),
