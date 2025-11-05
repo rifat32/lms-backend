@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCoupon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CouponUpdateRequest extends FormRequest
@@ -11,12 +12,19 @@ class CouponUpdateRequest extends FormRequest
         return true;
     }
 
+    public function prepareForValidation(): void
+    {
+        $this->merge([
+            'id' => $this->route('id'),
+        ]);
+    }
+
     public function rules(): array
     {
         $coupon_id = $this->route('id');
 
         return [
-
+            'id' => ['required', 'integer', new ValidCoupon()],
             'name' => 'sometimes|required|string|max:255',
             'code' => 'sometimes|required|string|max:255|unique:coupons,code,' . $coupon_id,
             'discount_type' => 'sometimes|required|in:percentage,fixed',

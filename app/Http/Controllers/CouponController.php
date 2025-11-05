@@ -93,15 +93,21 @@ class CouponController extends Controller
             ], 401);
         }
 
+        $request_payload = $request->validated();
+
         $coupon = Coupon::find($id);
 
         if (!$coupon) {
-            return response()->json(['message' => 'Coupon not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Coupon not found'
+            ], 404);
         }
 
-        $coupon->update($request->validated());
+        $coupon->update($request_payload);
 
         return response()->json([
+            'success' => true,
             'message' => 'Coupon updated successfully',
             'coupon' => $coupon
         ], 200);
@@ -223,9 +229,6 @@ class CouponController extends Controller
     public function toggleActiveCoupon(CouponToggleActiveRequest $request)
     {
         try {
-
-
-
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
                 return response()->json([
                     "message" => "You can not perform this action"
@@ -236,14 +239,18 @@ class CouponController extends Controller
             $data = $request->validated();
             $coupon = Coupon::find($data['id']);
 
-            if (! $coupon) {
-                return response()->json(['message' => 'Coupon not found'], 404);
+            if (!$coupon) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Coupon not found'
+                ], 404);
             }
 
             $coupon->is_active = !$coupon->is_active;
             $coupon->save();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Coupon status updated successfully',
                 'coupon' => $coupon
             ], 200);
@@ -256,7 +263,7 @@ class CouponController extends Controller
 
     /**
      * @OA\Delete(
-     *      path="/v1.0/coupons/{garage_id}/{id}",
+     *      path="/v1.0/coupons/{id}",
      *      operationId="deleteCouponById",
      *      tags={"coupon_management"},
      *      summary="Delete coupon by id",
@@ -289,12 +296,18 @@ class CouponController extends Controller
                 ->first();
 
             if (!$coupon) {
-                return response()->json(['message' => 'Coupon not found'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Coupon not found'
+                ], 404);
             }
 
             $coupon->delete();
 
-            return response()->json(['ok' => true], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon deleted successfully',
+            ], 200);
         } catch (\Exception $e) {
 
             return response()->json(['message' => $e->getMessage()], 500);

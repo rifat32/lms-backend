@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidCoupon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CouponToggleActiveRequest extends FormRequest
@@ -9,13 +10,13 @@ class CouponToggleActiveRequest extends FormRequest
     public function authorize(): bool
     {
         // controller will still validate permission; keep true so middleware/auth applies
-        return true;
+        return auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer']);
     }
 
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:coupons,id',
+            'id' => ['required', 'integer', new ValidCoupon()],
         ];
     }
 
@@ -23,7 +24,6 @@ class CouponToggleActiveRequest extends FormRequest
     {
         return [
             'id.required' => 'Coupon id is required',
-            'id.exists' => 'Coupon not found',
         ];
     }
 }
