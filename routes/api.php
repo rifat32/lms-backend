@@ -98,16 +98,15 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{ids}', [LessonController::class, 'deleteLesson']);
     });
 
-    Route::group(['prefix' => '/v1.0/payments'], function () {
-        Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
+    Route::group(['prefix' => '/v1.0/coupons'], function () {
+        Route::post('/', [CouponController::class, 'createCoupon']);
+        Route::put('/{id}', [CouponController::class, 'updateCoupon']);
+        Route::get('/', [CouponController::class, 'getAllCoupons']);
+        Route::put('/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
+        Route::delete('/{id}', [CouponController::class, 'deleteCouponById']);
+        Route::post('/apply', [CouponController::class, 'applyCoupon']);
     });
 
-    Route::get('/v1.0/payments', [StripePaymentController::class, 'getPayments']);
-    Route::get('/v1.0/payments/{id}', [StripePaymentController::class, 'getPaymentDetail']);
-
-
-    // quiz attempt
-    Route::put('/v1.0/quiz-attempts/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
 
     // sections
     Route::group(['prefix' => '/v1.0/sections'], function () {
@@ -118,13 +117,6 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{ids}', [SectionController::class, 'deleteSection']); // 🔥 Delete
     });
 
-    Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
-
-    Route::put('/v1.0/sections-add-lessons', [SectionController::class, 'updateSectionAddLessons']);
-
-    Route::put('/v1.0/sections-remove-lessons', [SectionController::class, 'updateSectionRemoveLessons']);
-
-
     // Business
     Route::post('/v1.0/register-user-with-business', [BusinessController::class, 'registerUserWithBusiness']);
     Route::group(['prefix' => '/v1.0/businesses'], function () {
@@ -132,6 +124,12 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [BusinessController::class, 'getAllBusinesses']);
         Route::get('/{id}', [BusinessController::class, 'getBusinessById']);
         Route::delete('/{ids}', [BusinessController::class, 'deleteBusiness']);
+    });
+
+    Route::group(['prefix' => '/v1.0/payments'], function () {
+        Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
+        Route::get('/', [StripePaymentController::class, 'getPayments']);
+        Route::get('/{id}', [StripePaymentController::class, 'getPaymentDetail']);
     });
 
     // QUESTION
@@ -154,16 +152,6 @@ Route::middleware('auth:api')->group(function () {
     });
 
 
-
-    // Enrollments
-    Route::post('/v1.0/enrollments', [EnrollmentController::class, 'createEnrollment']);
-    Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
-
-    // LESSON PROGRESS API
-    Route::put('/v1.0/lessons/progress', [LessonProgressController::class, 'updateLessonProgress']);
-    Route::put('/v1.0/lessons/time', [LessonProgressController::class, 'trackLessonTime']);
-
-
     // QUIZ API
     Route::prefix('/v1.0/quizzes')->group(function () {
         Route::get('/', [QuizController::class, 'getQuizWithQuestions']);
@@ -173,12 +161,11 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{id}', [QuizController::class, 'destroy']);
     });
 
-
     // Submit quiz attempt
-    Route::post('/v1.0/quizzes/attempts/submit', [QuizAttemptController::class, 'submitQuizAttempt']);
-
-    Route::post('/v1.0/quizzes/attempts/start', [QuizAttemptController::class, 'startQuizAttempt']);
-
+    Route::prefix('/v1.0/quizzes/attempts')->group(function () {
+        Route::post('/submit', [QuizAttemptController::class, 'submitQuizAttempt']);
+        Route::post('/start', [QuizAttemptController::class, 'startQuizAttempt']);
+    });
 
     // QUESTION CATEGORIES API
     Route::group(['prefix' => '/v1.0/question-categories'], function () {
@@ -187,6 +174,39 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
         Route::delete('/{ids}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
     });
+
+
+    // REPORT API
+    Route::group(['prefix' => '/v1.0/reports'], function () {
+        Route::get('/sales', [ReportController::class, 'sales']);
+        Route::get('/enrollments', [ReportController::class, 'enrollmentAnalytics']);
+        Route::get('/revenue', [ReportController::class, 'revenueReport']);
+        Route::get('/overview', [ReportController::class, 'overviewReport']);
+        Route::get('/course-performance', [ReportController::class, 'coursePerformanceReport']);
+    });
+
+
+
+    // quiz attempt
+    Route::put('/v1.0/quiz-attempts/grade', [QuizAttemptController::class, 'gradeQuizAttempt']);
+
+
+
+    Route::put('/v1.0/sections-with-lessons', [SectionController::class, 'updateSectionWithLessons']);
+
+    Route::put('/v1.0/sections-add-lessons', [SectionController::class, 'updateSectionAddLessons']);
+
+    Route::put('/v1.0/sections-remove-lessons', [SectionController::class, 'updateSectionRemoveLessons']);
+
+
+    // Enrollments
+    Route::post('/v1.0/enrollments', [EnrollmentController::class, 'createEnrollment']);
+    Route::get('/v1.0/users/{id}/enrollments', [EnrollmentController::class, 'userEnrollments']);
+
+    // LESSON PROGRESS API
+    Route::put('/v1.0/lessons/progress', [LessonProgressController::class, 'updateLessonProgress']);
+    Route::put('/v1.0/lessons/time', [LessonProgressController::class, 'trackLessonTime']);
+
 
 
 
@@ -207,14 +227,6 @@ Route::middleware('auth:api')->group(function () {
     // Submit course review
     Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'submitCourseReview']);
 
-    // Sales report
-    Route::get('/v1.0/reports/sales', [ReportController::class, 'sales']);
-
-    // Enrollments report
-    Route::get('/v1.0/reports/enrollments', [ReportController::class, 'enrollmentAnalytics']);
-    // REPORT API
-    Route::get('/v1.0/reports/revenue', [ReportController::class, 'revenueReport']);
-
 
 
     // BUSINESS SETTINGS API
@@ -231,15 +243,12 @@ Route::middleware('auth:api')->group(function () {
     // routes/api.php
     Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
 
-    Route::post('/v1.0/coupons', [CouponController::class, 'createCoupon']);
-    Route::put('/v1.0/coupons/{id}', [CouponController::class, 'updateCoupon']);
-    Route::get('/v1.0/coupons', [CouponController::class, 'getAllCoupons']);
-    Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
-    Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
-    Route::post('/v1.0/coupons/apply', [CouponController::class, 'applyCoupon']);
+
 
     Route::patch('/v1.0/student-profile/{id}', [StudentProfileController::class, 'updateStudentProfile']);
 });
+
+
 
 // Get all reviews (auth optional)
 Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCourseReviews']);

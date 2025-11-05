@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
@@ -402,6 +403,274 @@ class ReportController extends Controller
             'averageOrderValue' => (float) $averageOrderValue,
             'revenueTrends'     => $revenueTrends,
             'coursePerformance' => $coursePerformance,
+        ]);
+    }
+
+
+    /**
+     * @OA\Get(
+     *     path="/v1.0/reports/overview",
+     *     operationId="overviewReport",
+     *     tags={"Reports"},
+     *     summary="Get overview and student analytics metrics (roles: owner, admin, lecturer)",
+     *     description="Returns total students, course completions, total revenue, enrollment trends, active students and new enrollments. Accepts optional start_date and end_date parameters (YYYY-MM-DD).",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Start date for the report (YYYY-MM-DD). Defaults to start of current month for overview metrics and last 7 days for active/new enrollments if not provided.",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="End date for the report (YYYY-MM-DD). Defaults to end of current day if not provided.",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Overview metrics retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Overview metrics retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="totalStudents", type="integer", example=1234),
+     *                 @OA\Property(property="courseCompletions", type="integer", example=892),
+     *                 @OA\Property(property="totalRevenue", type="number", format="float", example=48650),
+     *                 @OA\Property(
+     *                     property="enrollmentTrends",
+     *                     type="array",
+     *                     description="Daily enrollment counts within the selected period",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="date", type="string", format="date", example="2025-01-01"),
+     *                         @OA\Property(property="count", type="integer", example=100)
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="activeStudents", type="integer", example=1045),
+     *                 @OA\Property(property="newEnrollments", type="integer", example=234)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden – user lacks required role",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request – invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred while retrieving the report.")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function overviewReport(Request $request)
+    {
+        // Only admins/owners/lecturers can see this
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json(['message' => 'You do not have permission.'], 403);
+        }
+
+        // Determine date range (defaults to current month)
+        $start = $request->query('start_date')
+            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $end = $request->query('end_date')
+            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        // Count all students (assuming a role/relationship setup)
+        $totalStudents = User::whereHas('roles', function ($q) {
+            $q->where('name', 'student');
+        })->count();
+
+        // Count course completions within the period (assuming completed_at is set)
+        $totalCompletions = Enrollment::whereNotNull('completed_at')
+            ->whereBetween('completed_at', [$start, $end])
+            ->count();
+
+        // Sum payments for total revenue
+        $totalRevenue = Payment::whereBetween('paid_at', [$start, $end])->sum('amount');
+
+        // Enrollment trends (daily counts)
+        $enrollmentTrends = Enrollment::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->whereBetween('created_at', [$start, $end])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('date')
+            ->get();
+
+        $start = $request->query('start_date')
+            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            : Carbon::now()->subDays(7)->startOfDay();  // default to last 7 days
+        $end   = $request->query('end_date')
+            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        // Count active students BASE ON PROGRESS
+        $activeStudents = Enrollment::whereBetween('enrolled_at', [$start, $end])
+            ->where('progress', '>', 0)
+            ->where('progress', '<', 100)
+            ->distinct('user_id')
+            ->count('user_id');
+
+        // Count new enrollments
+        $newEnrollments = Enrollment::whereBetween('enrolled_at', [$start, $end])
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Overview metrics retrieved successfully',
+            'data' => [
+                'totalStudents'    => $totalStudents,
+                'courseCompletions' => $totalCompletions,
+                'totalRevenue'     => $totalRevenue,
+                'enrollmentTrends' => $enrollmentTrends,
+                'activeStudents'  => $activeStudents,
+                'newEnrollments'  => $newEnrollments,
+            ],
+        ]);
+    }
+
+
+    /**
+     * @OA\Get(
+     *     path="/v1.0/reports/course-performance",
+     *     operationId="coursePerformanceReport",
+     *     tags={"Reports"},
+     *     summary="Get course performance metrics (roles: owner, admin, lecturer)",
+     *     description="Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Start date for the report (YYYY-MM-DD). Defaults to the start of the current month.",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="End date for the report (YYYY-MM-DD). Defaults to the end of the current day.",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course performance metrics retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course performance metrics retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 description="List of courses with performance metrics",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="course_id", type="integer", example=1),
+     *                     @OA\Property(property="title", type="string", example="React Fundamentals"),
+     *                     @OA\Property(property="enrollments", type="integer", example=456),
+     *                     @OA\Property(property="completion_rate", type="string", example="80%"),
+     *                     @OA\Property(property="revenue", type="number", format="float", example=45600)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden – user lacks required role",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You do not have permission.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request – invalid parameters",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid request parameters.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal Server Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="An unexpected error occurred while retrieving the report.")
+     *         )
+     *     )
+     * )
+     */
+
+
+    public function coursePerformanceReport(Request $request)
+    {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json(['message' => 'You do not have permission.'], 403);
+        }
+
+        $start = $request->query('start_date')
+            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $end   = $request->query('end_date')
+            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        $courses = Course::withCount([
+            // Enrollments within the period
+            'enrollments' => function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            },
+            // Completions within the period (alias completions_count)
+            'enrollments as completions_count' => function ($q) use ($start, $end) {
+                $q->whereNotNull('completed_at')
+                    ->whereBetween('completed_at', [$start, $end]);
+            },
+        ])
+            // Average rating (if ratings relationship exists)
+            // ->withAvg('ratings', 'rating')
+            // Sum of payments (course revenue) within the period
+            ->withSum(['payments as revenue_sum' => function ($q) use ($start, $end) {
+                $q->whereBetween('paid_at', [$start, $end]);
+            }], 'amount')
+            ->get()
+            ->map(function ($course) {
+                $enrollments    = $course->enrollments_count ?? 0;
+                $completions    = $course->completions_count ?? 0;
+                $completionRate = $enrollments > 0 ? round(($completions / $enrollments) * 100) : 0;
+                // $rating         = $course->ratings_avg_rating ? round($course->ratings_avg_rating, 1) : null;
+                return [
+                    'course_id'       => $course->id,
+                    'title'           => $course->title,
+                    'enrollments'     => $enrollments,
+                    'completion_rate' => $completionRate . '%',
+                    // 'rating'          => $rating,
+                    'revenue'         => $course->revenue_sum_amount ?? 0,
+                ];
+            });
+
+        // (Optionally) compute completion rate trends here if needed
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course performance metrics retrieved successfully',
+            'data'    => $courses,
         ]);
     }
 }
