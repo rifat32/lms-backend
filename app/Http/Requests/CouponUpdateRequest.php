@@ -13,12 +13,12 @@ class CouponUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $coupon_id = $this->route('id');
+      
 
         return [
-
+            "id" => ['required', 'numeric', 'exists:coupons,id'],
             'name' => 'sometimes|required|string|max:255',
-            'code' => 'sometimes|required|string|max:255|unique:coupons,code,' . $coupon_id,
+            'code' => 'sometimes|required|string|max:255|unique:coupons,code,' . $this->id,
             'discount_type' => 'sometimes|required|in:percentage,fixed',
             'discount_amount' => 'sometimes|required|numeric|min:0',
             'min_total' => 'nullable|numeric|min:0',

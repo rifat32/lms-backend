@@ -50,7 +50,7 @@ class CouponController extends Controller
 
     /**
      * @OA\Put(
-     *      path="/v1.0/coupons/{id}",
+     *      path="/v1.0/coupons",
      *      operationId="updateCoupon",
      *      tags={"coupon_management"},
      *      summary="Update an existing coupon",
@@ -66,7 +66,7 @@ class CouponController extends Controller
      *      @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-
+     *            @OA\Property(property="id", type="string", example="1"),
      *            @OA\Property(property="name", type="string", example="Summer Sale"),
      *            @OA\Property(property="code", type="string", example="SUMMER25"),
      *            @OA\Property(property="discount_type", type="string", example="percentage"),
@@ -85,7 +85,7 @@ class CouponController extends Controller
      *      @OA\Response(response=422, description="Validation Error")
      * )
      */
-    public function updateCoupon(CouponUpdateRequest $request, $id)
+    public function updateCoupon(CouponUpdateRequest $request,)
     {
           if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
@@ -218,7 +218,6 @@ class CouponController extends Controller
     {
         try {
            
-     
 
            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
@@ -231,7 +230,7 @@ class CouponController extends Controller
             $coupon = Coupon::find($data['id']);
 
             if (! $coupon) {
-                return response()->json(['message' => 'Coupon not found'], 404);
+                return response()->json(['message' => 'Coupon not found with id: ' . $data['id']], 404);
             }
 
             $coupon->is_active = !$coupon->is_active;
@@ -241,6 +240,7 @@ class CouponController extends Controller
                 'message' => 'Coupon status updated successfully',
                 'coupon' => $coupon
             ], 200);
+
         } catch (\Exception $e) {
      return response()->json(['message' => $e->getMessage()], 500);
         }

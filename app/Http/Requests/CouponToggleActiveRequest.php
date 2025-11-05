@@ -15,7 +15,7 @@ class CouponToggleActiveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:coupons,id',
+            'id' => 'required|numeric|exists:coupons,id',
         ];
     }
 

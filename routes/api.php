@@ -229,7 +229,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/v1.0/dashboard', [DashboardController::class, 'index']);
 
     Route::post('/v1.0/coupons', [CouponController::class, 'createCoupon']);
-    Route::put('/v1.0/coupons/{id}', [CouponController::class, 'updateCoupon']);
+    Route::put('/v1.0/coupons', [CouponController::class, 'updateCoupon']);
     Route::get('/v1.0/coupons', [CouponController::class, 'getAllCoupons']);
     Route::put('/v1.0/coupons/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
     Route::delete('/v1.0/coupons/{id}', [CouponController::class, 'deleteCouponById']);
