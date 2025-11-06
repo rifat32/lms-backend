@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ValidCoupon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CouponToggleActiveRequest extends FormRequest

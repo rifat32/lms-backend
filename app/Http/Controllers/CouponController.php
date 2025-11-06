@@ -51,8 +51,8 @@ class CouponController extends Controller
     }
 
     /**
-     * @OA\Put(
-     *      path="/v1.0/coupons",
+     * @OA\Patch(
+     *      path="/v1.0/coupons/{id}",
      *      operationId="updateCoupon",
      *      tags={"coupon_management"},
      *      summary="Update an existing coupon",
@@ -82,7 +82,7 @@ class CouponController extends Controller
      *      @OA\Response(response=422, description="Validation Error")
      * )
      */
-    public function updateCoupon(CouponUpdateRequest $request,)
+    public function updateCoupon(CouponUpdateRequest $request, $id)
     {
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
@@ -226,13 +226,13 @@ class CouponController extends Controller
     public function toggleActiveCoupon(CouponToggleActiveRequest $request)
     {
         try {
-           
 
-           if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json([
-                "message" => "You can not perform this action"
-            ], 401);
-        }
+
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json([
+                    "message" => "You can not perform this action"
+                ], 401);
+            }
 
 
             $data = $request->validated();
@@ -250,7 +250,6 @@ class CouponController extends Controller
                 'message' => 'Coupon status updated successfully',
                 'coupon' => $coupon
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
