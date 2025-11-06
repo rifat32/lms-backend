@@ -37,7 +37,7 @@ class AuthController extends Controller
         $payload = [
             'email' => $email,
             'random' => Str::random(32), // Randomness for uniqueness
-            'expires_at' => now()->addMinutes(5)->timestamp, // 1 hour expiry
+            'expires_at' => now()->addMinutes(5)->timestamp, // expire after 5 minutes
         ];
 
         $encoded = base64_encode(json_encode($payload));
@@ -187,8 +187,8 @@ class AuthController extends Controller
     /**
      *
      * @OA\Patch(
-     *      path="/forgetpassword/reset/{token}",
-     *      operationId="changePasswordByToken",
+     *      path="/reset-password/{token}",
+     *      operationId="resetPasswordWithToken",
      *      tags={"Auth"},
      *  @OA\Parameter(
      * name="token",
@@ -242,7 +242,7 @@ class AuthController extends Controller
      */
 
 
-    public function changePasswordWithToken(ChangePasswordWithTokenRequest $request, string $token = "")
+    public function resetPasswordWithToken(ChangePasswordWithTokenRequest $request, string $token = "")
     {
         $data = $request->validated();
 
@@ -253,7 +253,8 @@ class AuthController extends Controller
             $payload = $this->verifySignedToken($token);
             if (!$payload) {
                 return response()->json([
-                    'message' => 'Invalid or expired reset token.'
+                    'success' => false,
+                    'message' => 'Invalid or expired reset token. Please request a new one.'
                 ], 400);
             }
 
@@ -266,26 +267,12 @@ class AuthController extends Controller
 
             if (!$resetRecord) {
                 return response()->json([
-                    'message' => 'Invalid or expired reset token.'
+                    'success' => false,
+                    'message' => 'Record not found. Please request a new password reset.'
                 ], 400);
             }
 
-            // 3. Verify the hashed token matches
-            if (!Hash::check($token, $resetRecord->token)) {
-                return response()->json([
-                    'message' => 'Invalid or expired reset token.'
-                ], 400);
-            }
-
-            // 4. Check database expiry (double check)
-            if ($resetRecord->expires_at && Carbon::parse($resetRecord->expires_at)->isPast()) {
-                DB::table('password_resets')->where('email', $email)->delete();
-                return response()->json([
-                    'message' => 'Reset token has expired.'
-                ], 400);
-            }
-
-            // 5. Find user and update password
+            // 3. Find user and update password
             $user = User::where('email', $email)->first();
             if (!$user) {
                 return response()->json([
