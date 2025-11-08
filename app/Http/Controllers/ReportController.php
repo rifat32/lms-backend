@@ -9,7 +9,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
@@ -23,7 +23,7 @@ class ReportController extends Controller
      * @OA\Get(
      *     path="/v1.0/reports/sales",
      *     operationId="sales",
-     *     tags={"Reports"},
+     *     tags={"Trash"},
      *     summary="Get sales report for all courses (role: Admin only)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -194,7 +194,7 @@ class ReportController extends Controller
 
         $end   = $request->query('end_date')
             ? Carbon::parse($request->query('end_date'))->endOfDay()
-            : Carbon::now()->endOfDay();
+            : Carbon::now()->endOfMonth();
 
         // Total enrollments in the period
         $totalEnrollments = Enrollment::whereBetween('created_at', [$start, $end])->count();
@@ -503,8 +503,8 @@ class ReportController extends Controller
         })->count();
 
         // Count course completions within the period (assuming completed_at is set)
-        $totalCompletions = Enrollment::whereNotNull('completed_at')
-            ->whereBetween('completed_at', [$start, $end])
+        $totalCompletions = Enrollment::whereNotNull('progress')
+            ->whereBetween('enrolled_at', [$start, $end])
             ->count();
 
         // Sum payments for total revenue
