@@ -45,7 +45,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('/v1.0/auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/verify-user-email', [AuthController::class, "verifyUserEmail"]);
+    Route::post('/verify-business-email', [AuthController::class, "verifyBusinessEmail"]);
 });
+
 
 
 // PRIVATE ROUTES

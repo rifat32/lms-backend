@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordWithTokenRequest;
+use App\Http\Requests\VerifyBusinessEmailRequest;
 use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use App\Utils\BasicUtil;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\StudentWelcomeMail;
+use App\Models\Business;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -480,6 +482,185 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
+        }
+    }
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/auth/verify-user-email",
+     *      operationId="verifyUserEmail",
+     *      tags={"Auth"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="This method is to check user",
+     *      description="This method is to check user",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"email"},
+     *
+     *             @OA\Property(property="email", type="string", format="string",example="test@g.c"),
+     *             @OA\Property(property="user_id", type="integer", format="int64",example="1"),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request"
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found"
+     *   ),
+     *@OA\JsonContent()
+     *      )
+     *     )
+     */
+
+
+    public function verifyUserEmail(Request $request)
+    {
+        try {
+
+            // Validate the request
+            $payload_data = $request->validate([
+                'email' => 'required|email',
+                'user_id' => 'nullable|integer|exists:users,id'
+            ]);
+
+            $user = User::where('email', $payload_data['email'])
+                ->when(!empty($payload_data['user_id']), function ($query) use ($payload_data) {
+                    $query->where('id', '!=', $payload_data['user_id']);
+                })
+                ->select('id')
+                ->first();
+
+            if ($user) {
+                return response()->json([
+                    "data" => true,
+                    "message" => "Email already exists",
+                ], 409); // Changed to 409 Conflict for better semantics
+            }
+
+            return response()->json([
+                "data" => false,
+                "message" => "Email is available",
+            ], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e);
+        }
+    }
+
+    /**
+     *
+     * @OA\Post(
+     *      path="/v1.0/auth/verify-business-email",
+     *      operationId="verifyBusinessEmail",
+     *      tags={"Auth"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+     *      summary="Verify business email availability",
+     *      description="Check if a business email is available, excluding the specified business_id if provided.",
+     *
+     *  @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *            required={"email"},
+     *
+     *             @OA\Property(property="email", type="string", format="email", example="business@example.com"),
+     *             @OA\Property(property="business_id", type="integer", format="int64", example=1),
+     *
+     *         ),
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Email is available",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="data", type="boolean", example=false),
+     *              @OA\Property(property="message", type="string", example="Email is available")
+     *          )
+     *       ),
+     *      @OA\Response(
+     *          response=409,
+     *          description="Email already exists",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="data", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Email already exists")
+     *          )
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocessable Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request"
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found"
+     *   ),
+     *@OA\JsonContent()
+     *      )
+     *     )
+     */
+
+    public function verifyBusinessEmail(VerifyBusinessEmailRequest $request)
+    {
+        try {
+            $payload_data = $request->validated();
+
+            $business = Business::where('email', $payload_data['email'])
+                ->when(!empty($payload_data['business_id']), function ($query) use ($payload_data) {
+                    $query->where('id', '!=', $payload_data['business_id']);
+                })
+                ->select('id')
+                ->first();
+
+            if ($business) {
+                return response()->json([
+                    "data" => true,
+                    "message" => "Email already exists",
+                ], 409); // Conflict for existing email
+            }
+
+            return response()->json([
+                "data" => false,
+                "message" => "Email is available",
+            ], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e);
         }
     }
 }

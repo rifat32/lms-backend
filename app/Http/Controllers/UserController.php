@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -389,7 +387,7 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links'])->query();
+        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links']);
 
         // ROLE FILTER (Spatie relationship-based)
         if (request()->filled('role')) {
