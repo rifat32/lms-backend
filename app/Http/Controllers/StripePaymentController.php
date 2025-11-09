@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Utils\BasicUtil;
 use Exception;
@@ -95,6 +96,21 @@ class StripePaymentController extends Controller
                 ], 404);
             }
 
+            // Check if user is already enrolled in any of the courses
+            $user_id = auth()->id();
+            $enrolled_course_ids = Enrollment::whereIn('course_id', $course_ids)
+                ->where('user_id', $user_id)
+                ->pluck('course_id')
+                ->toArray();
+
+            if (!empty($enrolled_course_ids)) {
+                $enrolled_titles = $courses->whereIn('id', $enrolled_course_ids)->pluck('title')->toArray();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are already enrolled in: ' . implode(', ', $enrolled_titles)
+                ], 409);
+            }
+
             // Retrieve Stripe settings
             $stripe_setting = $this->get_business_setting();
             if (empty($stripe_setting) || empty($stripe_setting->stripe_enabled)) {
@@ -127,7 +143,7 @@ class StripePaymentController extends Controller
             $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
 
             $discount_amount = 0;
-            $coupon_code = $request_payload['coupon_code'];
+            $coupon_code = $request_payload['coupon_code'] ?? null;
 
             if (!empty($coupon_code)) {
                 $coupon = Coupon::where('code', $coupon_code)
@@ -172,8 +188,8 @@ class StripePaymentController extends Controller
             ];
 
             $payment_intent = $stripe->paymentIntents->create([
-                'amount' => max($total_amount, 0.50) * 100, // in cents
-                'currency' => 'usd',
+                'amount' => max($total_amount, 0.50) * 100, // in pence for GBP
+                'currency' => 'gbp',
                 'automatic_payment_methods' => ['enabled' => true],
                 'metadata' => $metadata,
             ]);
@@ -182,12 +198,8 @@ class StripePaymentController extends Controller
             // Save payment records
             // -------------------------------------
             foreach ($courses as $course) {
-                if (!empty($course->enrollment)) {
-                    throw new Exception("Course Already Enrolled", 409);
-                }
-
                 Payment::create([
-                    'user_id' => auth()->user()->id,
+                    'user_id' => auth()->id(),
                     'course_id' => $course->id,
                     'amount' => $course->computed_price,
                     'method' => 'stripe',
@@ -195,11 +207,6 @@ class StripePaymentController extends Controller
                     'payment_intent_id' => $payment_intent->id,
                     'coupon_code' => $coupon_code,
                     'discount_amount' => $discount_amount / count($courses),
-                ]);
-
-                $course->update([
-                    'payment_status' => 'pending',
-                    'payment_method' => 'stripe',
                 ]);
             }
 
