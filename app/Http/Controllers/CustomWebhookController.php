@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\CourseEnrollmentMail;
+use App\Mail\StudentEnrollmentNotification;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
@@ -108,22 +109,46 @@ class CustomWebhookController extends Controller
             if ($enrollment->wasRecentlyCreated && env("SEND_EMAIL") == true) {
                 $user = User::find($user_id);
                 $course = Course::find($course_id);
-                
+
                 if ($user && $course) {
+                    // Send enrollment email to student
                     try {
                         Mail::to($user->email)->send(new CourseEnrollmentMail($user, $course));
-                        
+
                         log_message([
                             'level' => 'info',
-                            'message' => 'Enrollment email sent successfully',
+                            'message' => 'Enrollment email sent to student successfully',
                             'context' => ['user_id' => $user_id, 'course_id' => $course_id],
                         ], 'stripe_webhooks.log');
                     } catch (\Exception $e) {
                         log_message([
                             'level' => 'error',
-                            'message' => 'Failed to send enrollment email',
+                            'message' => 'Failed to send enrollment email to student',
                             'context' => ['error' => $e->getMessage()],
                         ], 'stripe_webhooks.log');
+                    }
+
+                    // Send notification email to business owner
+                    if ($user->business_id) {
+                        $business = $user->business()->with('owner')->first();
+
+                        if ($business && $business->owner && $business->owner->email) {
+                            try {
+                                Mail::to($business->owner->email)->send(new StudentEnrollmentNotification($user, $course, $business->owner));
+
+                                log_message([
+                                    'level' => 'info',
+                                    'message' => 'Enrollment notification sent to business owner successfully',
+                                    'context' => ['user_id' => $user_id, 'course_id' => $course_id, 'owner_id' => $business->owner->id],
+                                ], 'stripe_webhooks.log');
+                            } catch (\Exception $e) {
+                                log_message([
+                                    'level' => 'error',
+                                    'message' => 'Failed to send enrollment notification to business owner',
+                                    'context' => ['error' => $e->getMessage(), 'owner_id' => $business->owner->id ?? 'unknown'],
+                                ], 'stripe_webhooks.log');
+                            }
+                        }
                     }
                 }
             }
