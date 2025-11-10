@@ -71,7 +71,7 @@ trait BasicUtil
 
 
               // ✅ Send email when reaching 100% (but only once)
-    if ($percentage == 100 && $previous_progress < 100) {
+    if ($percentage == 100) {
         $user = auth()->user();
         $course = Course::find($course_id);
 
