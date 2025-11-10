@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CourseEnrollmentMail;
+use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class CustomWebhookController extends Controller
 {
@@ -90,7 +94,7 @@ class CustomWebhookController extends Controller
 );
 
             // Enroll user
-            Enrollment::firstOrCreate(
+            $enrollment = Enrollment::firstOrCreate(
                 [
                     'user_id' => $user_id,
                     'course_id' => $course_id,
@@ -99,6 +103,30 @@ class CustomWebhookController extends Controller
                     'enrolled_at' => now(),
                 ]
             );
+
+            // Send enrollment email if enrollment was just created
+            if ($enrollment->wasRecentlyCreated && env("SEND_EMAIL") == true) {
+                $user = User::find($user_id);
+                $course = Course::find($course_id);
+                
+                if ($user && $course) {
+                    try {
+                        Mail::to($user->email)->send(new CourseEnrollmentMail($user, $course));
+                        
+                        log_message([
+                            'level' => 'info',
+                            'message' => 'Enrollment email sent successfully',
+                            'context' => ['user_id' => $user_id, 'course_id' => $course_id],
+                        ], 'stripe_webhooks.log');
+                    } catch (\Exception $e) {
+                        log_message([
+                            'level' => 'error',
+                            'message' => 'Failed to send enrollment email',
+                            'context' => ['error' => $e->getMessage()],
+                        ], 'stripe_webhooks.log');
+                    }
+                }
+            }
         }
 
         log_message([
