@@ -8,21 +8,19 @@ class CouponToggleActiveRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // controller will still validate permission; keep true so middleware/auth applies
-        return auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer']);
+        // Authorization is handled in the controller
+        return true;
     }
 
     public function rules(): array
     {
         return [
-            'id' => 'required|numeric|exists:coupons,id',
+            // No body validation needed since ID comes from route parameter
         ];
     }
 
     public function messages(): array
     {
-        return [
-            'id.required' => 'Coupon id is required',
-        ];
+        return [];
     }
 }

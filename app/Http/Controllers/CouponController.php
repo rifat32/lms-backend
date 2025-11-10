@@ -203,19 +203,19 @@ class CouponController extends Controller
 
 
     /**
-     * @OA\Put(
-     *      path="/v1.0/coupons/toggle-active",
+     * @OA\Patch(
+     *      path="/v1.0/coupons/{id}/toggle-active",
      *      operationId="toggleActiveCoupon",
      *      tags={"coupon_management"},
      *      summary="Toggle coupon active status",
      *      description="Toggle the is_active flag of a coupon (requires coupon_update permission)",
      *      security={{"bearerAuth": {}}},
-     *      @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *            required={"id"},
-     *            @OA\Property(property="id", type="integer", example=1, description="Coupon id")
-     *         )
+     *      @OA\Parameter(
+     *          name="id",
+     *          in="path",
+     *          description="Coupon ID",
+     *          required=true,
+     *          @OA\Schema(type="integer", example=1)
      *      ),
      *      @OA\Response(response=200, description="Coupon status updated successfully"),
      *      @OA\Response(response=401, description="Unauthorized"),
@@ -223,24 +223,17 @@ class CouponController extends Controller
      *      @OA\Response(response=422, description="Validation Error")
      * )
      */
-    public function toggleActiveCoupon(CouponToggleActiveRequest $request)
+    public function toggleActiveCoupon(Request $request, $id)
     {
         try {
-
-
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
             }
 
-
-            $data = $request->validated();
-            $coupon = Coupon::find($data['id']);
-
-            if (! $coupon) {
-                return response()->json(['message' => 'Coupon not found with id: ' . $data['id']], 404);
-            }
+            // Find the coupon by route parameter
+            $coupon = Coupon::findOrFail($id);
 
             $coupon->is_active = !$coupon->is_active;
             $coupon->save();
@@ -248,14 +241,20 @@ class CouponController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Coupon status updated successfully',
-                'coupon' => $coupon
+                'data' => $coupon
             ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Coupon not found with id: ' . $id
+            ], 404);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
-
-
 
     /**
      * @OA\Delete(

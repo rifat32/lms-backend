@@ -105,7 +105,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [CouponController::class, 'createCoupon']);
         Route::put('/{id}', [CouponController::class, 'updateCoupon']);
         Route::get('/', [CouponController::class, 'getAllCoupons']);
-        Route::put('/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
+        Route::patch('/{id}/toggle-active', [CouponController::class, 'toggleActiveCoupon']);
         Route::delete('/{id}', [CouponController::class, 'deleteCouponById']);
         Route::post('/apply', [CouponController::class, 'applyCoupon']);
     });
