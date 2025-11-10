@@ -344,7 +344,7 @@ class QuizAttemptController extends Controller
             ->whereNull('completed_at')
             ->firstOrFail();
 
-      
+
 
         // ⏱️ enforce timer
         $elapsed = now()->diffInSeconds($attempt->started_at);
@@ -431,15 +431,7 @@ class QuizAttemptController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Quiz attempt submitted',
-            'data' => [
-                'attempt_id' => $attempt->id,
-                "total_points" => $attempt->total_points,
-                'score' => $attempt->score,
-                'is_passed' => $attempt->is_passed,
-                'time_spent' => $attempt->time_spent,
-                'feedback' => $feedback,
-                'answers' => $attempt->quiz_attempt_answers
-            ]
+            'data' => $attempt->load('quiz_attempt_answers')
         ], 201);
     }
 }

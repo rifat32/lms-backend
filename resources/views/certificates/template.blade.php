@@ -7,8 +7,15 @@
 
     // Convert image to base64
     $imagePath = public_path('images/certificate_bg.png');
-    $imageData = base64_encode(file_get_contents($imagePath));
-    $imageSrc = 'data:image/png;base64,' . $imageData;
+    $imageSrc = '';
+
+    if (file_exists($imagePath)) {
+        $imageData = base64_encode(file_get_contents($imagePath));
+        $imageSrc = 'data:image/png;base64,' . $imageData;
+    } else {
+        // Fallback: try asset URL
+        $imageSrc = asset('images/certificate_bg.png');
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -42,6 +49,7 @@
             height: 210mm;
             position: relative;
             overflow: hidden;
+            background-color: #f8f9fa;
         }
 
         .background-image {
@@ -50,6 +58,8 @@
             left: 0;
             width: 100%;
             height: 100%;
+            object-fit: cover;
+            object-position: center;
             z-index: 0;
         }
 
@@ -172,17 +182,6 @@
 
                 <div class="ornament">❖</div>
             </div>
-
-            {{-- <div class="footer-section">
-                <div><strong>Issued On:</strong> {{ $issueDate }}</div>
-                <div><strong>Recommended Renewal Date:</strong> {{ $renewalDate }}</div>
-                <div><strong>Certificate Number:</strong> {{ $certificateCode }}</div>
-                <div><strong>to visit:</strong> www.bbeducators.com</div>
-            </div>
-
-            <div class="signature-section">
-                <div class="signature-title">Head of Academics & Research</div>
-            </div> --}}
         </div>
     </div>
 </body>
