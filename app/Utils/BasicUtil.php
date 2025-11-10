@@ -9,6 +9,7 @@ use App\Models\QuizAttempt;
 use App\Models\Section;
 use Exception;
 use App\Mail\CourseCompletedMail;
+use App\Models\Course;
 use Illuminate\Support\Facades\Mail;
 
 trait BasicUtil
