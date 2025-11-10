@@ -428,10 +428,19 @@ class QuizAttemptController extends Controller
             $percentage = $this->recalculateCourseProgress($request->course_id);
         }
 
+        // Get attempt count for this user and quiz
+        $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->count();
+
+        // Add attempts count to attempt object
+        $attempt->attempts_count = $attempts_count;
+
+        // return response
         return response()->json([
             'success' => true,
             'message' => 'Quiz attempt submitted',
-            'data' => $attempt->load('quiz_attempt_answers')
+            'data' => $attempt->load(['quiz_attempt_answers', 'quiz']),
         ], 201);
     }
 }

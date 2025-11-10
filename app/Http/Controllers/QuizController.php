@@ -152,6 +152,12 @@ class QuizController extends Controller
         // SEND ONLY SECTION IDS
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
 
+        // Get attempt count for this user and quiz
+        $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', auth()->id())
+            ->count();
+
+        $quiz->setAttribute('quiz_attempts_count', $attempts_count);
 
         // Return the response
         return response()->json([
