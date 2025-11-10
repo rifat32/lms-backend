@@ -186,10 +186,13 @@ class Course extends Model
                     });
                 });
 
-                // Popular courses
+                // Popular courses (by enrollments in last month)
                 $q->when(request()->filled('is_popular'), function ($q2) use ($popular_limit) {
                     if (request()->boolean('is_popular')) {
-                        $q2->withCount('enrollments')
+                        $lastMonth = now()->subMonth();
+                        $q2->withCount(['enrollments' => function ($query) use ($lastMonth) {
+                            $query->where('created_at', '>=', $lastMonth);
+                        }])
                             ->orderByDesc('enrollments_count')
                             ->limit($popular_limit);
                     }

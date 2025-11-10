@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Artisan;
 class SetupController extends Controller
 {
     use SetupUtils;
+
+    public function cacheClear()
+    {
+        // Clear caches
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+
+
+        return response()->json(['message' => 'Caches cleared']);
+    }
+
+
     // initial setup
     public function setup()
     {

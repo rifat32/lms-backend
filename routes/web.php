@@ -20,6 +20,7 @@ Route::get('/', function () {
 });
 
 
+Route::get('/cache-clear', [SetupController::class, 'cacheClear'])->name('cacheClear');
 Route::get('/setup', [SetupController::class, 'setup'])->name('setup');
 Route::get('/setup-passport', [SetupController::class, 'setupPassport'])->name('passport');
 Route::get('/roleRefresh', [SetupController::class, 'roleRefresh'])->name('roleRefresh');
