@@ -142,6 +142,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/intent', [StripePaymentController::class, 'createPaymentIntent']);
         Route::get('/', [StripePaymentController::class, 'getPayments']);
         Route::get('/{id}', [StripePaymentController::class, 'getPaymentDetail']);
+        Route::get('/{paymentId}/pay-slip', [StripePaymentController::class, 'downloadPaymentSlip']);
     });
 
     // QUESTION

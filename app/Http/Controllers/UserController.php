@@ -100,13 +100,13 @@ class UserController extends Controller
 
     public function getUserById($id)
     {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer', 'student'])) {
             return response()->json([
                 "message" => "You can not perform this action"
             ], 401);
         }
 
-        $user = User::with(['roles:id,name'])->find($id);
+        $user = User::with(['roles:id,name', 'student_profile', 'social_links'])->find($id);
         if (empty($user)) {
             return response()->json([
                 'success' => false,
@@ -242,7 +242,7 @@ class UserController extends Controller
     public function updateUser(UserUpdateRequest $request, $id)
     {
         try {
-            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer', 'student'])) {
                 return response()->json([
                     "message" => "You can not perform this action"
                 ], 401);
