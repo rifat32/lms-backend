@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Models\BusinessSetting;
 use App\Models\Enrollment;
 use App\Models\LessonProgress;
+use App\Models\Notification;
 use App\Models\QuizAttempt;
 use App\Models\Section;
 use Exception;
@@ -71,15 +72,78 @@ trait BasicUtil
             ->update(['progress' => $percentage]);
 
 
-              // ✅ Send email when reaching 100% (but only once)
-    if ($percentage == 100) {
-        $user = auth()->user();
-        $course = Course::find($course_id);
+        // ✅ Send email when reaching 100% (but only once)
+        if ($percentage == 100) {
+            $user = auth()->user();
+            $course = Course::find($course_id);
 
-        // Send email asynchronously (queue preferred)
-     Mail::to($user->email)->send(new CourseCompletedMail($user, $course));
+            if ($user && $course) {
+                // Send course completion email to student
+                try {
+                    Mail::to($user->email)->send(new CourseCompletedMail($user, $course));
 
-    }
+                    // Create notification for student
+                    Notification::create([
+                        'type' => 'App\\Notifications\\CourseCompleted',
+                        'notifiable_type' => 'App\\Models\\User',
+                        'notifiable_id' => $user->id,
+                        'data' => json_encode([
+                            'course_id' => $course->id,
+                            'course_name' => $course->name,
+                            'completed_at' => now()->toDateTimeString(),
+                            'progress' => $percentage,
+                        ]),
+                        'entity_id' => $course->id,
+                        'entity_name' => 'course',
+                        'notification_title' => 'Course Completed!',
+                        'notification_description' => "Congratulations! You have completed {$course->name}",
+                        'notification_link' => "/dashboard/courses/{$course->id}/certificate",
+                        'sender_id' => $user->business_id ? $user->business->owner->id : $user->id,
+                        'receiver_id' => $user->id,
+                        'business_id' => $user->business_id,
+                        'is_system_generated' => true,
+                        'notification_type' => 'course_completed',
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error but don't break the flow
+                }
+
+                // Send notification to business owner if applicable
+                if ($user->business_id) {
+                    $business = $user->business()->with('owner')->first();
+
+                    if ($business && $business->owner && $business->owner->email) {
+                        try {
+                            // Create notification for business owner
+                            Notification::create([
+                                'type' => 'App\\Notifications\\StudentCourseCompleted',
+                                'notifiable_type' => 'App\\Models\\User',
+                                'notifiable_id' => $business->owner->id,
+                                'data' => json_encode([
+                                    'student_id' => $user->id,
+                                    'student_name' => $user->name,
+                                    'course_id' => $course->id,
+                                    'course_name' => $course->name,
+                                    'completed_at' => now()->toDateTimeString(),
+                                ]),
+                                'entity_id' => $course->id,
+                                'entity_name' => 'course',
+                                'notification_title' => 'Student Completed Course',
+                                'notification_description' => "{$user->name} has completed {$course->name}",
+                                'notification_link' => "/dashboard/students/{$user->id}/progress",
+                                'sender_id' => $user->id,
+                                'receiver_id' => $business->owner->id,
+                                'business_id' => $business->id,
+                                'is_system_generated' => true,
+                                'notification_type' => 'student_course_completed',
+                            ]);
+                        } catch (\Exception $e) {
+                            // Log error but don't break the flow
+                        }
+                    }
+                }
+            }
+        }
 
         return [
             $percentage,

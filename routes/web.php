@@ -27,6 +27,7 @@ Route::get('/roleRefresh', [SetupController::class, 'roleRefresh'])->name('roleR
 Route::get('/swagger-refresh', [SetUpController::class, "swaggerRefresh"])->name("swaggerRefresh");
 Route::get('/migrate', [SetupController::class, 'migrate'])->name('migrate');
 Route::get('/rollback-migrate', [SetupController::class, 'rollbackMigration'])->name('rollbackMigration');
+Route::get('/drop-table', [SetupController::class, 'dropTable'])->name('dropTable');
 
 Route::get('/storage-link', [SetupController::class, 'storageLink'])->name('storageLink');
 

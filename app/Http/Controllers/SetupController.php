@@ -117,6 +117,45 @@ class SetupController extends Controller
         return "storage linked";
     }
 
+    public function dropTable(Request $request)
+    {
+        try {
+            $tableName = $request->input('table');
+
+            if (empty($tableName)) {
+                return response()->json([
+                    'message' => 'Table name is required',
+                    'usage' => 'Add ?table=table_name to URL'
+                ], 400);
+            }
+
+            // Security: Only allow specific tables to be dropped
+            $allowedTables = [
+                'notifications',
+                'notification_templates',
+                // Add other tables if needed
+            ];
+
+            if (!in_array($tableName, $allowedTables)) {
+                return response()->json([
+                    'message' => 'Table not allowed to be dropped',
+                    'allowed_tables' => $allowedTables
+                ], 403);
+            }
+
+            \Illuminate\Support\Facades\Schema::dropIfExists($tableName);
+
+            return response()->json([
+                'message' => "Table '{$tableName}' dropped successfully"
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to drop table',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     // ROLE REFRESH
     public function roleRefresh(Request $request)

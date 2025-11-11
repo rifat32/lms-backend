@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonProgressController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\QuestionCategoryController;
 use App\Http\Controllers\QuestionController;
@@ -65,6 +66,14 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/{ids}', [UserController::class, 'deleteUsers']);
     });
 
+    // NOTIFICATION APIS
+    Route::prefix('/v1.0/notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'getNotifications']);
+        Route::get('/business/{business_id}', [NotificationController::class, 'getNotificationsByBusinessId']);
+        Route::patch('/{id}/status', [NotificationController::class, 'updateNotificationStatus']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllNotificationsAsRead']);
+        Route::delete('/{id}', [NotificationController::class, 'deleteNotificationById']);
+    });
 
     // Admin-only routes
     // COURSE CATEGORY
