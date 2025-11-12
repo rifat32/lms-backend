@@ -92,7 +92,8 @@ class CustomWebhookController extends Controller
                     'status' => 'completed',
                     'amount' => $amount / count($course_ids),
                     'method' => 'stripe',
-                    "transaction_id" => $transaction_id
+                    'transaction_id' => $transaction_id,
+                    'paid_at' => now()
                 ]
             );
 

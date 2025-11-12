@@ -309,7 +309,7 @@ class StripePaymentController extends Controller
      *                     @OA\Property(property="amount", type="number", format="float", example=73.99),
      *                     @OA\Property(property="method", type="string", example="credit_card"),
      *                     @OA\Property(property="status", type="string", example="completed"),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
+     *                     @OA\Property(property="paid_at", type="string", format="date-time", example="2024-01-13T12:00:00Z"),
      *                     @OA\Property(
      *                         property="course",
      *                         type="object",
@@ -373,7 +373,7 @@ class StripePaymentController extends Controller
 
         $this->applyFilters($query, $request);
 
-        $payments = retrieve_data($query, 'created_at', 'payments', 'desc');
+        $payments = retrieve_data($query, 'paid_at', 'payments', 'desc');
         $summary = $this->getPaymentSummary();
 
         return response()->json([
@@ -409,11 +409,11 @@ class StripePaymentController extends Controller
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
+            $query->whereDate('paid_at', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
+            $query->whereDate('paid_at', '<=', $request->date_to);
         }
     }
 
@@ -427,16 +427,16 @@ class StripePaymentController extends Controller
         $total_earnings = (float) Payment::where('status', 'completed')->sum('amount');
 
         $this_month_earnings = (float) Payment::where('status', 'completed')
-            ->whereYear('created_at', $now->year)
-            ->whereMonth('created_at', $now->month)
+            ->whereYear('paid_at', $now->year)
+            ->whereMonth('paid_at', $now->month)
             ->sum('amount');
 
         $this_week_earnings = (float) Payment::where('status', 'completed')
-            ->whereBetween('created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
+            ->whereBetween('paid_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
             ->sum('amount');
 
         $today_earnings = (float) Payment::where('status', 'completed')
-            ->whereDate('created_at', $now->copy()->toDateString())
+            ->whereDate('paid_at', $now->copy()->toDateString())
             ->sum('amount');
 
         return [
