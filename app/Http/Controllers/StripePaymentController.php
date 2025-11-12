@@ -83,7 +83,6 @@ class StripePaymentController extends Controller
                 'coupon_code' => 'nullable|string',
             ]);
 
-
             $course_ids = $request_payload['course_ids'];
             if (empty($course_ids) || !is_array($course_ids)) {
                 return response()->json([
@@ -142,11 +141,9 @@ class StripePaymentController extends Controller
             }
 
             // -------------------------------------
-            // Calculate total and handle coupon
+            // Handle coupon validation
             // -------------------------------------
-            $total_amount = $courses->sum(fn($course) => $course->computed_price + ($course->vat_amount ?? 0));
-
-            $discount_amount = 0;
+            $coupon = null;
             $coupon_code = $request_payload['coupon_code'] ?? null;
 
             if (!empty($coupon_code)) {
@@ -168,17 +165,42 @@ class StripePaymentController extends Controller
                         'message' => 'Invalid or expired coupon code'
                     ], 422);
                 }
+            }
 
-                // Calculate discount based on type (flat or percent)
-                if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
-                    $discount_amount = ($total_amount * $coupon->discount_amount) / 100;
-                } else {
-                    $discount_amount = $coupon->discount_amount;
+            // -------------------------------------
+            // Calculate total and apply coupon per course
+            // -------------------------------------
+            $total_amount = 0;
+            $total_discount = 0;
+            $course_details = [];
+
+            foreach ($courses as $course) {
+                $course_price = $course->computed_price;
+                $discount_amount = 0;
+
+                if ($coupon) {
+                    // Calculate discount for this course
+                    if ($coupon->discount_type === Coupon::DISCOUNT_TYPE['PERCENTAGE']) {
+                        $discount_amount = ($course_price * $coupon->discount_amount) / 100;
+                    } else {
+                        $discount_amount = $coupon->discount_amount / count($courses); // Spread flat discount across all courses
+                    }
+
+                    // Prevent over-discount
+                    $discount_amount = min($discount_amount, $course_price);
                 }
 
-                // Prevent over-discount
-                $discount_amount = min($discount_amount, $total_amount);
-                $total_amount -= $discount_amount;
+                $final_price = $course_price - $discount_amount;
+                $total_amount += $final_price;
+                $total_discount += $discount_amount;
+
+                // Store details for payment records
+                $course_details[] = [
+                    'course' => $course,
+                    'original_price' => $course_price,
+                    'discount_amount' => $discount_amount,
+                    'final_price' => $final_price,
+                ];
             }
 
             // -------------------------------------
@@ -199,18 +221,19 @@ class StripePaymentController extends Controller
             ]);
 
             // -------------------------------------
-            // Save payment records
+            // Save payment records with individual discounts
             // -------------------------------------
-            foreach ($courses as $course) {
+            foreach ($course_details as $detail) {
                 Payment::create([
                     'user_id' => auth()->id(),
-                    'course_id' => $course->id,
-                    'amount' => $course->computed_price,
+                    'course_id' => $detail['course']->id,
+                    'amount' => $detail['final_price'],
+                    'original_price' => $detail['original_price'],
                     'method' => 'stripe',
                     'status' => 'pending',
                     'payment_intent_id' => $payment_intent->id,
                     'coupon_code' => $coupon_code,
-                    'discount_amount' => $discount_amount / count($courses),
+                    'discount_amount' => $detail['discount_amount'],
                 ]);
             }
 
@@ -219,8 +242,16 @@ class StripePaymentController extends Controller
             return response()->json([
                 'clientSecret' => $payment_intent->client_secret,
                 'totalAmount' => round($total_amount, 2),
-                'discountAmount' => round($discount_amount, 2),
+                'discountAmount' => round($total_discount, 2),
                 'courses' => $courses->pluck('title'),
+                'courseBreakdown' => array_map(function ($detail) {
+                    return [
+                        'title' => $detail['course']->title,
+                        'originalPrice' => round($detail['original_price'], 2),
+                        'discount' => round($detail['discount_amount'], 2),
+                        'finalPrice' => round($detail['final_price'], 2),
+                    ];
+                }, $course_details),
             ]);
         } catch (Exception $e) {
             DB::rollBack();

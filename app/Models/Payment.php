@@ -14,6 +14,7 @@ class Payment extends Model
         'user_id',
         'course_id',
         'amount',
+        'original_price',
         'method',
         'status',
         'transaction_id',
