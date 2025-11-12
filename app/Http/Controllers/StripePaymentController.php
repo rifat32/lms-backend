@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use Stripe\StripeClient;
 
 /**
  * @OA\Tag(
@@ -123,7 +124,7 @@ class StripePaymentController extends Controller
                 ], 403);
             }
 
-            $stripe = new \Stripe\StripeClient($stripe_setting->STRIPE_SECRET);
+            $stripe = new StripeClient($stripe_setting->STRIPE_SECRET);
 
             // Ensure webhook endpoint exists (optional safety)
             try {

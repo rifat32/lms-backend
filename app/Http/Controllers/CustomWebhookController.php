@@ -66,7 +66,9 @@ class CustomWebhookController extends Controller
         }
 
         $user_id = $metadata['user_id'] ?? null;
-        $course_ids = isset($metadata['course_ids']) ? explode(',', $metadata['course_ids']) : [];
+        $course_ids = isset($metadata['course_ids'])
+            ? array_map('trim', explode(',', $metadata['course_ids']))
+            : [];
 
         if (!$user_id || empty($course_ids)) {
             log_message([
@@ -77,129 +79,164 @@ class CustomWebhookController extends Controller
             return;
         }
 
+        log_message([
+            'level' => 'info',
+            'message' => 'Processing courses',
+            'context' => ['user_id' => $user_id, 'course_ids' => $course_ids, 'count' => count($course_ids)],
+        ], 'stripe_webhooks.log');
+
         $payment_intent_id = $data['id'] ?? $data['payment_intent'] ?? null;
 
         $transaction_id = $data['id'] ?? $data['id'] ?? null;
 
         foreach ($course_ids as $course_id) {
-            $payment = Payment::updateOrCreate(
-                [
-                    'payment_intent_id' => $payment_intent_id,
-                    'course_id' => $course_id,
-                    'user_id' => $user_id,
-                ],
-                [
-                    'status' => 'completed',
-                    'amount' => $amount / count($course_ids),
-                    'method' => 'stripe',
-                    'transaction_id' => $transaction_id,
-                    'paid_at' => now()
-                ]
-            );
+            try {
+                $course_id = trim($course_id); // Extra safety
 
-            // Enroll user
-            $enrollment = Enrollment::firstOrCreate(
-                [
-                    'user_id' => $user_id,
-                    'course_id' => $course_id,
-                ],
-                [
-                    'enrolled_at' => now(),
-                ]
-            );
+                log_message([
+                    'level' => 'info',
+                    'message' => 'Processing course',
+                    'context' => ['course_id' => $course_id, 'payment_intent_id' => $payment_intent_id],
+                ], 'stripe_webhooks.log');
 
-            // Send enrollment email if enrollment was just created
-            if ($enrollment->wasRecentlyCreated && env("SEND_EMAIL") == true) {
-                $user = User::find($user_id);
-                $course = Course::find($course_id);
+                $payment = Payment::updateOrCreate(
+                    [
+                        'payment_intent_id' => $payment_intent_id,
+                        'course_id' => $course_id,
+                        'user_id' => $user_id,
+                    ],
+                    [
+                        'status' => 'completed',
+                        'method' => 'stripe',
+                        'transaction_id' => $transaction_id,
+                        'paid_at' => now()
+                    ]
+                );
 
-                if ($user && $course) {
-                    // Send enrollment email to student
-                    try {
-                        Mail::to($user->email)->send(new CourseEnrollmentMail($user, $course));
+                log_message([
+                    'level' => 'info',
+                    'message' => 'Payment record created/updated',
+                    'context' => ['payment_id' => $payment->id, 'course_id' => $course_id, 'was_recently_created' => $payment->wasRecentlyCreated],
+                ], 'stripe_webhooks.log');
 
-                        // Create notification for student
-                        Notification::create([
-                            'type' => 'App\\Notifications\\CourseEnrollment',
-                            'notifiable_type' => 'App\\Models\\User',
-                            'notifiable_id' => $user->id,
-                            'data' => json_encode([
-                                'course_id' => $course->id,
-                                'course_name' => $course->name,
-                                'enrolled_at' => now()->toDateTimeString(),
-                            ]),
-                            'entity_id' => $course->id,
-                            'entity_name' => 'course',
-                            'notification_title' => 'Course Enrollment Successful',
-                            'notification_description' => "You have successfully enrolled in {$course->name}",
-                            'notification_link' => "/dashboard/courses/{$course->id}",
-                            'sender_id' => $user->business_id ? $user->business->owner->id : $user->id,
-                            'receiver_id' => $user->id,
-                            'business_id' => $user->business_id,
-                            'is_system_generated' => true,
-                            'notification_type' => 'course_enrollment',
-                        ]);
+                // Enroll user
+                $enrollment = Enrollment::firstOrCreate(
+                    [
+                        'user_id' => $user_id,
+                        'course_id' => $course_id,
+                    ],
+                    [
+                        'enrolled_at' => now(),
+                    ]
+                );
 
-                        log_message([
-                            'level' => 'info',
-                            'message' => 'Enrollment email and notification sent to student successfully',
-                            'context' => ['user_id' => $user_id, 'course_id' => $course_id],
-                        ], 'stripe_webhooks.log');
-                    } catch (\Exception $e) {
-                        log_message([
-                            'level' => 'error',
-                            'message' => 'Failed to send enrollment email to student',
-                            'context' => ['error' => $e->getMessage()],
-                        ], 'stripe_webhooks.log');
-                    }
+                // Send enrollment email if enrollment was just created
+                if ($enrollment->wasRecentlyCreated && env("SEND_EMAIL") == true) {
+                    $user = User::find($user_id);
+                    $course = Course::find($course_id);
 
-                    // Send notification email to business owner
-                    if ($user->business_id) {
-                        $business = $user->business()->with('owner')->first();
+                    if ($user && $course) {
+                        // Send enrollment email to student
+                        try {
+                            Mail::to($user->email)->send(new CourseEnrollmentMail($user, $course));
 
-                        if ($business && $business->owner && $business->owner->email) {
-                            try {
-                                Mail::to($business->owner->email)->send(new StudentEnrollmentNotification($user, $course, $business->owner));
+                            // Create notification for student
+                            Notification::create([
+                                'type' => 'App\\Notifications\\CourseEnrollment',
+                                'notifiable_type' => 'App\\Models\\User',
+                                'notifiable_id' => $user->id,
+                                'data' => json_encode([
+                                    'course_id' => $course->id,
+                                    'course_name' => $course->name,
+                                    'enrolled_at' => now()->toDateTimeString(),
+                                ]),
+                                'entity_id' => $course->id,
+                                'entity_name' => 'course',
+                                'notification_title' => 'Course Enrollment Successful',
+                                'notification_description' => "You have successfully enrolled in {$course->name}",
+                                'notification_link' => "/dashboard/courses/{$course->id}",
+                                'sender_id' => $user->business_id ? $user->business->owner->id : $user->id,
+                                'receiver_id' => $user->id,
+                                'business_id' => $user->business_id,
+                                'is_system_generated' => true,
+                                'notification_type' => 'course_enrollment',
+                            ]);
 
-                                // Create notification for business owner
-                                Notification::create([
-                                    'type' => 'App\\Notifications\\StudentEnrollment',
-                                    'notifiable_type' => 'App\\Models\\User',
-                                    'notifiable_id' => $business->owner->id,
-                                    'data' => json_encode([
-                                        'student_id' => $user->id,
-                                        'student_name' => $user->name,
-                                        'course_id' => $course->id,
-                                        'course_name' => $course->name,
-                                        'enrolled_at' => now()->toDateTimeString(),
-                                    ]),
-                                    'entity_id' => $course->id,
-                                    'entity_name' => 'course',
-                                    'notification_title' => 'New Student Enrollment',
-                                    'notification_description' => "{$user->name} has enrolled in {$course->name}",
-                                    'notification_link' => "/dashboard/enrollments",
-                                    'sender_id' => $user->id,
-                                    'receiver_id' => $business->owner->id,
-                                    'business_id' => $business->id,
-                                    'is_system_generated' => true,
-                                    'notification_type' => 'student_enrollment',
-                                ]);
+                            log_message([
+                                'level' => 'info',
+                                'message' => 'Enrollment email and notification sent to student successfully',
+                                'context' => ['user_id' => $user_id, 'course_id' => $course_id],
+                            ], 'stripe_webhooks.log');
+                        } catch (\Exception $e) {
+                            log_message([
+                                'level' => 'error',
+                                'message' => 'Failed to send enrollment email to student',
+                                'context' => ['error' => $e->getMessage()],
+                            ], 'stripe_webhooks.log');
+                        }
 
-                                log_message([
-                                    'level' => 'info',
-                                    'message' => 'Enrollment notification and notification record sent to business owner successfully',
-                                    'context' => ['user_id' => $user_id, 'course_id' => $course_id, 'owner_id' => $business->owner->id],
-                                ], 'stripe_webhooks.log');
-                            } catch (\Exception $e) {
-                                log_message([
-                                    'level' => 'error',
-                                    'message' => 'Failed to send enrollment notification to business owner',
-                                    'context' => ['error' => $e->getMessage(), 'owner_id' => $business->owner->id ?? 'unknown'],
-                                ], 'stripe_webhooks.log');
+                        // Send notification email to business owner
+                        if ($user->business_id) {
+                            $business = $user->business()->with('owner')->first();
+
+                            if ($business && $business->owner && $business->owner->email) {
+                                try {
+                                    Mail::to($business->owner->email)->send(new StudentEnrollmentNotification($user, $course, $business->owner));
+
+                                    // Create notification for business owner
+                                    Notification::create([
+                                        'type' => 'App\\Notifications\\StudentEnrollment',
+                                        'notifiable_type' => 'App\\Models\\User',
+                                        'notifiable_id' => $business->owner->id,
+                                        'data' => json_encode([
+                                            'student_id' => $user->id,
+                                            'student_name' => $user->name,
+                                            'course_id' => $course->id,
+                                            'course_name' => $course->name,
+                                            'enrolled_at' => now()->toDateTimeString(),
+                                        ]),
+                                        'entity_id' => $course->id,
+                                        'entity_name' => 'course',
+                                        'notification_title' => 'New Student Enrollment',
+                                        'notification_description' => "{$user->name} has enrolled in {$course->name}",
+                                        'notification_link' => "/dashboard/enrollments",
+                                        'sender_id' => $user->id,
+                                        'receiver_id' => $business->owner->id,
+                                        'business_id' => $business->id,
+                                        'is_system_generated' => true,
+                                        'notification_type' => 'student_enrollment',
+                                    ]);
+
+                                    log_message([
+                                        'level' => 'info',
+                                        'message' => 'Enrollment notification and notification record sent to business owner successfully',
+                                        'context' => ['user_id' => $user_id, 'course_id' => $course_id, 'owner_id' => $business->owner->id],
+                                    ], 'stripe_webhooks.log');
+                                } catch (\Exception $e) {
+                                    log_message([
+                                        'level' => 'error',
+                                        'message' => 'Failed to send enrollment notification to business owner',
+                                        'context' => ['error' => $e->getMessage(), 'owner_id' => $business->owner->id ?? 'unknown'],
+                                    ], 'stripe_webhooks.log');
+                                }
                             }
                         }
                     }
                 }
+
+                log_message([
+                    'level' => 'info',
+                    'message' => 'Course processing completed',
+                    'context' => ['course_id' => $course_id],
+                ], 'stripe_webhooks.log');
+            } catch (\Exception $e) {
+                log_message([
+                    'level' => 'error',
+                    'message' => 'Failed to process course',
+                    'context' => ['course_id' => $course_id, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()],
+                ], 'stripe_webhooks.log');
+                // Continue to next course even if this one fails
+                continue;
             }
         }
 

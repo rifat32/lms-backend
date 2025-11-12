@@ -390,7 +390,7 @@ class ReportController extends Controller
                     : null;
 
                 return [
-                    'course'      => $row->course->name,
+                    'course'      => $row->course->title,
                     'revenue'     => (float) $row->revenue,
                     'enrollments' => (int) $row->enrollments,
                     'aov'         => (float) $row->aov,
@@ -635,12 +635,12 @@ class ReportController extends Controller
         $courses = Course::withCount([
             // Enrollments within the period
             'enrollments' => function ($q) use ($start, $end) {
-                $q->whereBetween('created_at', [$start, $end]);
+                $q->whereBetween('enrolled_at', [$start, $end]);
             },
             // Completions within the period (alias completions_count)
             'enrollments as completions_count' => function ($q) use ($start, $end) {
-                $q->whereNotNull('completed_at')
-                    ->whereBetween('completed_at', [$start, $end]);
+                $q->where('progress', 100)
+                    ->whereBetween('enrolled_at', [$start, $end]);
             },
         ])
             // Average rating (if ratings relationship exists)
