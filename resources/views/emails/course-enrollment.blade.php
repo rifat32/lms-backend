@@ -94,11 +94,11 @@
                                         <div style="font-size:20px;font-weight:700;color:#333333;margin:0 0 10px 0;">
                                             {{ $course->title }}
                                         </div>
-                                        @if ($course->description)
+                                        {{-- @if ($course->description)
                                             <p style="margin:5px 0 10px 0;font-size:15px;color:#555555;">
                                                 {{ Str::limit($course->description, 150) }}
                                             </p>
-                                        @endif
+                                        @endif --}}
                                         @if ($course->level)
                                             <p style="margin:5px 0;font-size:15px;color:#555555;">
                                                 <strong>Level:</strong> {{ ucfirst($course->level) }}
