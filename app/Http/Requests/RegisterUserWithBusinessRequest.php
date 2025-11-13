@@ -63,6 +63,7 @@ class RegisterUserWithBusinessRequest extends FormRequest
             'business.postcode' => 'nullable|string',
             'business.address_line_1' => 'required|string',
             'business.address_line_2' => 'nullable|string',
+            'business.registration_date' => 'nullable|string',
             'business.logo' => 'nullable|string',
             'business.image' => 'nullable|string',
             'business.background_image' => 'nullable|string',

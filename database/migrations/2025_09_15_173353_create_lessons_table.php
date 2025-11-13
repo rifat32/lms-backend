@@ -16,7 +16,8 @@ class CreateLessonsTable extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->enum('content_type', ['video', 'text','pdf','audio', 'file']);
+            $table->string('subtitle')->nullable();
+            $table->string('content_type');
             $table->string('content_url')->nullable();
             $table->integer('sort_order')->default(0);
             $table->integer('duration')->nullable(); // duration in minutes
@@ -29,11 +30,16 @@ class CreateLessonsTable extends Migration
             $table->longText('content')->nullable();
             $table->json('files')->nullable();
             $table->json('materials')->nullable();
+            $table->string('video_width')->nullable();
+            $table->string('required_progress')->nullable();
+            $table->string('preview_video_source_type')->nullable(); // HTML, YouTube, Vimeo, External Link, Embed
+            $table->string('preview_video_url')->nullable();         // YouTube, Vimeo, External Link, or HTML video file
+            $table->string('preview_video_poster')->nullable();      // Poster image for the video preview
+            $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
+            $table->boolean('pdf_read_completion_required')->default(false);
 
-        
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
-
         });
     }
 

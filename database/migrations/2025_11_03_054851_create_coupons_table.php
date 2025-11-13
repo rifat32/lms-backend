@@ -17,7 +17,7 @@ class CreateCouponsTable extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->string('code')->unique();
-            $table->enum('discount_type', ['fixed', 'percentage'])->default('percentage');
+            $table->string('discount_type')->default('percentage');
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('min_total', 10, 2)->nullable();
             $table->decimal('max_total', 10, 2)->nullable();

@@ -68,6 +68,26 @@ class Business extends Model
         return array_values(self::STATUS_OPTIONS);
     }
 
+    /**
+     * Get validation rules for the status field
+     */
+    public static function statusValidationRule(): string
+    {
+        return 'required|in:' . implode(',', self::statusValues());
+    }
+
+    /**
+     * Set the status attribute with validation
+     */
+    public function setStatusAttribute($value)
+    {
+        if (!in_array($value, self::statusValues())) {
+            throw new \InvalidArgumentException("Invalid status value: {$value}. Must be one of: " . implode(', ', self::statusValues()));
+        }
+
+        $this->attributes['status'] = $value;
+    }
+
     // Single file accessors (your existing code)
     public function getLogoAttribute($value)
     {

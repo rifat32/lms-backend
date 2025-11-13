@@ -24,7 +24,7 @@ class CreateCoursesTable extends Migration
             $table->date("price_end_date")->nullable();
 
 
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+            $table->string('status')->default('draft');
             $table->date('status_start_date')->nullable();
             $table->date('status_end_date')->nullable();
 
@@ -40,7 +40,7 @@ class CreateCoursesTable extends Migration
             $table->text('preview_video_embed')->nullable();         // Embed iframe code for "Embed" type
 
             $table->string('duration')->nullable();
-            
+
             $table->string('video_duration')->nullable();
             $table->text('course_preview_description')->nullable();
 

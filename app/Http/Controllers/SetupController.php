@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Utils\SetupUtils;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 class SetupController extends Controller
 {
@@ -18,12 +20,6 @@ class SetupController extends Controller
         Artisan::call('cache:clear');
         Artisan::call('route:clear');
         Artisan::call('view:clear');
-
-        $user = User::where('email', 'admin@yopmail.com')->first();
-        $user->update([
-            'email' => 'admin.collegeemail@yopmail.com',
-        ]);
-
 
         return response()->json(['message' => 'Caches cleared']);
     }
@@ -143,12 +139,12 @@ class SetupController extends Controller
                 ], 403);
             }
 
-            \Illuminate\Support\Facades\Schema::dropIfExists($tableName);
+            Schema::dropIfExists($tableName);
 
             return response()->json([
                 'message' => "Table '{$tableName}' dropped successfully"
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Failed to drop table',
                 'error' => $e->getMessage()

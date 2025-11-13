@@ -35,11 +35,8 @@ class CreateBusinessesTable extends Migration
             $table->string("background_image")->nullable(); // nullable|string
             $table->string("theme")->nullable(); // nullable|string
             $table->json("images")->nullable(); // nullable|array of strings
-
             $table->string("additional_information")->nullable(); // nullable|string
-
-
-            $table->enum('status', ['pending', 'active', 'suspended', 'cancelled', 'expired', 'trail_ended', 'inactive'])->default("pending");
+            $table->string('status')->default("pending");
             $table->boolean('is_active')->default(1);
             $table->foreignId("owner_id")->constrained('users')->cascadeOnDelete();
             $table->foreignId("created_by")->nullable()->constrained('users')->nullOnDelete();

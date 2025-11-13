@@ -15,9 +15,9 @@ class CreateSectionablesTable extends Migration
     {
         Schema::create('sectionables', function (Blueprint $table) {
             $table->id();
-               $table->foreignId('section_id')->constrained()->cascadeOnDelete();
-    $table->morphs('sectionable'); // sectionable_id + sectionable_type
-    $table->integer('order')->nullable(); // to define order inside a section
+            $table->foreignId('section_id')->constrained()->cascadeOnDelete();
+            $table->morphs('sectionable'); // sectionable_id + sectionable_type
+            $table->integer('order')->nullable(); // to define order inside a section
             $table->timestamps();
         });
     }

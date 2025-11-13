@@ -18,10 +18,13 @@ class CreatePaymentsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('course_id');
             $table->decimal('amount', 10, 2);
+            $table->decimal('original_price', 10, 2)->nullable();
             $table->string('method');
-            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
-            $table->string('transaction_id')->nullable()->unique();
-            $table->string('payment_intent_id')->nullable()->unique();
+            $table->string('status')->default('pending');
+            $table->string('transaction_id')->nullable();
+            $table->string('payment_intent_id')->nullable();
+            $table->string('coupon_code')->nullable();
+            $table->decimal('discount_amount', 10, 2)->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
 

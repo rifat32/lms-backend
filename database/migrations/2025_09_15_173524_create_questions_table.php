@@ -15,9 +15,9 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            
+
             $table->text('question_text');
-            $table->enum('question_type', ['true_false', 'single', 'multiple', 'matching', 'file_matching', 'keywords', 'fill_in_the_blanks']);
+            $table->string('question_type');
             $table->integer('points')->default(1);
             $table->integer('time_limit')->nullable();
             $table->boolean('is_required')->default(true);

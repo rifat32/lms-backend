@@ -25,6 +25,7 @@ class CreateQuizAttemptsTable extends Migration
             $table->integer('total_points')->nullable();
             $table->integer('score')->nullable();
             $table->timestamp('started_at')->nullable();
+            $table->timestamp('last_accessed')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->integer('time_spent')->default(0); // in seconds
             $table->boolean('is_expired')->default(false);

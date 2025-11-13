@@ -17,15 +17,13 @@ class CreateQuizAttemptAnswersTable extends Migration
 
             $table->id();
 
-             $table->foreignId('quiz_attempt_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('quiz_attempt_id')->constrained()->cascadeOnDelete();
             $table->foreignId('question_id')->constrained()->cascadeOnDelete();
             $table->json('user_answer_ids')->nullable();
             $table->json('correct_answer_ids')->nullable();
             $table->boolean('is_correct')->default(false);
 
             $table->timestamps();
-
-
         });
     }
 

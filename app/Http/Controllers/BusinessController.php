@@ -69,7 +69,7 @@ class BusinessController extends Controller
      *                 @OA\Property(property="name", type="string", example="Learning Hub"),
      *                 @OA\Property(property="email", type="string", format="email", example="mdronymia040@gmail.com"),
      *                 @OA\Property(property="phone", type="string", example="+8801XXXXXXXXX"),
-     *                 @OA\Property(property="registration_date", type="string", format="date", example="01-01-2010"),
+     *                 @OA\Property(property="registration_date", type="string", format="date-time", example="2025-09-16 12:00:00"),
 
      *                 @OA\Property(property="about", type="string", example="About the business..."),
      *                 @OA\Property(property="web_page", type="string", example="https://example.com"),

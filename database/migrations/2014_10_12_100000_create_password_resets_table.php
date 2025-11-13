@@ -17,7 +17,6 @@ class CreatePasswordResetsTable extends Migration
             $table->string('email')->index();
             $table->text('token'); // Changed to TEXT for longer tokens
             $table->timestamp('created_at')->nullable();
-            // $table->timestamp('expires_at')->nullable(); // ✅ Add expiry
         });
     }
 

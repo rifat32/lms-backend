@@ -39,6 +39,26 @@ class Coupon extends Model
     {
         return array_values(self::DISCOUNT_TYPE);
     }
+
+    /**
+     * Get validation rules for the discount_type field
+     */
+    public static function discountTypeValidationRule(): string
+    {
+        return 'required|in:' . implode(',', self::getDiscountTypes());
+    }
+
+    /**
+     * Set the discount_type attribute with validation
+     */
+    public function setDiscountTypeAttribute($value)
+    {
+        if (!in_array($value, self::getDiscountTypes())) {
+            throw new \InvalidArgumentException("Invalid discount type: {$value}. Must be one of: " . implode(', ', self::getDiscountTypes()));
+        }
+
+        $this->attributes['discount_type'] = $value;
+    }
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'coupon_courses', 'coupon_id', 'course_id');
