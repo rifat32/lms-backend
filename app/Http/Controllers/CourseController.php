@@ -1437,6 +1437,10 @@ class CourseController extends Controller
                         'message' => 'Cannot publish a course without lessons'
                     ], 422);
                 }
+
+
+
+                
             }
 
 
