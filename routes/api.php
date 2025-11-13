@@ -54,9 +54,8 @@ Route::prefix('/v1.0/auth')->group(function () {
 
 // PRIVATE ROUTES
 Route::middleware('auth:api')->group(function () {
-    Route::get('/v1.0/user', function (Request $request) {
-        return $request->user();
-    });
+    // VERIFY USER BY TOKEN
+    Route::get('/v1.0/verify-user-by-token', [AuthController::class, 'verifyUserByToken']);
 
     // USER APIS
     Route::prefix('/v1.0/users')->group(function () {

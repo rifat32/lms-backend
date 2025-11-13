@@ -663,4 +663,73 @@ class AuthController extends Controller
             return $this->sendError($e);
         }
     }
+
+    /**
+     *
+     * @OA\Get(
+     *      path="/v1.0/verify-user-by-token",
+     *      operationId="verifyUserByToken",
+     *      tags={"Auth"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="This method is to get  user by token",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+    public function verifyUserByToken(Request $request)
+    {
+        try {
+
+            $user = $request->user();
+            $user->permissions = $user->getAllPermissions()->pluck('name');
+            $user->roles = $user->roles->pluck('name');
+            $user->business = $user->business;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Token is valid',
+                'user' => $user
+            ], 200);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
 }
