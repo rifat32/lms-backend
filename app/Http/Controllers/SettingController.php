@@ -6,6 +6,7 @@ use App\Http\Requests\UpdateBusinessSettingRequest;
 use App\Models\BusinessSetting;
 use Exception;
 use Illuminate\Http\Request;
+use Stripe\StripeClient;
 
 class SettingController extends Controller
 {
@@ -137,7 +138,7 @@ class SettingController extends Controller
             // Stripe validation if stripe_enabled is passed and true
             if (!empty($request_data['stripe_enabled'])) {
                 try {
-                    $stripe = new \Stripe\StripeClient($request_data['STRIPE_SECRET'] ?? '');
+                    $stripe = new StripeClient($request_data['STRIPE_SECRET'] ?? '');
                     $stripe->balance->retrieve();
                 } catch (\Exception $e) {
                     return response()->json([
@@ -156,7 +157,7 @@ class SettingController extends Controller
             }
 
             return response()->json($businessSetting, 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 "message" => "An error occurred while updating business settings: " . $e->getMessage()
             ], 500);

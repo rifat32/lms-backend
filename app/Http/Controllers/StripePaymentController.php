@@ -236,19 +236,24 @@ class StripePaymentController extends Controller
             DB::commit();
 
             return response()->json([
-                'client_secret' => $payment_intent->client_secret,
-                'total_amount' => round($total_amount, 2),
-                'discount_amount' => round($total_discount, 2),
-                'courses' => $courses->pluck('title'),
-                'course_breakdown' => array_map(function ($detail) {
-                    return [
-                        'id' => $detail['course']->id,
-                        'title' => $detail['course']->title,
-                        'original_price' => round($detail['original_price'], 2),
-                        'discount' => round($detail['discount_amount'], 2),
-                        'final_price' => round($detail['final_price'], 2),
-                    ];
-                }, $course_details),
+                'success' => true,
+                'message' => 'Payment intent created successfully',
+                'data' => [
+                    'client_secret' => $payment_intent->client_secret,
+                    'total_amount' => round($total_amount, 2),
+                    'discount_amount' => round($total_discount, 2),
+                    'courses' => $courses->pluck('title'),
+                    'course_breakdown' => array_map(function ($detail) {
+                        return [
+                            'id' => $detail['course']->id,
+                            'title' => $detail['course']->title,
+                            'original_price' => round($detail['original_price'], 2),
+                            'discount' => round($detail['discount_amount'], 2),
+                            'final_price' => round($detail['final_price'], 2),
+                        ];
+                    }, $course_details),
+                ]
+
             ], 200);
         } catch (Exception $e) {
             DB::rollBack();
