@@ -1423,6 +1423,24 @@ class CourseController extends Controller
             // FIND COURSE
             $course = Course::findOrFail($request_payload['id']);
 
+
+               if ($request_payload['status'] == 'published') {
+                $has_lessons = $course->sections->flatMap(function ($section) {
+                    return $section->sectionables->filter(function ($sectionable) {
+                        return $sectionable->sectionable_type === Lesson::class;
+                    });
+                })->count() > 0;
+
+                if (!$has_lessons) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot publish a course without lessons'
+                    ], 422);
+                }
+            }
+
+
+
             // ========================
             // UPDATE COURSE
             // ========================
