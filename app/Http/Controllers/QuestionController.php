@@ -307,16 +307,16 @@ class QuestionController extends Controller
             $question->categories()->sync($request_payload["category_ids"]);
 
             if (!empty($request->options)) {
+                Option::where('question_id', $question->id)->delete();
                 foreach ($request->options as $optData) {
-                    $option = Option::updateOrCreate(
-                        ['id' => $optData['id'] ?? null],
-                        [
+                    $option = Option::create(
+                    [
                             'question_id' => $question->id,
                             'option_text' => $optData['option_text'] ?? null,
                             'is_correct' => $optData['is_correct'],
                             'explanation' => $optData['explanation'] ?? null,
                             'matching_pair_text' => $optData['matching_pair_text'] ?? null,
-                        ]
+                    ]     
                     );
 
                     $base_folder = "business_1/question_{$question->id}";

@@ -1423,24 +1423,21 @@ class CourseController extends Controller
             // FIND COURSE
             $course = Course::findOrFail($request_payload['id']);
 
+               if (($request_payload['status']??"") == 'published') {
 
-               if ($request_payload['status'] == 'published') {
-                $has_lessons = $course->sections->flatMap(function ($section) {
+                $lessons_count = $course->sections->flatMap(function ($section) {
                     return $section->sectionables->filter(function ($sectionable) {
-                        return $sectionable->sectionable_type === Lesson::class;
+                        return $sectionable->sectionable_type == Lesson::class;
                     });
-                })->count() > 0;
+                })->count() ;
 
-                if (!$has_lessons) {
+                if ($lessons_count==0) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Cannot publish a course without lessons'
                     ], 422);
                 }
 
-
-
-                
             }
 
 
@@ -1770,6 +1767,23 @@ class CourseController extends Controller
             // ========================
             $request_payload['cover'] = $request_payload['cover'] ?? null;
 
+                if (($request_payload['status']??"") == 'published') {
+
+                $lessons_count = $course->sections->flatMap(function ($section) {
+                    return $section->sectionables->filter(function ($sectionable) {
+                        return $sectionable->sectionable_type == Lesson::class;
+                    });
+                })->count() ;
+
+                if ($lessons_count==0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot publish a course without lessons'
+                    ], 422);
+                }
+
+            }
+
             $course->update($request_payload);
 
 
@@ -1868,65 +1882,74 @@ class CourseController extends Controller
      * )
      */
 
-    public function deleteCourse($ids)
-    {
-        try {
-            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-                return response()->json([
-                    "message" => "You can not perform this action"
-                ], 401);
+  public function deleteCourse($ids)
+{
+    try {
+        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+            return response()->json(["message" => "You can not perform this action"], 401);
+        }
+
+        DB::beginTransaction();
+
+        $ids_of_array = array_map('intval', explode(',', $ids));
+        $courses = Course::whereIn('id', $ids_of_array)->get();
+        $existing_ids = $courses->pluck('id')->toArray();
+
+        if (count($existing_ids) !== count($ids_of_array)) {
+            $missing_ids = array_diff($ids_of_array, $existing_ids);
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Some data not found',
+                'data' => ['missing_ids' => array_values($missing_ids)]
+            ], 400);
+        }
+
+        // --- SAFETY CHECK FIRST: collect courses which have enrollments ---
+        $blocked = [];
+        foreach ($courses as $course) {
+            if ($course->enrollments()->exists()) {
+                $blocked[] = $course->id;
             }
+        }
 
-            DB::beginTransaction();
+        if (!empty($blocked)) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Some courses have enrollments and cannot be deleted',
+                'data' => ['blocked_ids' => $blocked]
+            ], 400);
+        }
 
-            $idsOfArray = array_map('intval', explode(',', $ids));
-
-            // VALIDATE PAYLOAD
-            $courses = Course::whereIn('id', $idsOfArray)->get();
-
-            $existingIds = $courses->pluck('id')->toArray();
-
-            if (count($existingIds) !== count($idsOfArray)) {
-                $missingIds = array_diff($idsOfArray, $existingIds);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Some data not found',
-                    'data' => [
-                        'missing_ids' => $missingIds
-                    ]
-                ], 400);
-            }
-
-            foreach ($courses as $course) {
-                $raw_cover = $course->getRawOriginal('cover');
-                if ($raw_cover) {
-                    $path = "business_1/course_{$course->id}/$raw_cover";
-                    if (Storage::disk('public')->exists($path)) {
-                        Storage::disk('public')->delete($path);
-                    }
+        // --- All clear: delete cover files then DB records ---
+        foreach ($courses as $course) {
+            $raw_cover = $course->getRawOriginal('cover');
+            if ($raw_cover) {
+                $path = "business_1/course_{$course->id}/{$raw_cover}";
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
                 }
             }
-
-
-            // DELETE THE RECORDS
-            Course::whereIn('id', $existingIds)->delete();
-
-
-
-
-
-
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Course deleted successfully',
-                'data' => $existingIds
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
         }
+
+        Course::whereIn('id', $existing_ids)->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course(s) deleted successfully',
+            'data' => $existing_ids
+        ], 200);
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        throw $th;
     }
+}
+
+
+
+
+
 }

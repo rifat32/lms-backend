@@ -88,6 +88,10 @@ Route::middleware('auth:api')->group(function () {
 
     Route::put('/v1.0/course-faqs', [CourseFaqController::class, 'updateCourseFaqs']);
     Route::get('/v1.0/course-faqs/{course_id}', [CourseFaqController::class, 'getCourseFaqs']);
+    Route::get('/v1.0/course-faqs', [CourseFaqController::class, 'getCourseFaqsAll']);
+    Route::delete('/course-faqs/{ids}', [CourseFaqController::class, 'deleteCourseFaqs']);
+
+
     // COURSE
     Route::group(['prefix' => '/v1.0/courses'], function () {
         Route::post('/', [CourseController::class, 'createCourse']);

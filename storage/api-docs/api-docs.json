@@ -136,14 +136,14 @@
                 }
             }
         },
-        "/forgetpassword/reset/{token}": {
+        "/reset-password/{token}": {
             "patch": {
                 "tags": [
                     "Auth"
                 ],
                 "summary": "This method is to change password",
                 "description": "This method is to change password",
-                "operationId": "changePasswordByToken",
+                "operationId": "resetPasswordWithToken",
                 "parameters": [
                     {
                         "name": "token",
@@ -385,6 +385,186 @@
                 }
             }
         },
+        "/v1.0/auth/verify-user-email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "This method is to check user",
+                "description": "This method is to check user",
+                "operationId": "verifyUserEmail",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "test@g.c"
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocesseble Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/auth/verify-business-email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify business email availability",
+                "description": "Check if a business email is available, excluding the specified business_id if provided.",
+                "operationId": "verifyBusinessEmail",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "business@example.com"
+                                    },
+                                    "business_id": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email is available",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email is available"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email already exists"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/v1.0/register-user-with-business": {
             "post": {
                 "tags": [
@@ -444,8 +624,8 @@
                                             },
                                             "registration_date": {
                                                 "type": "string",
-                                                "format": "date",
-                                                "example": "01-01-2010"
+                                                "format": "date-time",
+                                                "example": "2025-09-16 12:00:00"
                                             },
                                             "about": {
                                                 "type": "string",
@@ -894,12 +1074,12 @@
                                     "lat": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 23.7808875
+                                        "example": 23.78088749999999862438926356844604015350341796875
                                     },
                                     "long": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 90.2792371
+                                        "example": 90.2792371000000031244780984707176685333251953125
                                     },
                                     "currency": {
                                         "type": "string",
@@ -1739,7 +1919,40 @@
             }
         },
         "/v1.0/coupons/{id}": {
-            "put": {
+            "delete": {
+                "tags": [
+                    "coupon_management"
+                ],
+                "summary": "Delete coupon by id",
+                "description": "Deletes a coupon for a specific garage (requires coupon_delete permission)",
+                "operationId": "deleteCouponById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Coupon ID",
+                        "required": true,
+                        "example": 6
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Coupon deleted successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Coupon not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
                 "tags": [
                     "coupon_management"
                 ],
@@ -1763,6 +1976,10 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "1"
+                                    },
                                     "name": {
                                         "type": "string",
                                         "example": "Summer Sale"
@@ -1809,69 +2026,28 @@
                         "bearerAuth": []
                     }
                 ]
-            },
-            "delete": {
-                "tags": [
-                    "coupon_management"
-                ],
-                "summary": "Delete coupon by id",
-                "description": "Deletes a coupon for a specific garage (requires coupon_delete permission)",
-                "operationId": "deleteCouponById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Coupon ID",
-                        "required": true,
-                        "example": 6
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Coupon deleted successfully"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "404": {
-                        "description": "Coupon not found"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
-        "/v1.0/coupons/toggle-active": {
-            "put": {
+        "/v1.0/coupons/{id}/toggle-active": {
+            "patch": {
                 "tags": [
                     "coupon_management"
                 ],
                 "summary": "Toggle coupon active status",
                 "description": "Toggle the is_active flag of a coupon (requires coupon_update permission)",
                 "operationId": "toggleActiveCoupon",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "id"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "description": "Coupon id",
-                                        "type": "integer",
-                                        "example": 1
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Coupon ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
                         "description": "Coupon status updated successfully"
@@ -3133,7 +3309,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3374,7 +3550,7 @@
                     "Trash"
                 ],
                 "summary": "Get enrolled course details (Authenticated and enrolled users only) (role: Student only)",
-                "description": "Retrieve detailed course information including lessons, quizzes, and progress.\r\n     *     Authenticated and enrolled users only",
+                "description": "Retrieve detailed course information including lessons, quizzes, and progress.\n     *     Authenticated and enrolled users only",
                 "operationId": "getCourseByIdSecureClient",
                 "parameters": [
                     {
@@ -3627,7 +3803,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3854,7 +4030,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -3979,12 +4155,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.99
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -4110,12 +4286,12 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "sale_price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 29.99
+                                            "example": 29.989999999999998436805981327779591083526611328125
                                         },
                                         "price_start_date": {
                                             "type": "string",
@@ -4363,12 +4539,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.99
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -4494,7 +4670,7 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "status": {
                                             "type": "string",
@@ -4675,12 +4851,12 @@
                                     "price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 49.99
+                                        "example": 49.99000000000000198951966012828052043914794921875
                                     },
                                     "sale_price": {
                                         "type": "number",
                                         "format": "float",
-                                        "example": 29.99
+                                        "example": 29.989999999999998436805981327779591083526611328125
                                     },
                                     "price_start_date": {
                                         "type": "string",
@@ -4806,12 +4982,12 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "sale_price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 29.99
+                                            "example": 29.989999999999998436805981327779591083526611328125
                                         },
                                         "price_start_date": {
                                             "type": "string",
@@ -5403,6 +5579,41 @@
             }
         },
         "/v1.0/course-faqs": {
+            "get": {
+                "tags": [
+                    "course_management.course_faq"
+                ],
+                "summary": "Get FAQs for multiple courses (role: Any Role)",
+                "operationId": "getCourseFaqsAll",
+                "parameters": [
+                    {
+                        "name": "course_ids[]",
+                        "in": "query",
+                        "description": "Array of course IDs",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "example": 10
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FAQs retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "course_management.course_faq"
@@ -6005,19 +6216,19 @@
                                                 },
                                                 "enrollment_rate": {
                                                     "type": "number",
-                                                    "example": 89.2
+                                                    "example": 89.2000000000000028421709430404007434844970703125
                                                 },
                                                 "completion_rate": {
                                                     "type": "number",
-                                                    "example": 76.8
+                                                    "example": 76.7999999999999971578290569595992565155029296875
                                                 },
                                                 "avg_learning_hours": {
                                                     "type": "number",
-                                                    "example": 4.2
+                                                    "example": 4.20000000000000017763568394002504646778106689453125
                                                 },
                                                 "audience_reach": {
                                                     "type": "number",
-                                                    "example": 67.3
+                                                    "example": 67.2999999999999971578290569595992565155029296875
                                                 }
                                             },
                                             "type": "object"
@@ -6361,7 +6572,7 @@
                                                             },
                                                             "price": {
                                                                 "type": "number",
-                                                                "example": 49.99
+                                                                "example": 49.99000000000000198951966012828052043914794921875
                                                             }
                                                         },
                                                         "type": "object"
@@ -6496,7 +6707,7 @@
                                                     "price": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 49.99
+                                                        "example": 49.99000000000000198951966012828052043914794921875
                                                     },
                                                     "category_id": {
                                                         "type": "integer",
@@ -7072,7 +7283,7 @@
                                         "price": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 49.99
+                                            "example": 49.99000000000000198951966012828052043914794921875
                                         },
                                         "category_id": {
                                             "type": "integer",
@@ -7521,6 +7732,786 @@
                     },
                     "422": {
                         "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get notifications for authenticated user with filtering and pagination",
+                "operationId": "getNotifications",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by read status (read/unread/all)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "read",
+                                "unread",
+                                "all"
+                            ],
+                            "example": "unread"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by notification type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "course_enrollment"
+                        }
+                    },
+                    {
+                        "name": "entity_id",
+                        "in": "query",
+                        "description": "Filter by entity ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    },
+                    {
+                        "name": "entity_name",
+                        "in": "query",
+                        "description": "Filter by entity name",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "course"
+                        }
+                    },
+                    {
+                        "name": "business_id",
+                        "in": "query",
+                        "description": "Filter by receiver business ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "is_system_generated",
+                        "in": "query",
+                        "description": "Filter by system generated status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Filter notifications from this date (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Filter notifications until this date (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search in notification title and description",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "welcome"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notifications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notifications retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "App\\\\Notifications\\\\CourseEnrollment"
+                                                    },
+                                                    "notifiable_type": {
+                                                        "type": "string",
+                                                        "example": "App\\\\Models\\\\User"
+                                                    },
+                                                    "notifiable_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "example": {
+                                                            "course_name": "Laravel Basics"
+                                                        }
+                                                    },
+                                                    "read_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "entity_id": {
+                                                        "type": "integer",
+                                                        "example": 123
+                                                    },
+                                                    "entity_name": {
+                                                        "type": "string",
+                                                        "example": "course"
+                                                    },
+                                                    "notification_title": {
+                                                        "type": "string",
+                                                        "example": "Course Enrollment Successful"
+                                                    },
+                                                    "notification_description": {
+                                                        "type": "string",
+                                                        "example": "You have successfully enrolled in Laravel Basics course"
+                                                    },
+                                                    "notification_link": {
+                                                        "type": "string",
+                                                        "example": "/dashboard/courses",
+                                                        "nullable": true
+                                                    },
+                                                    "sender_id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "business_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "is_system_generated": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "notification_type": {
+                                                        "type": "string",
+                                                        "example": "course_enrollment",
+                                                        "nullable": true
+                                                    },
+                                                    "start_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-01-01",
+                                                        "nullable": true
+                                                    },
+                                                    "end_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-31",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "sender": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "email": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "business": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid request parameters."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Authentication required",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/notifications/business/{business_id}": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get all notifications for a specific business",
+                "operationId": "getNotificationsByBusinessId",
+                "parameters": [
+                    {
+                        "name": "business_id",
+                        "in": "path",
+                        "description": "Business ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by read status (read/unread/all)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "read",
+                                "unread",
+                                "all"
+                            ],
+                            "example": "unread"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Business notifications retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Business notifications retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/notifications/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Update notification read status",
+                "operationId": "updateNotificationStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Notification ID (UUID)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_read"
+                                ],
+                                "properties": {
+                                    "is_read": {
+                                        "description": "Mark as read (true) or unread (false)",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Notification status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification status updated successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/notifications/mark-all-read": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Mark all notifications as read for authenticated user",
+                "operationId": "markAllNotificationsAsRead",
+                "responses": {
+                    "200": {
+                        "description": "All notifications marked as read successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "All notifications marked as read"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "updated_count": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/notifications/{id}": {
+            "delete": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete a specific notification",
+                "operationId": "deleteNotificationById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Notification ID (UUID)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notification not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An unexpected error occurred."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -10706,7 +11697,7 @@
         "/v1.0/reports/sales": {
             "get": {
                 "tags": [
-                    "Reports"
+                    "Trash"
                 ],
                 "summary": "Get sales report for all courses (role: Admin only)",
                 "operationId": "sales",
@@ -13335,7 +14326,7 @@
                                         },
                                         "totalAmount": {
                                             "type": "number",
-                                            "example": 199.99
+                                            "example": 199.990000000000009094947017729282379150390625
                                         },
                                         "discountAmount": {
                                             "type": "number",
@@ -13498,7 +14489,7 @@
                                                     "amount": {
                                                         "type": "number",
                                                         "format": "float",
-                                                        "example": 73.99
+                                                        "example": 73.9899999999999948840923025272786617279052734375
                                                     },
                                                     "method": {
                                                         "type": "string",
@@ -13508,7 +14499,7 @@
                                                         "type": "string",
                                                         "example": "completed"
                                                     },
-                                                    "created_at": {
+                                                    "paid_at": {
                                                         "type": "string",
                                                         "format": "date-time",
                                                         "example": "2024-01-13T12:00:00Z"
@@ -13562,7 +14553,7 @@
                                                 "available_balance": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 892.3
+                                                    "example": 892.299999999999954525264911353588104248046875
                                                 }
                                             },
                                             "type": "object"
@@ -13668,7 +14659,7 @@
                                                 "amount": {
                                                     "type": "number",
                                                     "format": "float",
-                                                    "example": 73.99
+                                                    "example": 73.9899999999999948840923025272786617279052734375
                                                 },
                                                 "method": {
                                                     "type": "string",
@@ -13743,6 +14734,86 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Payment not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1.0/payments/{paymentId}/pay-slip": {
+            "get": {
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Download payment slip PDF",
+                "description": "Download a PDF payment slip for a specific payment transaction",
+                "operationId": "downloadPaymentSlip",
+                "parameters": [
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "description": "Payment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "PAY-001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "PDF file download",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Payment not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Payment not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
                                         }
                                     },
                                     "type": "object"
@@ -15269,6 +16340,10 @@
         {
             "name": "LessonProgress",
             "description": "Endpoints to update lesson progress for enrolled users"
+        },
+        {
+            "name": "Notifications",
+            "description": "Endpoints to manage notifications"
         },
         {
             "name": "QuizAttempts",
