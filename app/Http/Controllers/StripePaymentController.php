@@ -604,24 +604,6 @@ class StripePaymentController extends Controller
      */
     public function downloadPaymentSlip(string $paymentId)
     {
-        /**
-         * Supported Stripe Payment Methods:
-         * - card: Credit/Debit cards (Visa, Mastercard, Amex, etc.)
-         * - Google Pay (via card with wallet type)
-         * - Apple Pay (via card with wallet type)
-         * - bank_transfer: Bank transfers
-         * - us_bank_account: US Bank Account (ACH)
-         * - sepa_debit: SEPA Direct Debit
-         * - bacs_debit: Bacs Direct Debit (UK)
-         * - paypal: PayPal
-         * - klarna: Klarna
-         * - afterpay_clearpay: Afterpay/Clearpay
-         * - alipay: Alipay
-         * - wechat_pay: WeChat Pay
-         * - amazon_pay: Amazon Pay
-         * - cashapp: Cash App Pay
-         * - link: Stripe Link
-         */
 
         $paymentModel = Payment::with([
             'course:id,title,description,price',
@@ -674,7 +656,7 @@ class StripePaymentController extends Controller
             'payment_details'     => null, // Generic field for other payment types
         ];
 
-        $discountAmount = 0;
+        $discountAmount = $paymentModel->discount_amount ?? 0;
         $actualAmount = $paymentModel->amount;
 
         if (!empty($paymentModel->payment_intent_id)) {
@@ -816,11 +798,11 @@ class StripePaymentController extends Controller
         // Payment meta
         $payMeta = [
             'slip_no'        => now()->format('Y') . '-' . str_pad($paymentModel->id, 5, '0', STR_PAD_LEFT),
-            'date'           => $paymentModel->paid_at ?? $paymentModel->created_at ?? now(),
+            'date'           => $paymentModel->paid_at,
             'status'         => $paymentModel->status === 'completed' ? 'Paid' : ($paymentModel->status === 'pending' ? 'Pending' : 'Failed'),
             'currency'       => $stripeData['currency'],
             'notes'          => 'Thank you for your payment. Keep a copy for your records.',
-            'subtotal'       => $paymentModel->amount,
+            'subtotal'       => 0,
             'discount_amount' => $discountAmount,
             'processing_fee' => 0,
             'amount_paid'    => $actualAmount,
