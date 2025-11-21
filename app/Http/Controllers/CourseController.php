@@ -1562,6 +1562,7 @@ class CourseController extends Controller
     public function updateCourseStatus(Request $request)
     {
         try {
+            
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
                 return response()->json(["message" => "You can not perform this action"], 401);
             }
@@ -1748,6 +1749,7 @@ class CourseController extends Controller
             }
 
             DB::beginTransaction();
+
             // VALIDATE PAYLOAD
             $request_payload = $request->validated();
 
@@ -1765,6 +1767,7 @@ class CourseController extends Controller
             // ========================
             // UPDATE COURSE
             // ========================
+
             $request_payload['cover'] = $request_payload['cover'] ?? null;
 
                 if (($request_payload['status']??"") == 'published') {
@@ -1786,11 +1789,10 @@ class CourseController extends Controller
 
             $course->update($request_payload);
 
-
-
             // ========================
             // HANDLE COVER (SINGLE FILE)
             // ========================
+
             $cover_filename = $course->getRawOriginal('cover');
             $folder_path = "business_1/course_{$course->id}";
 

@@ -368,7 +368,9 @@ class BusinessController extends Controller
                 );
                 $request_data['background_image'] = $bgFilename;
             } elseif ($request->filled('background_image') && is_string($request->input('background_image'))) {
+                
                 $request_data['background_image'] = basename($request->input('background_image'));
+            
             }
 
             // ========================

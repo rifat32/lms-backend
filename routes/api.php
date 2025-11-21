@@ -190,6 +190,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [QuestionCategoryController::class, 'getQuestionCategories']);   // Get all
         Route::delete('/{ids}', [QuestionCategoryController::class, 'deleteQuestionCategory']); // Delete
     });
+    Route::get('/v1.0/question-categories/validate-slug', [QuestionCategoryController::class, 'validateSlug']);
+
 
 
     // REPORT API

@@ -172,6 +172,73 @@ class QuestionCategoryController extends Controller
 
 
     /**
+ * @OA\Get(
+ *     path="/v1.0/question-categories/validate-slug",
+ *     operationId="validateQuestionCategorySlug",
+ *     tags={"question_management.question_category"},
+ *     summary="Validate a question category slug",
+ *     description="Check if a slug is valid and unique for question categories (role: Admin/Owner/Lecturer)",
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="slug",
+ *         in="query",
+ *         required=true,
+ *         description="Slug to validate",
+ *         @OA\Schema(type="string", example="programming")
+ *     ),
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="query",
+ *         required=false,
+ *         description="Question category ID (for updating existing category, exclude self from uniqueness check)",
+ *         @OA\Schema(type="integer", example=5)
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Validation result",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="valid", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="The slug is valid.")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Validation error",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="The slug field is required.")
+ *         )
+ *     )
+ * )
+ */
+public function validateSlug(Request $request)
+{
+    $request->validate([
+        'slug' => 'required|string|max:255',
+        'id'   => 'nullable|integer', // for edit case
+    ]);
+
+    $slug = $request->slug;
+    $id = $request->id;
+
+    $exists = QuestionCategory::where('slug', $slug)
+                ->when($id, fn($q) => $q->where('id', '!=', $id))
+                ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'valid' => false,
+            'message' => 'The slug is already taken.'
+        ], 200);
+    }
+
+    return response()->json([
+        'valid' => true,
+        'message' => 'The slug is valid.'
+    ], 200);
+}
+
+
+    /**
      * @OA\Get(
      *     path="/v1.0/question-categories",
      *     operationId="getQuestionCategories",
