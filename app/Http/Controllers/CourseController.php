@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -1193,11 +1194,12 @@ class CourseController extends Controller
             'reviews',
         ])->where('url', $slug)->first();
 
+
         // SEND RESPONSE
         if (empty($course)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Course not found by'
+                'message' => 'Course not found by slug: ' . $slug
             ], 404);
         }
         // ✅ Now eager-load questions only for quizzes (manually)
