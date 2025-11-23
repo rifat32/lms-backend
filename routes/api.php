@@ -279,22 +279,21 @@ Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCou
 // Public verification route
 Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verifyCertificate']);
 
-
-// 
-Route::get('/v1.0/client/course-categories', [CourseCategoryController::class, 'getCourseCategoryClient']);
-
-// Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdClient']);
-// Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClient']);
-
-
-Route::get('/v1.0/client/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
-Route::get('/v1.0/client/courses', [CourseController::class, 'getCoursesClientUnified']);
-
-
-
-Route::get('/v1.0/client/business-settings', [SettingController::class, "getBusinessSettingsClient"]);
-
-
 Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");
 Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
 Route::patch('/reset-password/{token}', [AuthController::class, "resetPasswordWithToken"]);
+
+
+// CLIENT APIS 
+Route::prefix('/v1.0/client')->group(function () {
+
+    Route::get('/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
+    Route::get('/courses', [CourseController::class, 'getCoursesClientUnified']);
+    Route::get('/courses/{slug}', [CourseController::class, 'getCourseBySlugClient']);
+
+    // Get all course categories
+    Route::get('/course-categories', [CourseCategoryController::class, 'getCourseCategoryClient']);
+
+    // BUSINESS SETTINGS
+    Route::get('/business-settings', [SettingController::class, "getBusinessSettingsClient"]);
+});

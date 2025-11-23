@@ -190,7 +190,7 @@ class CourseController extends Controller
         }
 
         // Usage for featured courses limit
-       
+
 
         $query = Course::with([
             'categories:id,name',
@@ -199,7 +199,7 @@ class CourseController extends Controller
             "enrollment"
         ])
             ->where('status', 'published')
-            
+
             ->filters();
 
         $courses = retrieve_data($query, 'created_at', 'courses');
@@ -1104,6 +1104,120 @@ class CourseController extends Controller
             'data' => $course
         ], 200);
     }
+    /**
+     * @OA\Get(
+     *     path="/v1.0/client/courses/{slug}",
+     *     tags={"course_management.course"},
+     *     operationId="getCourseBySlugClient",
+     *     summary="Get a single course by slug ID",
+     *     description="Retrieve a course by its slug ID along with lessons, FAQs, and notices",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         description="Course slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course details retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Course retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Introduction to Programming"),
+     *                 @OA\Property(property="description", type="string", example="A beginner course on programming"),
+     *                 @OA\Property(
+     *                     property="lessons",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Lesson 1")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="faqs",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="question", type="string", example="What is a variable?"),
+     *                         @OA\Property(property="answer", type="string", example="A variable is...")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="notices",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="title", type="string", example="Exam Notice"),
+     *                         @OA\Property(property="description", type="string", example="Exam will be held on...")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Course not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Course not found")
+     *         )
+     *     )
+     * )
+     */
+
+    public function getCourseBySlugClient($slug)
+    {
+
+        $course = Course::with([
+            'categories',
+            'sections' => function ($q) {
+                $q->with([
+                    'sectionables' => function ($sq) {
+                        $sq->with([
+                            'sectionable'
+                        ]);
+                    },
+                ]);
+            },
+            'reviews',
+        ])->where('slug', $slug)->first();
+
+        // SEND RESPONSE
+        if (empty($course)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found by'
+            ], 404);
+        }
+        // ✅ Now eager-load questions only for quizzes (manually)
+        $course->sections->each(function ($section) {
+            $section->sectionables->each(function ($sectionable) {
+                if ($sectionable->sectionable_type == Quiz::class) {
+                    $sectionable->sectionable->load('questions');
+                } else {
+                    $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+                }
+            });
+        });
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course retrieved successfully',
+            'data' => $course
+        ], 200);
+    }
 
     /**
      * @OA\Post(
@@ -1423,21 +1537,20 @@ class CourseController extends Controller
             // FIND COURSE
             $course = Course::findOrFail($request_payload['id']);
 
-               if (($request_payload['status']??"") == 'published') {
+            if (($request_payload['status'] ?? "") == 'published') {
 
                 $lessons_count = $course->sections->flatMap(function ($section) {
                     return $section->sectionables->filter(function ($sectionable) {
                         return $sectionable->sectionable_type == Lesson::class;
                     });
-                })->count() ;
+                })->count();
 
-                if ($lessons_count==0) {
+                if ($lessons_count == 0) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Cannot publish a course without lessons'
                     ], 422);
                 }
-
             }
 
 
@@ -1562,7 +1675,7 @@ class CourseController extends Controller
     public function updateCourseStatus(Request $request)
     {
         try {
-            
+
             if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
                 return response()->json(["message" => "You can not perform this action"], 401);
             }
@@ -1770,21 +1883,20 @@ class CourseController extends Controller
 
             $request_payload['cover'] = $request_payload['cover'] ?? null;
 
-                if (($request_payload['status']??"") == 'published') {
+            if (($request_payload['status'] ?? "") == 'published') {
 
                 $lessons_count = $course->sections->flatMap(function ($section) {
                     return $section->sectionables->filter(function ($sectionable) {
                         return $sectionable->sectionable_type == Lesson::class;
                     });
-                })->count() ;
+                })->count();
 
-                if ($lessons_count==0) {
+                if ($lessons_count == 0) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Cannot publish a course without lessons'
                     ], 422);
                 }
-
             }
 
             $course->update($request_payload);
@@ -1884,74 +1996,69 @@ class CourseController extends Controller
      * )
      */
 
-  public function deleteCourse($ids)
-{
-    try {
-        if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
-            return response()->json(["message" => "You can not perform this action"], 401);
-        }
-
-        DB::beginTransaction();
-
-        $ids_of_array = array_map('intval', explode(',', $ids));
-        $courses = Course::whereIn('id', $ids_of_array)->get();
-        $existing_ids = $courses->pluck('id')->toArray();
-
-        if (count($existing_ids) !== count($ids_of_array)) {
-            $missing_ids = array_diff($ids_of_array, $existing_ids);
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Some data not found',
-                'data' => ['missing_ids' => array_values($missing_ids)]
-            ], 400);
-        }
-
-        // --- SAFETY CHECK FIRST: collect courses which have enrollments ---
-        $blocked = [];
-        foreach ($courses as $course) {
-            if ($course->enrollments()->exists()) {
-                $blocked[] = $course->id;
+    public function deleteCourse($ids)
+    {
+        try {
+            if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
+                return response()->json(["message" => "You can not perform this action"], 401);
             }
-        }
 
-        if (!empty($blocked)) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Some courses have enrollments and cannot be deleted',
-                'data' => ['blocked_ids' => $blocked]
-            ], 400);
-        }
+            DB::beginTransaction();
 
-        // --- All clear: delete cover files then DB records ---
-        foreach ($courses as $course) {
-            $raw_cover = $course->getRawOriginal('cover');
-            if ($raw_cover) {
-                $path = "business_1/course_{$course->id}/{$raw_cover}";
-                if (Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->delete($path);
+            $ids_of_array = array_map('intval', explode(',', $ids));
+            $courses = Course::whereIn('id', $ids_of_array)->get();
+            $existing_ids = $courses->pluck('id')->toArray();
+
+            if (count($existing_ids) !== count($ids_of_array)) {
+                $missing_ids = array_diff($ids_of_array, $existing_ids);
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some data not found',
+                    'data' => ['missing_ids' => array_values($missing_ids)]
+                ], 400);
+            }
+
+            // --- SAFETY CHECK FIRST: collect courses which have enrollments ---
+            $blocked = [];
+            foreach ($courses as $course) {
+                if ($course->enrollments()->exists()) {
+                    $blocked[] = $course->id;
                 }
             }
+
+            if (!empty($blocked)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some courses have enrollments and cannot be deleted',
+                    'data' => ['blocked_ids' => $blocked]
+                ], 400);
+            }
+
+            // --- All clear: delete cover files then DB records ---
+            foreach ($courses as $course) {
+                $raw_cover = $course->getRawOriginal('cover');
+                if ($raw_cover) {
+                    $path = "business_1/course_{$course->id}/{$raw_cover}";
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                }
+            }
+
+            Course::whereIn('id', $existing_ids)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Course(s) deleted successfully',
+                'data' => $existing_ids
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
         }
-
-        Course::whereIn('id', $existing_ids)->delete();
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Course(s) deleted successfully',
-            'data' => $existing_ids
-        ], 200);
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        throw $th;
     }
-}
-
-
-
-
-
 }
