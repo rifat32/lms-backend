@@ -1191,7 +1191,7 @@ class CourseController extends Controller
                 ]);
             },
             'reviews',
-        ])->where('slug', $slug)->first();
+        ])->where('url', $slug)->first();
 
         // SEND RESPONSE
         if (empty($course)) {
