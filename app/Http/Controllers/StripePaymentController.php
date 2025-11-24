@@ -228,6 +228,7 @@ class StripePaymentController extends Controller
                     'method' => 'stripe',
                     'status' => 'pending',
                     'payment_intent_id' => $payment_intent->id,
+                    'transaction_id' => $payment_intent->id,
                     'coupon_code' => $coupon_code,
                     'discount_amount' => $detail['discount_amount'],
                 ]);
@@ -608,7 +609,10 @@ class StripePaymentController extends Controller
         $paymentModel = Payment::with([
             'course:id,title,description,price',
             'student:id,first_name,last_name,email,phone',
-        ])->findOrFail($paymentId);
+        ])
+            ->where('transaction_id', $paymentId)
+            ->orWhere('payment_intent_id', $paymentId)
+            ->first();
 
         $business = optional(auth()->user())->business;
 
