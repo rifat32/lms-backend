@@ -280,7 +280,7 @@ Route::get('/v1.0/courses/{id}/reviews', [CourseReviewController::class, 'getCou
 Route::get('/v1.0/certificates/verify/{code}', [CertificateController::class, 'verifyCertificate']);
 
 Route::post('webhooks/stripe', [CustomWebhookController::class, "handleStripeWebhook"])->name("stripe.webhook");
-Route::post('/forgetpassword', [AuthController::class, "storeToken"]);
+Route::post('/forget-password', [AuthController::class, "storeToken"]);
 Route::patch('/reset-password/{token}', [AuthController::class, "resetPasswordWithToken"]);
 
 
