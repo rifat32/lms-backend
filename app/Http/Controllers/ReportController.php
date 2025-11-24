@@ -556,19 +556,19 @@ class ReportController extends Controller
      *     operationId="coursePerformanceReport",
      *     tags={"Reports"},
      *     summary="Get course performance metrics (roles: owner, admin, lecturer)",
-     *     description="Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+     *     description="Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (DD-MM-YYYY).",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
-     *         description="Start date for the report (YYYY-MM-DD). Defaults to the start of the current month.",
+     *         description="Start date for the report (DD-MM-YYYY). Defaults to the start of the current month.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
      *     @OA\Parameter(
      *         name="end_date",
      *         in="query",
-     *         description="End date for the report (YYYY-MM-DD). Defaults to the end of the current day.",
+     *         description="End date for the report (DD-MM-YYYY). Defaults to the end of the current month.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
@@ -579,6 +579,16 @@ class ReportController extends Controller
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Course performance metrics retrieved successfully"),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="date_range",
+     *                     type="object",
+     *                     @OA\Property(property="start_date", type="string", format="date", example="01-11-2025"),
+     *                     @OA\Property(property="end_date", type="string", format="date", example="30-11-2025")
+     *                 )
+     *             ),
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
@@ -625,43 +635,40 @@ class ReportController extends Controller
             return response()->json(['message' => 'You do not have permission.'], 403);
         }
 
-        $start = $request->query('start_date')
-            ? Carbon::parse($request->query('start_date'))->startOfDay()
+        // Parse dates in DD-MM-YYYY format, default to current month
+        $start_date = $request->query('start_date')
+            ? Carbon::createFromFormat('d-m-Y', $request->query('start_date'))->startOfDay()
             : Carbon::now()->startOfMonth();
-        $end   = $request->query('end_date')
-            ? Carbon::parse($request->query('end_date'))->endOfDay()
-            : Carbon::now()->endOfDay();
+
+        $end_date = $request->query('end_date')
+            ? Carbon::createFromFormat('d-m-Y', $request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfMonth();
 
         $courses = Course::withCount([
             // Enrollments within the period
-            'enrollments' => function ($q) use ($start, $end) {
-                $q->whereBetween('enrolled_at', [$start, $end]);
+            'enrollments' => function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('enrolled_at', [$start_date, $end_date]);
             },
             // Completions within the period (alias completions_count)
-            'enrollments as completions_count' => function ($q) use ($start, $end) {
+            'enrollments as completions_count' => function ($q) use ($start_date, $end_date) {
                 $q->where('progress', 100)
-                    ->whereBetween('enrolled_at', [$start, $end]);
+                    ->whereBetween('enrolled_at', [$start_date, $end_date]);
             },
         ])
-            // Average rating (if ratings relationship exists)
-            // ->withAvg('ratings', 'rating')
-            // Sum of payments (course revenue) within the period
-            ->withSum(['payments as revenue_sum' => function ($q) use ($start, $end) {
-                $q->whereBetween('paid_at', [$start, $end]);
+            ->withSum(['payments as revenue_sum' => function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('paid_at', [$start_date, $end_date]);
             }], 'amount')
             ->get()
             ->map(function ($course) {
                 $enrollments    = $course->enrollments_count ?? 0;
                 $completions    = $course->completions_count ?? 0;
                 $completionRate = $enrollments > 0 ? round(($completions / $enrollments) * 100) : 0;
-                // $rating         = $course->ratings_avg_rating ? round($course->ratings_avg_rating, 1) : null;
                 return [
                     'course_id'       => $course->id,
                     'title'           => $course->title,
                     'enrollments'     => $enrollments,
                     'completion_rate' => $completionRate . '%',
-                    // 'rating'          => $rating,
-                    'revenue'         => $course->revenue_sum_amount ?? 0,
+                    'revenue'         => $course->revenue_sum ?? 0,
                 ];
             });
 
@@ -670,6 +677,12 @@ class ReportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Course performance metrics retrieved successfully',
+            'meta' => [
+                'date_range' => [
+                    'start_date' => $start_date->format('d-m-Y'),
+                    'end_date' => $end_date->format('d-m-Y'),
+                ]
+            ],
             'data'    => $courses,
         ]);
     }
