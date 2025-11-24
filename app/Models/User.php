@@ -78,4 +78,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(SocialLink::class, 'user_id', 'id');
     }
+
+    /**
+     * Scope to filter users based on request parameters
+     */
+    public function scopeFilter($query)
+    {
+        // Exclude superadmin users
+        $query->where('roles.name', '!=', 'superadmin');
+
+        // Exclude current user
+        $query->where('id', '!=', auth()->id());
+
+        // ROLE FILTER (Spatie relationship-based)
+        if (request()->filled('role')) {
+            $query->whereHas('roles', function ($q) {
+                $q->where('roles.name', request()->role);
+            });
+        }
+
+        return $query;
+    }
 }

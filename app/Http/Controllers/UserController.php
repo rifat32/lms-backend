@@ -387,14 +387,8 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links']);
-
-        // ROLE FILTER (Spatie relationship-based)
-        if (request()->filled('role')) {
-            $query->whereHas('roles', function ($q) {
-                $q->where('roles.name', request()->role);
-            });
-        }
+        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links'])
+            ->filter();
 
         $users = retrieve_data($query, 'created_at', 'users');
 
