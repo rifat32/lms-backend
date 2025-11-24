@@ -287,9 +287,13 @@ Route::patch('/reset-password/{token}', [AuthController::class, "resetPasswordWi
 // CLIENT APIS 
 Route::prefix('/v1.0/client')->group(function () {
 
+    // COURSE
     Route::get('/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
     Route::get('/courses', [CourseController::class, 'getCoursesClientUnified']);
     Route::get('/courses/{slug}', [CourseController::class, 'getCourseBySlugClient']);
+
+    // COURSE FAQ
+    Route::get('/course-faqs/{course_id}', [CourseFaqController::class, 'getCourseFaqsClient']);
 
     // Get all course categories
     Route::get('/course-categories', [CourseCategoryController::class, 'getCourseCategoryClient']);
