@@ -84,8 +84,13 @@ class User extends Authenticatable
      */
     public function scopeFilter($query)
     {
-        // Exclude superadmin users
-        $query->where('roles.name', '!=', 'superadmin');
+        // Exclude super_admin owner users
+        $query->whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'super_admin');
+        });
+        $query->whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'owner');
+        });
 
         // Exclude current user
         $query->where('id', '!=', auth()->id());

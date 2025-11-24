@@ -396,7 +396,11 @@ class UserController extends Controller
 
         $summary = [];
 
-        $summary["total_users"] =   User::get()->count();
+        $summary["total_users"] =   User::whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'super_admin');
+        })->whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'owner');
+        })->get()->count();
         $summary["total_students"] =   User::whereHas('roles', function ($q) {
             $q->where('roles.name', 'student');
         })->count();
@@ -405,9 +409,9 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Users retrieved successfully',
+            "summary" => $summary,
             'meta' => $users['meta'],
             'data' => $users['data'],
-            "summary" => $summary
         ], 200);
     }
 
