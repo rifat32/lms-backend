@@ -29,7 +29,8 @@ class StudentWelcomeMail extends Mailable
      */
     public function build()
     {
-        return $this->from($this->business->email ?? config('mail.from.address'), $this->business->name ?? config('mail.from.name'))
+        return $this
+            ->from(config('mail.from.address'), $this->business->name ?? config('mail.from.name'))
             ->subject('Welcome to ' . $this->business->name . ' 🎓')
             ->view('emails.students.welcome');
     }

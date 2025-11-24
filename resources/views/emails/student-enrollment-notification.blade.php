@@ -243,13 +243,6 @@
 
                     <tr>
                         <td align="center" style="padding:8px 28px 24px 28px;">
-                            <!-- Bulletproof button -->
-                            <!--[if mso]>
-              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ config('app.frontend_url', config('app.url')) }}/dashboard" style="height:44px;v-text-anchor:middle;width:260px;" arcsize="12%" stroke="f" fillcolor="#10b981">
-                <w:anchorlock/>
-                <center style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;">View Dashboard</center>
-              </v:roundrect>
-              <![endif]-->
                             <![if !mso]><a class="btn"
                                 href="{{ config('app.frontend_url', config('app.url')) }}/dashboard"
                                 style="display:inline-block; padding:12px 28px; background:#10b981; color:#ffffff; border-radius:6px; font-family:Arial,Helvetica,sans-serif; font-size:16px; font-weight:700;">

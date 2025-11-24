@@ -384,7 +384,6 @@ class AuthController extends Controller
                 [
                     'token' => $hashedToken,
                     'created_at' => now(),
-                    'expires_at' => $expiresAt,
                 ]
             );
 

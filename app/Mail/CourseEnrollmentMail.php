@@ -14,6 +14,7 @@ class CourseEnrollmentMail extends Mailable
 
     public $user;
     public $course;
+    public $business;
 
     /**
      * Create a new message instance.
@@ -22,6 +23,8 @@ class CourseEnrollmentMail extends Mailable
     {
         $this->user = $user;
         $this->course = $course;
+        // Fetch the business of the user
+        $this->business = $user->business;
     }
 
     /**
@@ -29,7 +32,9 @@ class CourseEnrollmentMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Successfully Enrolled in ' . $this->course->title)
+        return $this
+            ->from(config('mail.from.address'), $this->business->name ?? config('mail.from.name'))
+            ->subject('Successfully Enrolled in ' . $this->course->title)
             ->view('emails.course-enrollment');
     }
 }

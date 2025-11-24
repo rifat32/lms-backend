@@ -142,7 +142,7 @@ class CustomWebhookController extends Controller
 
                             // Create notification for student
                             Notification::create([
-                                'type' => 'App\\Notifications\\CourseEnrollment',
+                                'type' => 'course_enrollment',
                                 'notifiable_type' => 'App\\Models\\User',
                                 'notifiable_id' => $user->id,
                                 'data' => json_encode([
@@ -185,7 +185,7 @@ class CustomWebhookController extends Controller
 
                                     // Create notification for business owner
                                     Notification::create([
-                                        'type' => 'App\\Notifications\\StudentEnrollment',
+                                        'type' => 'student_enrollment',
                                         'notifiable_type' => 'App\\Models\\User',
                                         'notifiable_id' => $business->owner->id,
                                         'data' => json_encode([
