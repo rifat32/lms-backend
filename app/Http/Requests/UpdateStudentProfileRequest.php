@@ -56,14 +56,14 @@ class UpdateStudentProfileRequest extends FormRequest
             'social_links.twitter'  => ['nullable', 'url'],
 
             // User updatable fields
-            'user'              => ['nullable', 'array'],
-            'user.title'        => ['nullable', 'string', 'max:50'],
-            'user.first_name'   => ['nullable', 'string', 'max:100'],
-            'user.last_name'    => ['nullable', 'string', 'max:100'],
-            'user.phone'        => ['nullable', 'string', 'max:50'],
+            'user'            => ['nullable', 'array'],
+            'user.title'      => ['nullable', 'string', 'max:50'],
+            'user.first_name' => ['nullable', 'string', 'max:100'],
+            'user.last_name'  => ['nullable', 'string', 'max:100'],
+            'user.phone'      => ['nullable', 'string', 'max:50'], // ✅ This is correct
 
-            // profile_photo can be a file OR omitted
-            'user.profile_photo' => ['nullable', 'file', "mimes:$mimes", "max:$maxKB"],
+            // profile_photo is handled separately outside the user array
+            'profile_photo' => ['nullable', 'file', "mimes:$mimes", "max:$maxKB"],
         ];
     }
 

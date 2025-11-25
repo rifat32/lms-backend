@@ -135,45 +135,58 @@ class StudentProfileController extends Controller
             ])->findOrFail($id);
 
             // === Update User fields ===
-            if (!empty($data['user']) && is_array($payload_data['user'])) {
+            $userPayload = [];
+
+            // Collect user fields if they exist
+            if (!empty($payload_data['user']) && is_array($payload_data['user'])) {
                 $userPayload = collect($payload_data['user'])->only([
                     'title',
                     'first_name',
                     'last_name',
                     'phone'
-                ])->toArray();
+                ])->filter(function ($value) {
+                    return $value !== null; // Only include non-null values
+                })->toArray();
+            }
 
-                // Handle profile_photo file upload (optional)
-                $folder_path = "business_1/profile_photo_{$user->id}";
-                if ($request->hasFile('profile_photo')) {
-                    $photo_filename = $this->putSingleFile(
-                        $request->file('profile_photo'),
-                        $folder_path,
-                        $user->getRawOriginal('profile_photo')
-                    );
-                    $userPayload['profile_photo'] = $photo_filename;
-                } elseif ($request->filled('profile_photo') && is_string($request->input('profile_photo'))) {
-                    $userPayload['profile_photo'] = basename($request->input('profile_photo'));
-                } else {
-                    // Remove from update data if not provided (keep existing)
-                    unset($userPayload['profile_photo']);
-                }
+            // Handle profile_photo file upload (optional)
+            $folder_path = "business_1/profile_photo_{$user->id}";
+            if ($request->hasFile('profile_photo')) {
+                $photo_filename = $this->putSingleFile(
+                    $request->file('profile_photo'),
+                    $folder_path,
+                    $user->getRawOriginal('profile_photo')
+                );
+                $userPayload['profile_photo'] = $photo_filename;
+            } elseif ($request->filled('profile_photo') && is_string($request->input('profile_photo'))) {
+                // If profile_photo is sent as a string (existing filename)
+                $userPayload['profile_photo'] = basename($request->input('profile_photo'));
+            }
+            // If neither condition is met, don't modify profile_photo (keep existing)
 
+            // Update user only if there's data to update
+            if (!empty($userPayload)) {
                 $user->update($userPayload);
             }
 
             // === Update Student Profile ===
             $profile = StudentProfile::firstOrNew(['user_id' => $user->id]);
+
             $profilePayload = collect($payload_data)->only([
                 'bio',
                 'address_line_1',
                 'learning_preferences',
                 'interests'
-            ])->toArray();
+            ])->filter(function ($value, $key) {
+                // Keep arrays even if empty, but filter out null scalar values
+                return is_array($value) || $value !== null;
+            })->toArray();
 
-            $profile->fill($profilePayload);
-            $profile->user_id = $user->id;
-            $profile->save();
+            if (!empty($profilePayload)) {
+                $profile->fill($profilePayload);
+                $profile->user_id = $user->id;
+                $profile->save();
+            }
 
             // === Upsert Social Links ===
             if (!empty($payload_data['social_links']) && is_array($payload_data['social_links'])) {
@@ -183,17 +196,20 @@ class StudentProfileController extends Controller
                     'linkedin',
                     'github',
                     'twitter'
-                ])->map(fn($v) => is_string($v) && trim($v) === '' ? null : $v)->toArray();
+                ])->map(fn($v) => is_string($v) && trim($v) === '' ? null : $v)
+                    ->toArray();
 
                 SocialLink::updateOrCreate(
                     ['user_id' => $user->id],
-                    $socialPayload + ['user_id' => $user->id]
+                    array_merge($socialPayload, ['user_id' => $user->id])
                 );
-            } else {
-                $user->socialLink; // may be null
             }
 
-            $user->refresh();
+            // Refresh user with all relationships
+            $user->load([
+                'student_profile',
+                'social_links'
+            ]);
 
             DB::commit();
 
@@ -204,6 +220,14 @@ class StudentProfileController extends Controller
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
+
+            // Log the error for debugging
+            // \Log::error('Student profile update failed', [
+            //     'user_id' => $id,
+            //     'error' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
+
             throw $e;
         }
     }
