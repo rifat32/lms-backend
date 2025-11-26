@@ -16,6 +16,7 @@ use App\Mail\StudentWelcomeMail;
 use App\Models\Business;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -447,41 +448,36 @@ class AuthController extends Controller
      * )
      */
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        try {
-            DB::beginTransaction();
-            $credentials = $request->only('email', 'password');
+        // VALIDATE REQUEST
+        $credentials = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
 
-            if (!Auth::attempt($credentials)) {
-                return response()->json(['error' => 'Invalid credentials'], 401);
-            }
-
-            $user = Auth::user();
-            $token = $user->createToken('API Token')->accessToken;
-
-            $business_settings = $this->get_business_setting();
-            // Commit the transaction
-            DB::commit();
-            // Return success response
+        // ATTEMPT LOGIN
+        if (!Auth::attempt($credentials)) {
             return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
-                    'user_id' => $user->id,
-                    'title'    => $user->title,
-                    'first_name'    => $user->first_name,
-                    'last_name'    => $user->last_name,
-                    'email'   => $user->email,
-                    'role'    => $user->roles->pluck('name')->first(),
-                    'token'   => $token,
-                    'business' => $business_settings
-                ]
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
         }
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // ADDED EXTRA USER DATA
+        $user->token = $user->createToken('API Token')->accessToken;
+        $user->business = $this->get_business_setting();
+        $user->roles = $user->roles->pluck('name');
+
+        // RETURN SUCCESS RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data'    => $user,
+        ], 200);
     }
 
     /**
