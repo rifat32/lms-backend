@@ -40,7 +40,6 @@ class UpdateStudentProfileRequest extends FormRequest
             'bio'                         => ['nullable', 'string', 'max:500'],
             'address_line_1'              => ['nullable', 'string', 'max:255'],
 
-            'learning_preferences'                         => ['nullable', 'array'],
             'learning_preferences.preferred_learning_time' => ['nullable', 'string'],
             'learning_preferences.daily_goal'              => ['nullable', 'integer', 'min:1', 'max:24'],
 
@@ -48,7 +47,6 @@ class UpdateStudentProfileRequest extends FormRequest
             'interests.*' => ['nullable', 'string', 'max:100'],
 
             // Social links
-            'social_links'          => ['nullable', 'array'],
             'social_links.web_site' => ['nullable', 'url'],
             'social_links.facebook' => ['nullable', 'url'],
             'social_links.linkedin' => ['nullable', 'url'],
@@ -56,7 +54,6 @@ class UpdateStudentProfileRequest extends FormRequest
             'social_links.twitter'  => ['nullable', 'url'],
 
             // User updatable fields
-            'user'            => ['nullable', 'array'],
             'user.title'      => ['nullable', 'string', 'max:50'],
             'user.first_name' => ['nullable', 'string', 'max:100'],
             'user.last_name'  => ['nullable', 'string', 'max:100'],

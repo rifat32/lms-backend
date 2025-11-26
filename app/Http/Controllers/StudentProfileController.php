@@ -7,10 +7,32 @@ use App\Models\SocialLink;
 use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StudentProfileController extends Controller
 {
+    private function putSingleFile(?UploadedFile $file, string $folderPath, ?string $oldFilename = null): ?string
+    {
+        if (!$file) {
+            return $oldFilename;
+        }
+
+        $new = $file->hashName();
+        $file->storeAs($folderPath, $new, 'public');
+
+        if ($oldFilename) {
+            $old = "{$folderPath}/{$oldFilename}";
+            if (Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+        }
+
+        return $new;
+    }
+
+
     /**
      * @OA\Patch(
      *   path="/v1.0/student-profile/{id}",
@@ -135,19 +157,10 @@ class StudentProfileController extends Controller
             ])->findOrFail($id);
 
             // === Update User fields ===
-            $userPayload = [];
-
-            // Collect user fields if they exist
-            if (!empty($payload_data['user']) && is_array($payload_data['user'])) {
-                $userPayload = collect($payload_data['user'])->only([
-                    'title',
-                    'first_name',
-                    'last_name',
-                    'phone'
-                ])->filter(function ($value) {
-                    return $value !== null; // Only include non-null values
-                })->toArray();
-            }
+            $userPayload['title'] = $payload_data['user']['title'] ?? null;
+            $userPayload['first_name'] = $payload_data['user']['first_name'] ?? null;
+            $userPayload['last_name'] = $payload_data['user']['last_name'] ?? null;
+            $userPayload['phone'] = $payload_data['user']['phone'] ?? null;
 
             // Handle profile_photo file upload (optional)
             $folder_path = "business_1/profile_photo_{$user->id}";
@@ -172,15 +185,10 @@ class StudentProfileController extends Controller
             // === Update Student Profile ===
             $profile = StudentProfile::firstOrNew(['user_id' => $user->id]);
 
-            $profilePayload = collect($payload_data)->only([
-                'bio',
-                'address_line_1',
-                'learning_preferences',
-                'interests'
-            ])->filter(function ($value, $key) {
-                // Keep arrays even if empty, but filter out null scalar values
-                return is_array($value) || $value !== null;
-            })->toArray();
+            $profilePayload['bio'] = $payload_data['bio'] ?? null;
+            $profilePayload['address_line_1'] = $payload_data['address_line_1'] ?? null;
+            $profilePayload['learning_preferences'] = $payload_data['learning_preferences'] ?? null;
+            $profilePayload['interests'] = $payload_data['interests'] ?? null;
 
             if (!empty($profilePayload)) {
                 $profile->fill($profilePayload);
@@ -189,16 +197,13 @@ class StudentProfileController extends Controller
             }
 
             // === Upsert Social Links ===
-            if (!empty($payload_data['social_links']) && is_array($payload_data['social_links'])) {
-                $socialPayload = collect($payload_data['social_links'])->only([
-                    'web_site',
-                    'facebook',
-                    'linkedin',
-                    'github',
-                    'twitter'
-                ])->map(fn($v) => is_string($v) && trim($v) === '' ? null : $v)
-                    ->toArray();
+            $socialPayload['web_site'] = $payload_data['social_links']['web_site'] ?? null;
+            $socialPayload['facebook'] = $payload_data['social_links']['facebook'] ?? null;
+            $socialPayload['linkedin'] = $payload_data['social_links']['linkedin'] ?? null;
+            $socialPayload['github'] = $payload_data['social_links']['github'] ?? null;
+            $socialPayload['twitter'] = $payload_data['social_links']['twitter'] ?? null;
 
+            if (!empty($payload_data['social_links']) && is_array($payload_data['social_links'])) {
                 SocialLink::updateOrCreate(
                     ['user_id' => $user->id],
                     array_merge($socialPayload, ['user_id' => $user->id])
