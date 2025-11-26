@@ -476,6 +476,7 @@ class AuthController extends Controller
         $user->token = $user->createToken('API Token')->accessToken;
         $user->business = $this->get_business_setting();
         $user->role = $user->roles->pluck('name')->first(); // Return primary role as string
+        $user->user_id = $user->id; // Return user ID
 
         // RETURN SUCCESS RESPONSE
         return response()->json([
