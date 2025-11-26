@@ -1107,7 +1107,7 @@ class CourseController extends Controller
     }
     /**
      * @OA\Get(
-     *     path="/v1.0/client/courses/{slug}",
+     *     path="/v1.0/client/course-by-slug/{slug}",
      *     tags={"course_management.course"},
      *     operationId="getCourseBySlugClient",
      *     summary="Get a single course by slug ID",

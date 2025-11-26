@@ -290,7 +290,7 @@ Route::prefix('/v1.0/client')->group(function () {
     // COURSE
     Route::get('/courses/{id}', [CourseController::class, 'getCourseByIdUnified']);
     Route::get('/courses', [CourseController::class, 'getCoursesClientUnified']);
-    Route::get('/courses/{slug}', [CourseController::class, 'getCourseBySlugClient']);
+    Route::get('/course-by-slug/{slug}', [CourseController::class, 'getCourseBySlugClient']);
 
     // COURSE FAQ
     Route::get('/course-faqs/{course_id}', [CourseFaqController::class, 'getCourseFaqsClient']);
