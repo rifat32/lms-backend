@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use Exception;
 use Illuminate\Http\Request;
 
 /**
@@ -477,7 +478,8 @@ class NotificationController extends Controller
         try {
             $user = auth()->user();
 
-            $updatedCount = Notification::where('receiver_id', $user->id)
+            $updatedCount = Notification::where('business_id', $user->business_id)
+                // ->where('receiver_id', $user->id)
                 ->whereNull('read_at')
                 ->update(['read_at' => now()]);
 
@@ -488,7 +490,7 @@ class NotificationController extends Controller
                     'updated_count' => $updatedCount
                 ]
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to mark notifications as read',

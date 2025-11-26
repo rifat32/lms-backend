@@ -146,6 +146,8 @@ class AuthController extends Controller
             // $user->assignRole("$request->role" . "#" . $request->business_id);
             $user->assignRole($request->role);
 
+            // Load roles relationship to ensure it's available
+            $user->load('roles');
 
             // Generate Passport token
             $token = $user->createToken('API Token')->accessToken;
@@ -467,10 +469,13 @@ class AuthController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        // Load roles relationship
+        $user->load('roles');
+
         // ADDED EXTRA USER DATA
         $user->token = $user->createToken('API Token')->accessToken;
         $user->business = $this->get_business_setting();
-        $user->roles = $user->roles->pluck('name');
+        $user->role = $user->roles->pluck('name')->first(); // Return primary role as string
 
         // RETURN SUCCESS RESPONSE
         return response()->json([
@@ -713,7 +718,7 @@ class AuthController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = $request->user()->load(['roles', 'business']);
             $user->permissions = $user->getAllPermissions()->pluck('name');
             $user->roles = $user->roles->pluck('name');
             $user->business = $user->business;
