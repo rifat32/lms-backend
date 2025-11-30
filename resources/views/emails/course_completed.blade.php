@@ -127,7 +127,7 @@
                                 style="margin:6px auto 0 auto;">
                                 <tr>
                                     <td align="center">
-                                        <a href="{{ config('app.frontend_url', config('app.url')) }}/courses"
+                                        <a href="{{ config('app.frontend_url', config('app.url')) }}/dashboard?tab=certificates"
                                             style="display:inline-block;padding:10px 16px;color:#4CAF50;font-weight:600;font-size:14px;">
                                             Explore More Courses →
                                         </a>
