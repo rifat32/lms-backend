@@ -94,11 +94,6 @@
                                         <div style="font-size:20px;font-weight:700;color:#333333;margin:0 0 10px 0;">
                                             {{ $course->title }}
                                         </div>
-                                        {{-- @if ($course->description)
-                                            <p style="margin:5px 0 10px 0;font-size:15px;color:#555555;">
-                                                {{ Str::limit($course->description, 150) }}
-                                            </p>
-                                        @endif --}}
                                         @if ($course->level)
                                             <p style="margin:5px 0;font-size:15px;color:#555555;">
                                                 <strong>Level:</strong> {{ ucfirst($course->level) }}
@@ -123,14 +118,6 @@
                                 style="margin:10px auto 0 auto;">
                                 <tr>
                                     <td align="center" bgcolor="#667eea" style="border-radius:6px;">
-                                        <!--[if mso]>
-                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ config('app.frontend_url', config('app.url')) }}/dashboard?tab=my-courses" style="height:44px;v-text-anchor:middle;width:260px;" arcsize="12%" stroke="f" fillcolor="#667eea">
-                        <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;">
-                          Start Learning Now
-                        </center>
-                      </v:roundrect>
-                    <![endif]-->
                                         <![if !mso]><a class="btn"
                                             href="{{ config('app.frontend_url', config('app.url')) }}/dashboard?tab=my-courses"
                                             style="display:inline-block;padding:12px 28px;color:#ffffff;font-weight:700;font-size:16px;line-height:1;background:#667eea;border-radius:6px;">

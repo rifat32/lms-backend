@@ -132,7 +132,7 @@ class QuizController extends Controller
         // GETTING QUESTIONS
         $questions = $quiz->questions;
 
-        // Handle randomization and limit
+        // Handle randomization and limit based on quiz settings
         if ($quiz->is_randomized && $quiz->question_limit > 0) {
             // Case 1: Randomize + Limit
             $questions = $questions->shuffle()->take($quiz->question_limit);
@@ -439,6 +439,7 @@ class QuizController extends Controller
      *             @OA\Property(property="points_cut_after_retake", type="integer", example=20),
      *             @OA\Property(property="passing_grade", type="integer", example=50),
      *             @OA\Property(property="question_limit", type="integer", example=10),
+     *             @OA\Property(property="show_correct_answer", type="boolean", example=false),
      *             @OA\Property(property="question_ids", type="array", @OA\Items(type="integer", example=1))
      *         )
      *     ),

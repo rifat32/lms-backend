@@ -52,19 +52,11 @@ class BusinessUpdateRequest extends FormRequest
             'theme' => 'nullable|string',
 
             // Image validations
-            'logo' => [
-                'nullable',
-            ],
-            'image' => [
-                'nullable',
-            ],
-            'background_image' => [
-                'nullable',
-            ],
+            'logo' => 'nullable',
+            'image' => 'nullable',
+            'background_image' => 'nullable',
             'images' => 'nullable|array',
-            'images.*' => [
-                'nullable',
-            ],
+            'images.*' => 'nullable',
         ];
     }
 }

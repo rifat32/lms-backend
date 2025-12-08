@@ -15,6 +15,7 @@ class StudentEnrollmentNotification extends Mailable
     public $student;
     public $course;
     public $owner;
+    public $business;
 
     /**
      * Create a new message instance.
@@ -24,6 +25,8 @@ class StudentEnrollmentNotification extends Mailable
         $this->student = $student;
         $this->course = $course;
         $this->owner = $owner;
+        // Fetch the business of the user
+        $this->business = $student->business;
     }
 
     /**
@@ -31,7 +34,9 @@ class StudentEnrollmentNotification extends Mailable
      */
     public function build()
     {
-        return $this->subject('New Student Enrollment: ' . $this->course->title)
+        return $this
+            ->from(config('mail.from.address'), $this->business->name ?? config('mail.from.name'))
+            ->subject('New Student Enrollment: ' . $this->course->title)
             ->view('emails.student-enrollment-notification');
     }
 }

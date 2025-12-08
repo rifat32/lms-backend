@@ -112,16 +112,8 @@
                                 style="margin:18px auto 8px auto;">
                                 <tr>
                                     <td align="center" bgcolor="#4CAF50" style="border-radius:6px;">
-                                        <!--[if mso]>
-                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ url('/courses/' . $course->id . '/certificate') }}" style="height:44px;v-text-anchor:middle;width:280px;" arcsize="12%" stroke="f" fillcolor="#4CAF50">
-                        <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;">
-                          Download Your Certificate
-                        </center>
-                      </v:roundrect>
-                    <![endif]-->
                                         <![if !mso]><a class="btn"
-                                            href="{{ url('/courses/' . $course->id . '/certificate') }}"
+                                            href="{{ config('app.frontend_url', config('app.url')) }}/dashboard?tab=certificates"
                                             style="display:inline-block;padding:12px 24px;background:#4CAF50;color:#ffffff !important;border-radius:6px;font-weight:700;font-size:16px;line-height:1;">
                                             Download Your Certificate
                                         </a>
@@ -135,7 +127,7 @@
                                 style="margin:6px auto 0 auto;">
                                 <tr>
                                     <td align="center">
-                                        <a href="{{ config('app.frontend_url', config('app.url')) }}/courses"
+                                        <a href="{{ config('app.frontend_url', config('app.url')) }}/dashboard?tab=certificates"
                                             style="display:inline-block;padding:10px 16px;color:#4CAF50;font-weight:600;font-size:14px;">
                                             Explore More Courses →
                                         </a>

@@ -33,6 +33,7 @@ class Quiz extends Model
         'points_cut_after_retake',
         'passing_grade',
         'question_limit',
+        'show_correct_answer',
     ];
 
 

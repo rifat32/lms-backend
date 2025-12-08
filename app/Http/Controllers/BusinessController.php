@@ -298,6 +298,7 @@ class BusinessController extends Controller
         try {
             $request_data = $request->validated();
 
+
             // Validate business owner
             $business = $this->businessOwnerCheck($id);
             $folder_path = "business_1/business_{$business->id}";
@@ -333,7 +334,6 @@ class BusinessController extends Controller
                         Storage::disk('public')->delete($old_path);
                     }
                 }
-
                 $cover_filename = $new_filename;
                 $request_data['logo'] = $cover_filename;
             }
@@ -368,9 +368,8 @@ class BusinessController extends Controller
                 );
                 $request_data['background_image'] = $bgFilename;
             } elseif ($request->filled('background_image') && is_string($request->input('background_image'))) {
-                
+
                 $request_data['background_image'] = basename($request->input('background_image'));
-            
             }
 
             // ========================
@@ -395,6 +394,7 @@ class BusinessController extends Controller
             // ========================
             // UPDATE BUSINESS - Now images won't be overwritten
             // ========================
+
             $business->update($request_data);
 
             DB::commit();

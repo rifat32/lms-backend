@@ -7,10 +7,32 @@ use App\Models\SocialLink;
 use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StudentProfileController extends Controller
 {
+    private function putSingleFile(?UploadedFile $file, string $folderPath, ?string $oldFilename = null): ?string
+    {
+        if (!$file) {
+            return $oldFilename;
+        }
+
+        $new = $file->hashName();
+        $file->storeAs($folderPath, $new, 'public');
+
+        if ($oldFilename) {
+            $old = "{$folderPath}/{$oldFilename}";
+            if (Storage::disk('public')->exists($old)) {
+                Storage::disk('public')->delete($old);
+            }
+        }
+
+        return $new;
+    }
+
+
     /**
      * @OA\Patch(
      *   path="/v1.0/student-profile/{id}",
@@ -135,65 +157,64 @@ class StudentProfileController extends Controller
             ])->findOrFail($id);
 
             // === Update User fields ===
-            if (!empty($data['user']) && is_array($payload_data['user'])) {
-                $userPayload = collect($payload_data['user'])->only([
-                    'title',
-                    'first_name',
-                    'last_name',
-                    'phone'
-                ])->toArray();
+            $userPayload['title'] = $payload_data['user']['title'] ?? null;
+            $userPayload['first_name'] = $payload_data['user']['first_name'] ?? null;
+            $userPayload['last_name'] = $payload_data['user']['last_name'] ?? null;
+            $userPayload['phone'] = $payload_data['user']['phone'] ?? null;
 
-                // Handle profile_photo file upload (optional)
-                $folder_path = "business_1/profile_photo_{$user->id}";
-                if ($request->hasFile('profile_photo')) {
-                    $photo_filename = $this->putSingleFile(
-                        $request->file('profile_photo'),
-                        $folder_path,
-                        $user->getRawOriginal('profile_photo')
-                    );
-                    $userPayload['profile_photo'] = $photo_filename;
-                } elseif ($request->filled('profile_photo') && is_string($request->input('profile_photo'))) {
-                    $userPayload['profile_photo'] = basename($request->input('profile_photo'));
-                } else {
-                    // Remove from update data if not provided (keep existing)
-                    unset($userPayload['profile_photo']);
-                }
+            // Handle profile_photo file upload (optional)
+            $folder_path = "business_1/profile_photo_{$user->id}";
+            if ($request->hasFile('profile_photo')) {
+                $photo_filename = $this->putSingleFile(
+                    $request->file('profile_photo'),
+                    $folder_path,
+                    $user->getRawOriginal('profile_photo')
+                );
+                $userPayload['profile_photo'] = $photo_filename;
+            } elseif ($request->filled('profile_photo') && is_string($request->input('profile_photo'))) {
+                // If profile_photo is sent as a string (existing filename)
+                $userPayload['profile_photo'] = basename($request->input('profile_photo'));
+            }
+            // If neither condition is met, don't modify profile_photo (keep existing)
 
+            // Update user only if there's data to update
+            if (!empty($userPayload)) {
                 $user->update($userPayload);
             }
 
             // === Update Student Profile ===
             $profile = StudentProfile::firstOrNew(['user_id' => $user->id]);
-            $profilePayload = collect($payload_data)->only([
-                'bio',
-                'address_line_1',
-                'learning_preferences',
-                'interests'
-            ])->toArray();
 
-            $profile->fill($profilePayload);
-            $profile->user_id = $user->id;
-            $profile->save();
+            $profilePayload['bio'] = $payload_data['bio'] ?? null;
+            $profilePayload['address_line_1'] = $payload_data['address_line_1'] ?? null;
+            $profilePayload['learning_preferences'] = $payload_data['learning_preferences'] ?? null;
+            $profilePayload['interests'] = $payload_data['interests'] ?? null;
 
-            // === Upsert Social Links ===
-            if (!empty($payload_data['social_links']) && is_array($payload_data['social_links'])) {
-                $socialPayload = collect($payload_data['social_links'])->only([
-                    'web_site',
-                    'facebook',
-                    'linkedin',
-                    'github',
-                    'twitter'
-                ])->map(fn($v) => is_string($v) && trim($v) === '' ? null : $v)->toArray();
-
-                SocialLink::updateOrCreate(
-                    ['user_id' => $user->id],
-                    $socialPayload + ['user_id' => $user->id]
-                );
-            } else {
-                $user->socialLink; // may be null
+            if (!empty($profilePayload)) {
+                $profile->fill($profilePayload);
+                $profile->user_id = $user->id;
+                $profile->save();
             }
 
-            $user->refresh();
+            // === Upsert Social Links ===
+            $socialPayload['web_site'] = $payload_data['social_links']['web_site'] ?? null;
+            $socialPayload['facebook'] = $payload_data['social_links']['facebook'] ?? null;
+            $socialPayload['linkedin'] = $payload_data['social_links']['linkedin'] ?? null;
+            $socialPayload['github'] = $payload_data['social_links']['github'] ?? null;
+            $socialPayload['twitter'] = $payload_data['social_links']['twitter'] ?? null;
+
+            if (!empty($payload_data['social_links']) && is_array($payload_data['social_links'])) {
+                SocialLink::updateOrCreate(
+                    ['user_id' => $user->id],
+                    array_merge($socialPayload, ['user_id' => $user->id])
+                );
+            }
+
+            // Refresh user with all relationships
+            $user->load([
+                'student_profile',
+                'social_links'
+            ]);
 
             DB::commit();
 
@@ -204,6 +225,14 @@ class StudentProfileController extends Controller
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
+
+            // Log the error for debugging
+            // \Log::error('Student profile update failed', [
+            //     'user_id' => $id,
+            //     'error' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
+
             throw $e;
         }
     }

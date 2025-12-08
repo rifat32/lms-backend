@@ -108,14 +108,14 @@ class ReportController extends Controller
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
-     *         description="Start date (YYYY-MM-DD)",
+     *         description="Start date (DD-MM-YYYY)",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
      *     @OA\Parameter(
      *         name="end_date",
      *         in="query",
-     *         description="End date (YYYY-MM-DD)",
+     *         description="End date (DD-MM-YYYY)",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
@@ -180,20 +180,20 @@ class ReportController extends Controller
 
     public function enrollmentAnalytics(Request $request)
     {
-        // Authorise only owners, admins or lecturers
+        // Authorize only owners, admins or lecturers
         if (!auth()->user()->hasAnyRole(['owner', 'admin', 'lecturer'])) {
             return response()->json([
                 'message' => 'You do not have permission to access this report.'
-            ], 403); // 403 Forbidden – authenticated but lacks privileges:contentReference[oaicite:3]{index=3}
+            ], 403); // 403 Forbidden
         }
 
         // Determine the reporting period; defaults to current month
         $start = $request->query('start_date')
-            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('start_date'))->startOfDay()
             : Carbon::now()->startOfMonth();
 
         $end   = $request->query('end_date')
-            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('end_date'))->endOfDay()
             : Carbon::now()->endOfMonth();
 
         // Total enrollments in the period
@@ -241,19 +241,19 @@ class ReportController extends Controller
      *     operationId="revenueReport",
      *     tags={"Reports"},
      *     summary="Get revenue report per course (role: Admin only)",
-     *     description="Returns total revenue, average order value, daily revenue trends and per-course performance. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+     *     description="Returns total revenue, average order value, daily revenue trends and per-course performance. Accepts optional start_date and end_date query parameters (DD-MM-YYYY).",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
-     *         description="Start date for the report (YYYY-MM-DD)",
+     *         description="Start date for the report (DD-MM-YYYY)",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
      *     @OA\Parameter(
      *         name="end_date",
      *         in="query",
-     *         description="End date for the report (YYYY-MM-DD)",
+     *         description="End date for the report (DD-MM-YYYY)",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
@@ -339,10 +339,10 @@ class ReportController extends Controller
         $endDate   = $request->query('end_date');
 
         $start = $startDate
-            ? Carbon::parse($startDate)->startOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay()
             : Carbon::now()->startOfMonth();
         $end   = $endDate
-            ? Carbon::parse($endDate)->endOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
             : Carbon::now()->endOfDay();
 
         // total revenue for the period
@@ -413,19 +413,19 @@ class ReportController extends Controller
      *     operationId="overviewReport",
      *     tags={"Reports"},
      *     summary="Get overview and student analytics metrics (roles: owner, admin, lecturer)",
-     *     description="Returns total students, course completions, total revenue, enrollment trends, active students and new enrollments. Accepts optional start_date and end_date parameters (YYYY-MM-DD).",
+     *     description="Returns total students, course completions, total revenue, enrollment trends, active students and new enrollments. Accepts optional start_date and end_date parameters (DD-MM-YYYY).",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
-     *         description="Start date for the report (YYYY-MM-DD). Defaults to start of current month for overview metrics and last 7 days for active/new enrollments if not provided.",
+     *         description="Start date for the report (DD-MM-YYYY). Defaults to start of current month for overview metrics and last 7 days for active/new enrollments if not provided.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
      *     @OA\Parameter(
      *         name="end_date",
      *         in="query",
-     *         description="End date for the report (YYYY-MM-DD). Defaults to end of current day if not provided.",
+     *         description="End date for the report (DD-MM-YYYY). Defaults to end of current day if not provided.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
@@ -491,10 +491,10 @@ class ReportController extends Controller
 
         // Determine date range (defaults to current month)
         $start = $request->query('start_date')
-            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('start_date'))->startOfDay()
             : Carbon::now()->startOfMonth();
         $end = $request->query('end_date')
-            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('end_date'))->endOfDay()
             : Carbon::now()->endOfDay();
 
         // Count all students (assuming a role/relationship setup)
@@ -518,10 +518,10 @@ class ReportController extends Controller
             ->get();
 
         $start = $request->query('start_date')
-            ? Carbon::parse($request->query('start_date'))->startOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('start_date'))->startOfDay()
             : Carbon::now()->subDays(7)->startOfDay();  // default to last 7 days
         $end   = $request->query('end_date')
-            ? Carbon::parse($request->query('end_date'))->endOfDay()
+            ? Carbon::createFromFormat('d-m-Y', $request->query('end_date'))->endOfDay()
             : Carbon::now()->endOfDay();
 
         // Count active students BASE ON PROGRESS
@@ -556,19 +556,19 @@ class ReportController extends Controller
      *     operationId="coursePerformanceReport",
      *     tags={"Reports"},
      *     summary="Get course performance metrics (roles: owner, admin, lecturer)",
-     *     description="Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (YYYY-MM-DD).",
+     *     description="Returns enrollment counts, completion rates and revenue by course. Accepts optional start_date and end_date query parameters (DD-MM-YYYY).",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="start_date",
      *         in="query",
-     *         description="Start date for the report (YYYY-MM-DD). Defaults to the start of the current month.",
+     *         description="Start date for the report (DD-MM-YYYY). Defaults to the start of the current month.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
      *     @OA\Parameter(
      *         name="end_date",
      *         in="query",
-     *         description="End date for the report (YYYY-MM-DD). Defaults to the end of the current day.",
+     *         description="End date for the report (DD-MM-YYYY). Defaults to the end of the current month.",
      *         required=false,
      *         @OA\Schema(type="string", format="date")
      *     ),
@@ -579,6 +579,16 @@ class ReportController extends Controller
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Course performance metrics retrieved successfully"),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="date_range",
+     *                     type="object",
+     *                     @OA\Property(property="start_date", type="string", format="date", example="01-11-2025"),
+     *                     @OA\Property(property="end_date", type="string", format="date", example="30-11-2025")
+     *                 )
+     *             ),
      *             @OA\Property(
      *                 property="data",
      *                 type="array",
@@ -625,43 +635,40 @@ class ReportController extends Controller
             return response()->json(['message' => 'You do not have permission.'], 403);
         }
 
-        $start = $request->query('start_date')
-            ? Carbon::parse($request->query('start_date'))->startOfDay()
+        // Parse dates in DD-MM-YYYY format, default to current month
+        $start_date = $request->query('start_date')
+            ? Carbon::createFromFormat('d-m-Y', $request->query('start_date'))->startOfDay()
             : Carbon::now()->startOfMonth();
-        $end   = $request->query('end_date')
-            ? Carbon::parse($request->query('end_date'))->endOfDay()
-            : Carbon::now()->endOfDay();
+
+        $end_date = $request->query('end_date')
+            ? Carbon::createFromFormat('d-m-Y', $request->query('end_date'))->endOfDay()
+            : Carbon::now()->endOfMonth();
 
         $courses = Course::withCount([
             // Enrollments within the period
-            'enrollments' => function ($q) use ($start, $end) {
-                $q->whereBetween('enrolled_at', [$start, $end]);
+            'enrollments' => function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('enrolled_at', [$start_date, $end_date]);
             },
             // Completions within the period (alias completions_count)
-            'enrollments as completions_count' => function ($q) use ($start, $end) {
+            'enrollments as completions_count' => function ($q) use ($start_date, $end_date) {
                 $q->where('progress', 100)
-                    ->whereBetween('enrolled_at', [$start, $end]);
+                    ->whereBetween('enrolled_at', [$start_date, $end_date]);
             },
         ])
-            // Average rating (if ratings relationship exists)
-            // ->withAvg('ratings', 'rating')
-            // Sum of payments (course revenue) within the period
-            ->withSum(['payments as revenue_sum' => function ($q) use ($start, $end) {
-                $q->whereBetween('paid_at', [$start, $end]);
+            ->withSum(['payments as revenue_sum' => function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('paid_at', [$start_date, $end_date]);
             }], 'amount')
             ->get()
             ->map(function ($course) {
                 $enrollments    = $course->enrollments_count ?? 0;
                 $completions    = $course->completions_count ?? 0;
                 $completionRate = $enrollments > 0 ? round(($completions / $enrollments) * 100) : 0;
-                // $rating         = $course->ratings_avg_rating ? round($course->ratings_avg_rating, 1) : null;
                 return [
                     'course_id'       => $course->id,
                     'title'           => $course->title,
                     'enrollments'     => $enrollments,
                     'completion_rate' => $completionRate . '%',
-                    // 'rating'          => $rating,
-                    'revenue'         => $course->revenue_sum_amount ?? 0,
+                    'revenue'         => $course->revenue_sum ?? 0,
                 ];
             });
 
@@ -670,6 +677,12 @@ class ReportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Course performance metrics retrieved successfully',
+            'meta' => [
+                'date_range' => [
+                    'start_date' => $start_date->format('d-m-Y'),
+                    'end_date' => $end_date->format('d-m-Y'),
+                ]
+            ],
             'data'    => $courses,
         ]);
     }

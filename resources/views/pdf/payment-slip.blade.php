@@ -33,15 +33,14 @@
     function method_label($t)
     {
         if (!$t || $t === 'N/A') {
-            return null;
+            return 'Card';
         }
         $map = [
-            'afterpay_clearpay' => 'Afterpay / Clearpay',
-            'us_bank_account' => 'US Bank Account (ACH)',
-            'sepa_debit' => 'SEPA Direct Debit',
-            'bacs_debit' => 'Bacs Direct Debit',
-            'wechat_pay' => 'WeChat Pay',
-            'bank_transfer' => 'Bank Transfer',
+            'card' => 'Card',
+            'google_pay' => 'Google Pay',
+            'apple_pay' => 'Apple Pay',
+            'amazon_pay' => 'Amazon Pay',
+            'link' => 'Link',
         ];
         return $map[strtolower($t)] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $t));
     }
@@ -234,6 +233,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 10px 12px;
+            min-height: 100px;
         }
 
         .panel h4 {
@@ -265,7 +265,6 @@
         }
 
         .table thead th {
-            text-align: left;
             font-size: 11px;
             letter-spacing: .6px;
             text-transform: uppercase;
@@ -279,6 +278,16 @@
             padding: 10px 8px;
             border-bottom: 1px solid #f3f4f6;
             vertical-align: top;
+        }
+
+        .table th:first-child,
+        .table td:first-child {
+            text-align: left;
+        }
+
+        .table th:not(:first-child),
+        .table td:not(:first-child) {
+            text-align: right;
         }
 
         .row-alt {
@@ -478,16 +487,26 @@
                 <h4>Bill To</h4>
                 <div><strong>{{ $student['name'] ?? 'Student' }}</strong></div>
                 <div class="soft">{{ $student['email'] ?? '' }}</div>
-                <div class="soft">{{ $student['phone'] ?? '' }}</div>
+                @if ($student['phone'] ?? false)
+                    <div class="soft">{{ $student['phone'] ?? '' }}</div>
+                @endif
             </div>
         </div>
         <div class="col" style="width:50%;">
             <div class="panel">
                 <h4>Payment Details</h4>
-                @if ($pmLabel)
-                    <div class="kv"><span class="k">Method</span> <span>{{ $pmLabel }}</span></div>
-                @endif
-                @if ($cardBrand || $cardLast4)
+                <div class="kv"><span class="k">Method</span> <span>{{ $pmLabel ?? 'Card' }}</span></div>
+
+                @if ($walletType)
+                    {{-- Digital Wallet (Google Pay, Apple Pay) --}}
+                    <div class="kv"><span class="k">Wallet</span> <span>{{ $walletType }}</span></div>
+                    @if ($cardBrand || $cardLast4)
+                        <div class="kv soft"><span class="k">Card</span>
+                            <span>{{ $cardBrand ?? 'Card' }} ••{{ $cardLast4 ?? 'XXXX' }}</span>
+                        </div>
+                    @endif
+                @elseif ($cardBrand || $cardLast4)
+                    {{-- Regular Card Payment --}}
                     <div class="kv"><span class="k">Card</span>
                         <span>{{ $cardBrand ?? 'Card' }} &nbsp;••••&nbsp;{{ $cardLast4 ?? 'XXXX' }}
                             @if ($cardExpM && $cardExpY)
@@ -496,22 +515,8 @@
                         </span>
                     </div>
                     @if ($cardFunding)
-                        <div class="kv soft"><span class="k">Funding</span> <span>{{ $cardFunding }}</span></div>
+                        <div class="kv soft"><span class="k">Type</span> <span>{{ $cardFunding }}</span></div>
                     @endif
-                    @if ($walletType)
-                        <div class="kv soft"><span class="k">Wallet</span> <span>{{ $walletType }}</span></div>
-                    @endif
-                @endif
-                @if ($bankName)
-                    <div class="kv"><span class="k">Bank</span> <span>{{ $bankName }}</span></div>
-                    @if ($bankLast4)
-                        <div class="kv soft"><span class="k">Account</span> <span>•••• {{ $bankLast4 }}</span>
-                        </div>
-                    @endif
-                @endif
-                @if (!empty($qr_base64 ?? null))
-                    <div style="text-align:right;margin-top:8px;"><img src="{{ $qr_base64 }}" alt="QR"
-                            style="max-width:100px;"></div>
                 @endif
             </div>
         </div>
@@ -521,24 +526,20 @@
         <thead>
             <tr>
                 <th>Course</th>
-                <th class="text-center" style="width:8%;">Qty</th>
-                <th class="text-right" style="width:14%;">Unit</th>
-                <th class="text-right" style="width:14%;">Discount</th>
-                <th class="text-right" style="width:16%;">Line Total</th>
+                <th class="text-right">Course Fee</th>
+                <th class="text-right">Line Total</th>
             </tr>
         </thead>
         <tbody>
             @forelse($lines as $i => $line)
                 <tr class="{{ $i % 2 ? 'row-alt' : '' }}">
                     <td><strong>{{ $line['title'] ?? 'Course' }}</strong></td>
-                    <td class="text-center">{{ $line['qty'] }}</td>
                     <td class="text-right">{{ money_fmt($line['unit_price'], $currency) }}</td>
-                    <td class="text-right">{{ money_fmt($line['line_discount'] ?? 0, $currency) }}</td>
                     <td class="text-right"><strong>{{ money_fmt($line['line_total'], $currency) }}</strong></td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center muted">No course lines.</td>
+                    <td colspan="3" class="text-center muted">No course lines.</td>
                 </tr>
             @endforelse
         </tbody>
@@ -551,7 +552,7 @@
         </div>
         @if ($discountAmount > 0)
             <div class="row">
-                <div class="k">Discount:</div>
+                <div class="k">Total Discount:</div>
                 <div>-{{ money_fmt($discountAmount, $currency) }}</div>
             </div>
         @endif
@@ -577,16 +578,8 @@
         @endif
     </div>
 
-    <!-- Signature -->
-    <div style="margin-top:28px; text-align:right;">
-        <div style="display:inline-block; width:40%; text-align:center;">
-            <div style="border-top:1px solid #e5e7eb; margin-top:32px;"></div>
-            <div style="font-size:11px; color:#6b7280; margin-top:6px;">Accounts Office</div>
-        </div>
-    </div>
-
     @if (!empty($payment['notes']))
-        <div class="notes" style="margin-top:20px;"><strong>Notes:</strong> {{ $payment['notes'] }}</div>
+        <div class="notes" style="margin-top:28px;">{{ $payment['notes'] }}</div>
     @endif
 
     <footer class="footer">

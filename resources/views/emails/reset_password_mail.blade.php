@@ -87,12 +87,6 @@
                                 style="margin:18px 0 8px;">
                                 <tr>
                                     <td align="center" bgcolor="#005fa3" style="border-radius:6px;">
-                                        <!--[if mso]>
-                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{ $url }}" style="height:44px;v-text-anchor:middle;width:220px;" arcsize="12%" stroke="f" fillcolor="#005fa3">
-                        <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:Segoe UI,Arial,sans-serif;font-size:14px;font-weight:600;">Reset Password</center>
-                      </v:roundrect>
-                    <![endif]-->
                                         <![if !mso]><a class="btn" href="{{ $url }}" target="_blank"
                                             rel="noopener"
                                             style="display:inline-block;padding:12px 22px;background:#005fa3;color:#ffffff !important;border-radius:6px;font-weight:600;font-size:14px;">

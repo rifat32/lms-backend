@@ -17,6 +17,7 @@ use App\Models\Business;
 use App\Models\Role;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -146,6 +147,8 @@ class AuthController extends Controller
             // $user->assignRole("$request->role" . "#" . $request->business_id);
             $user->assignRole($request->role);
 
+            // Load roles relationship to ensure it's available
+            $user->load('roles');
 
             // Generate Passport token
             $token = $user->createToken('API Token')->accessToken;
@@ -385,7 +388,6 @@ class AuthController extends Controller
                 [
                     'token' => $hashedToken,
                     'created_at' => now(),
-                    'expires_at' => $expiresAt,
                 ]
             );
 
@@ -449,41 +451,40 @@ class AuthController extends Controller
      * )
      */
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        try {
-            DB::beginTransaction();
-            $credentials = $request->only('email', 'password');
+        // VALIDATE REQUEST
+        $credentials = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
 
-            if (!Auth::attempt($credentials)) {
-                return response()->json(['error' => 'Invalid credentials'], 401);
-            }
-
-            $user = Auth::user();
-            $token = $user->createToken('API Token')->accessToken;
-
-            $business_settings = $this->get_business_setting();
-            // Commit the transaction
-            DB::commit();
-            // Return success response
+        // ATTEMPT LOGIN
+        if (!Auth::attempt($credentials)) {
             return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
-                    'user_id' => $user->id,
-                    'title'    => $user->title,
-                    'first_name'    => $user->first_name,
-                    'last_name'    => $user->last_name,
-                    'email'   => $user->email,
-                    'role'    => $user->roles->pluck('name')->first(),
-                    'token'   => $token,
-                    'business' => $business_settings
-                ]
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
         }
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Load roles relationship
+        $user->load('roles');
+
+        // ADDED EXTRA USER DATA
+        $user->token = $user->createToken('API Token')->accessToken;
+        $user->business = $this->get_business_setting();
+        $user->role = $user->roles->pluck('name')->first(); // Return primary role as string
+        $user->user_id = $user->id; // Return user ID
+
+        // RETURN SUCCESS RESPONSE
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'data'    => $user,
+        ], 200);
     }
 
     /**
@@ -719,7 +720,7 @@ class AuthController extends Controller
     {
         try {
 
-            $user = $request->user();
+            $user = $request->user()->load(['roles', 'business']);
             $user->permissions = $user->getAllPermissions()->pluck('name');
             $user->roles = $user->roles->pluck('name');
             $user->business = $user->business;

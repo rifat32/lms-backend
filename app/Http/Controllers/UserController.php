@@ -387,14 +387,8 @@ class UserController extends Controller
             ], 401);
         }
 
-        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links']);
-
-        // ROLE FILTER (Spatie relationship-based)
-        if (request()->filled('role')) {
-            $query->whereHas('roles', function ($q) {
-                $q->where('roles.name', request()->role);
-            });
-        }
+        $query = User::with(['roles', 'enrollments', 'student_profile', 'social_links'])
+            ->filter();
 
         $users = retrieve_data($query, 'created_at', 'users');
 
@@ -402,7 +396,11 @@ class UserController extends Controller
 
         $summary = [];
 
-        $summary["total_users"] =   User::get()->count();
+        $summary["total_users"] =   User::whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'super_admin');
+        })->whereHas('roles', function ($q) {
+            $q->where('roles.name', '!=', 'owner');
+        })->get()->count();
         $summary["total_students"] =   User::whereHas('roles', function ($q) {
             $q->where('roles.name', 'student');
         })->count();
@@ -411,9 +409,9 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Users retrieved successfully',
+            "summary" => $summary,
             'meta' => $users['meta'],
             'data' => $users['data'],
-            "summary" => $summary
         ], 200);
     }
 

@@ -13,6 +13,7 @@ class ResetPasswordMail extends Mailable
 
     public $user;
     public $reset_url;
+    public $business;
 
     /**
      * Create a new message instance.
@@ -23,6 +24,9 @@ class ResetPasswordMail extends Mailable
     public function __construct($user = null)
     {
         $this->user = $user;
+        // Fetch the business of the user
+        $this->business = $user->business;
+
 
         $front_end_url = env('FRONT_END_URL');
         $base   = rtrim($front_end_url, '/') . '/auth/reset-password';
@@ -43,7 +47,9 @@ class ResetPasswordMail extends Mailable
     {
         $subject = "Reset Password Mail from " . ($this->user->business->name ?? config('app.name'));
 
-        return $this->subject($subject)
+        return $this
+            ->from(config('mail.from.address'), $this->business->name ?? config('mail.from.name'))
+            ->subject($subject)
             ->view('emails.reset_password_mail')
             ->with([
                 'user' => $this->user,
