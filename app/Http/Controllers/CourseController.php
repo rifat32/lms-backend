@@ -59,7 +59,8 @@ class CourseController extends Controller
             'categories',
             'sections.sectionables.sectionable',
             'reviews',
-            'enrollment'
+            'enrollment',
+            "faqs"
         ])
             ->where('status', 'published')
             ->filters();
