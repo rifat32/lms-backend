@@ -1193,6 +1193,7 @@ class CourseController extends Controller
                 ]);
             },
             'reviews',
+                 'enrollment',
         ])->where('url', $slug)->first();
 
 

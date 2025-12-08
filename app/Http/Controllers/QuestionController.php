@@ -145,9 +145,9 @@ class QuestionController extends Controller
                     ['id' => $optData['id'] ?? null],
                     [
                         'question_id' => $question->id,
-                        'option_text' => $optData['option_text'] ?? null,
+                        'option_text' => $optData['option_text'] ?? '',
                         'is_correct' => $optData['is_correct'],
-                        'explanation' => $optData['explanation'] ?? null,
+                        'explanation' => $optData['explanation'] ?? '',
                     ]
                 );
 
@@ -288,6 +288,8 @@ class QuestionController extends Controller
                         if ($option && $option->question_id === $question->id) {
                             $option->update([
                                 'option_text' => $opt_data['option_text'] ?? $option->option_text,
+                                "explanation" => $opt_data['explanation'] ?? "",
+
                             ]);
                         }
                     }
