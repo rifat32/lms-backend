@@ -1180,20 +1180,23 @@ class CourseController extends Controller
     public function getCourseBySlugClient($slug)
     {
 
-        $course = Course::with([
-            'categories',
-            'sections' => function ($q) {
-                $q->with([
-                    'sectionables' => function ($sq) {
-                        $sq->with([
-                            'sectionable'
-                        ]);
-                    },
-                ]);
-            },
-            'reviews',
-        ])->where('url', $slug)->first();
+        $user = auth('api')->user();
 
+        if ($user) {
+            Auth::login($user);
+        }
+
+        $query = Course::with([
+            'categories',
+            'sections.sectionables.sectionable',
+            'reviews',
+            'enrollment'
+        ])
+            ->where('status', 'published')
+            ->filters();
+
+
+        $course = $query->where('url', $slug)->first();
 
         // SEND RESPONSE
         if (empty($course)) {
@@ -1202,16 +1205,49 @@ class CourseController extends Controller
                 'message' => 'Course not found by slug: ' . $slug
             ], 404);
         }
-        // ✅ Now eager-load questions only for quizzes (manually)
-        $course->sections->each(function ($section) {
-            $section->sectionables->each(function ($sectionable) {
-                if ($sectionable->sectionable_type == Quiz::class) {
-                    $sectionable->sectionable->load('questions');
-                } else {
-                    $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
-                }
+
+        // For enrolled users, load more details
+        if ($user && $course->enrollment()->where('user_id', $user->id)->exists()) {
+            $course->sections->each(function ($section) {
+                $section->sectionables->each(function ($sectionable, $index) {
+
+                    if ($sectionable->sectionable_type === Lesson::class) {
+                        $sectionable->sectionable->load('lesson_progress');
+                    }
+                    if ($sectionable->sectionable_type === Quiz::class) {
+                        $sectionable->sectionable->load(['questions.options', "quiz_attempts"]);
+                    }
+                });
             });
-        });
+        }
+
+        // $course = Course::with([
+        //     'enrollment',
+        //     'categories',
+        //     'sections' => function ($q) {
+        //         $q->with([
+        //             'sectionables' => function ($sq) {
+        //                 $sq->with([
+        //                     'sectionable'
+        //                 ]);
+        //             },
+        //         ]);
+        //     },
+        //     'reviews',
+        // ])->where('url', $slug)->first();
+
+
+
+        // ✅ Now eager-load questions only for quizzes (manually)
+        // $course->sections->each(function ($section) {
+        //     $section->sectionables->each(function ($sectionable) {
+        //         if ($sectionable->sectionable_type == Quiz::class) {
+        //             $sectionable->sectionable->load('questions');
+        //         } else {
+        //             $sectionable->sectionable->setRelation('questions', collect()); // empty for lessons
+        //         }
+        //     });
+        // });
 
 
         return response()->json([
