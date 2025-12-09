@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\StudentWelcomeMail;
 use App\Models\Business;
+use App\Models\Role;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -733,4 +734,138 @@ class AuthController extends Controller
             throw $e;
         }
     }
+
+  /**
+     *
+     * @OA\Get(
+     *      path="/v4.0/user",
+     *      operationId="getUserV4",
+     *      tags={"Auth"},
+     *       security={
+     *           {"bearerAuth": {}}
+     *       },
+
+
+     *      summary="This method is to get  user ",
+     *      description="This method is to get user",
+     *
+
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *       @OA\JsonContent(),
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     * @OA\JsonContent(),
+     *      ),
+     *        @OA\Response(
+     *          response=422,
+     *          description="Unprocesseble Content",
+     *    @OA\JsonContent(),
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden",
+     *   @OA\JsonContent()
+     * ),
+     *  * @OA\Response(
+     *      response=400,
+     *      description="Bad Request",
+     *   *@OA\JsonContent()
+     *   ),
+     * @OA\Response(
+     *      response=404,
+     *      description="not found",
+     *   *@OA\JsonContent()
+     *   )
+     *      )
+     *     )
+     */
+
+
+   public function getUserV4(Request $request)
+{
+    try {
+
+        $user = User::where('id', auth()->id())->firstOrFail();
+
+        // Generate token
+        $new_token = $user->createToken('authToken')->accessToken;
+        $user->token = $new_token;
+
+        // Load only relationships that exist
+        $user->load(['roles.permissions', 'permissions', 'business']);
+
+        // Roles
+        $roles = $user->roles->map(function ($role) {
+            return [
+                'name' => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+            ];
+        });
+
+        // Permissions
+        $permissions = $user->permissions->pluck('name');
+
+        $business = $user->business;
+
+        // FINAL CLEANED RESPONSE (Only fields that exist)
+        $responseData = [
+            'id' => $user->id,
+            'token' => $user->token,
+
+            // User fields that exist in the model
+            'title' => $user->title,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'profile_photo' => $user->profile_photo,
+            'email_verified_at' => $user->email_verified_at,
+            'business_id' => $user->business_id,
+
+            'roles' => $roles,
+            'permissions' => $permissions,
+
+            // Business fields that exist
+            'business' => $business ? [
+                'id' => $business->id,
+                'name' => $business->name,
+                'email' => $business->email,
+                'phone' => $business->phone,
+                'registration_date' => $business->registration_date,
+                'about' => $business->about,
+                'web_page' => $business->web_page,
+                'address_line_1' => $business->address_line_1,
+                'address_line_2' => $business->address_line_2,
+                'country' => $business->country,
+                'city' => $business->city,
+                'postcode' => $business->postcode,
+                'currency' => $business->currency,
+                'latitude' => $business->latitude,
+                'longitude' => $business->longitude,
+                'logo' => $business->logo,
+                'image' => $business->image,
+                'background_image' => $business->background_image,
+                'theme' => $business->theme,
+                'images' => $business->images,
+                'status' => $business->status,
+                'is_active' => $business->is_active,
+                'owner_id' => $business->owner_id,
+                'created_by' => $business->created_by,
+            ] : null,
+        ];
+
+        return response()->json($responseData, 200);
+
+    } catch (\Exception $e) {
+        return $this->sendError($e);
+    }
+}
+
+
+
+
 }

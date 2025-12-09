@@ -74,7 +74,7 @@ class CourseFaqController extends Controller
 
         $validated = $request->validate([
             'course_id' => 'required|integer|exists:courses,id',
-            'faqs' => 'required|array|min:1',
+            'faqs' => 'present|array',
             'faqs.*.id' => 'nullable|integer|exists:course_faqs,id',
             'faqs.*.question' => 'required|string|max:500',
             'faqs.*.answer' => 'required|string|max:2000',

@@ -57,6 +57,8 @@ Route::middleware('auth:api')->group(function () {
     // VERIFY USER BY TOKEN
     Route::get('/v1.0/verify-user-by-token', [AuthController::class, 'verifyUserByToken']);
 
+        Route::get('/v4.0/user', [AuthController::class, "getUserV4"]);
+
     // USER APIS
     Route::prefix('/v1.0/users')->group(function () {
         Route::put('/{id}', [UserController::class, 'updateUser']);

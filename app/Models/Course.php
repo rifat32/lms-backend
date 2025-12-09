@@ -111,10 +111,10 @@ class Course extends Model
         return $this->hasMany(Section::class, 'course_id'); // foreign key in sections table
     }
 
-    // public function faqs()
-    // {
-    //     return $this->hasMany(Faq::class);
-    // }
+    public function faqs()
+    {
+        return $this->hasMany(CourseFaq::class, 'course_id', 'id');
+    }
 
     // public function notices()
     // {
