@@ -53,12 +53,11 @@ trait BasicUtil
             ->count('lesson_id');
 
         // ✅ Count completed quizzes (distinct)
+        // any quiz with at least one completed attempt (passed, failed, or expired) counts
         $completed_quizzes = QuizAttempt::where('user_id', auth()->user()->id)
-            ->where("course_id", $course_id)
+            ->where('course_id', $course_id)
             ->whereIn('quiz_id', $quiz_ids)
-            ->where('is_passed', 1)
-            ->whereNotNull('completed_at')
-            ->where('is_expired', 0)
+            ->whereNotNull('completed_at')   // completed attempts only (passed, failed, or expired)
             ->distinct('quiz_id')
             ->count('quiz_id');
 
@@ -70,7 +69,6 @@ trait BasicUtil
         Enrollment::where('user_id', auth()->user()->id)
             ->where('course_id', $course_id)
             ->update(['progress' => $percentage]);
-
 
         // ✅ Send email when reaching 100% (but only once)
         if ($percentage == 100) {
@@ -153,12 +151,11 @@ trait BasicUtil
             ],
             [
                 "quiz_ids" => $quiz_ids,
-
                 "completed_quizzes" =>  $completed_quizzes
             ]
-
         ];
     }
+
 
 
 

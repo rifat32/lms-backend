@@ -7,7 +7,9 @@ use App\Models\QuizAttempt;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttemptAnswer;
+use App\Rules\ValidCourse;
 use App\Rules\ValidQuestion;
+use App\Rules\ValidQuiz;
 use App\Utils\BasicUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -326,13 +328,13 @@ class QuizAttemptController extends Controller
             ], 401);
         }
 
-        // VALIDATE PAYLOAD
+        // VALIDATE PAYLOAD (use array rule format)
         $request->validate([
-            "course_id" => "required|numeric",
-            'quiz_id' => 'required|integer|exists:quizzes,id',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.user_answer_ids' => 'required|array',
+            'course_id' => ['required', 'numeric', new ValidCourse()],
+            'quiz_id' => ['required', 'integer', new ValidQuiz()],
+            'answers' => ['required', 'array'],
+            'answers.*.question_id' => ['required', 'integer', new ValidQuestion()],
+            'answers.*.user_answer_ids' => ['required', 'array'],
         ]);
 
         $user = Auth::user();
@@ -340,11 +342,9 @@ class QuizAttemptController extends Controller
 
         $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
-            ->where("course_id", $request->course_id)
+            ->where('course_id', $request->course_id)
             ->whereNull('completed_at')
             ->firstOrFail();
-
-
 
         // ⏱️ enforce timer
         $elapsed = now()->diffInSeconds($attempt->started_at);
@@ -355,7 +355,16 @@ class QuizAttemptController extends Controller
         if ($elapsed > $limit_seconds) {
             $attempt->is_expired = true;
             $attempt->completed_at = now();
+            $attempt->time_spent = $elapsed;
             $attempt->save();
+
+            // Count attempts (include this expired one)
+            $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
+                ->where('user_id', $user->id)
+                ->count();
+
+            // Recalculate course progress even on timeout (per your request)
+            $percentage = $this->recalculateCourseProgress($request->course_id);
 
             return response()->json([
                 'success' => false,
@@ -365,6 +374,8 @@ class QuizAttemptController extends Controller
                     'elapsed' => $elapsed,
                     'time_limit' => $limit_seconds,
                     'time_unit' => $quiz->time_unit,
+                    'attempts_count' => $attempts_count,
+                    'course_progress_percentage' => $percentage,
                 ]
             ], 406);
         }
@@ -378,7 +389,7 @@ class QuizAttemptController extends Controller
             $question = Question::find($answer['question_id']);
             if (!$question) {
                 continue;
-            };
+            }
 
             $total_points += $question->points;
 
@@ -391,7 +402,6 @@ class QuizAttemptController extends Controller
                 sort($correct_ids);
                 sort($user_ids);
                 $is_correct = $correct_ids === $user_ids;
-
 
                 // ✅ Save answer details
                 QuizAttemptAnswer::create([
@@ -412,7 +422,6 @@ class QuizAttemptController extends Controller
             }
         }
 
-
         // 📊 Calculate percentage
         $percentage_score = $total_points > 0 ? ($score / $total_points) * 100 : 0;
 
@@ -423,17 +432,16 @@ class QuizAttemptController extends Controller
         $attempt->time_spent = $elapsed;
         $attempt->save();
 
-        $percentage = null;
-        if ($attempt->is_passed) {
-            $percentage = $this->recalculateCourseProgress($request->course_id);
-        }
+        // Always recalculate course progress (pass or fail). This ensures progress updates
+        // when the user fails as well, like you requested.
+        $percentage = $this->recalculateCourseProgress($request->course_id);
 
         // Get attempt count for this user and quiz
         $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
             ->count();
 
-        // Add attempts count to attempt object
+        // Add attempts count to attempt object for response convenience
         $attempt->attempts_count = $attempts_count;
 
         // return response
@@ -441,6 +449,8 @@ class QuizAttemptController extends Controller
             'success' => true,
             'message' => 'Quiz attempt submitted',
             'data' => $attempt->load(['quiz_attempt_answers', 'quiz']),
+            'course_progress_percentage' => $percentage,
+            'feedback' => $feedback, // include essays needing manual grading info if any
         ], 201);
     }
 }
