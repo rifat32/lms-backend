@@ -155,7 +155,7 @@ class DashboardController extends Controller
                 $query
                     ->where('progress', '>', 0)
                     ->where('progress', '<', 100)
-                    ->where('expiry_date', '>=', now())
+                    // ->where('expiry_date', '>=', now())
                     ->whereBetween('enrolled_at', [$startDate, $endDate]);
             })
             ->count();
