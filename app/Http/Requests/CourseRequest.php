@@ -45,7 +45,12 @@ class CourseRequest extends FormRequest
             'status_start_date' => 'nullable|date',
             'status_end_date' => 'nullable|date|after_or_equal:status_start_date',
 
-            'url' => 'nullable|string|max:255',
+            'url' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('courses', 'url')->ignore($this->id),
+            ],
             'level' => 'nullable|string|max:50',
 
             'preview_video_url' => 'nullable|string|max:255|url',

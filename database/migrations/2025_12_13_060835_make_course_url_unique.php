@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddShowCorrectAnswerToQuizzesTable extends Migration
+class MakeCourseUrlUnique extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddShowCorrectAnswerToQuizzesTable extends Migration
      */
     public function up()
     {
-        Schema::table('quizzes', function (Blueprint $table) {
-            $table->boolean('show_correct_answer')->default(false);
+        Schema::table('courses', function (Blueprint $table) {
+            $table->unique('url');
         });
     }
 
@@ -25,8 +25,8 @@ class AddShowCorrectAnswerToQuizzesTable extends Migration
      */
     public function down()
     {
-        Schema::table('quizzes', function (Blueprint $table) {
-            $table->dropColumn('show_correct_answer');
+        Schema::table('courses', function (Blueprint $table) {
+            $table->dropUnique(['url']);
         });
     }
 }

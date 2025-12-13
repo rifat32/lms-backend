@@ -118,54 +118,54 @@ class QuizController extends Controller
 
     public function getQuizWithQuestionsByIdClient($id)
     {
-
-        // GETTING QUIZ BY ID
-        $quiz = Quiz::withCount("all_quiz_attempts")
+        // Eager-load only what's necessary. 'sections:id' loads only id column.
+        $quiz = Quiz::withCount('all_quiz_attempts')
             ->with([
-                'questions.options',
-                'quiz_attempts.quiz_attempt_answers',
-                'sections' => function ($query) {
-                    $query->select('sections.id')->pluck('id');
-                }
-            ])->findOrFail($id);
+                'questions.options',                      // eager-load options for each question
+                'quiz_attempts.quiz_attempt_answers',     // attempts and nested answers (if you use them on client)
+                'sections:id'                             // only load id column for sections
+            ])
+            ->findOrFail($id);
 
-        // GETTING QUESTIONS
-        $questions = $quiz->questions;
+        $questions = $quiz->questions; // Collection
 
-        // Handle randomization and limit based on quiz settings
-        if ($quiz->is_randomized && $quiz->question_limit > 0) {
-            // Case 1: Randomize + Limit
-            $questions = $questions->shuffle()->take($quiz->question_limit);
-        } elseif ($quiz->is_randomized) {
-            // Case 2: Randomize only
+        // Normalize limit and randomized flags
+        $isRandomized = (bool) $quiz->is_randomized;
+        $limit = (int) ($quiz->question_limit ?? 0);
+
+        // Apply randomization then limit (order matters)
+        if ($isRandomized) {
             $questions = $questions->shuffle();
-        } elseif ($quiz->question_limit > 0) {
-            // Case 3: Limit only
-            $questions = $questions->take($quiz->question_limit);
+        }
+        if ($limit > 0) {
+            $questions = $questions->take($limit);
         }
 
-
-
-        // ADD QUESTIONS DATA
+        // Set trimmed questions (re-index)
         $quiz->setRelation('questions', $questions->values());
 
-        // SEND ONLY SECTION IDS
+        // For sections we only want the IDs
         $quiz->setRelation('sections', $quiz->sections->pluck('id'));
 
-        // Get attempt count for this user and quiz
-        $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
-            ->where('user_id', auth()->id())
-            ->count();
+        // Count attempts for the currently authenticated user (null-safe)
+        $userId = auth()->id();
+        $attemptsCount = 0;
+        if ($userId) {
+            // Use the relationship so it benefits from eager-loaded data if present
+            $attemptsCount = $quiz->quiz_attempts
+                ? $quiz->quiz_attempts->where('user_id', $userId)->count()
+                : QuizAttempt::where('quiz_id', $quiz->id)->where('user_id', $userId)->count();
+        }
 
-        $quiz->setAttribute('quiz_attempts_count', $attempts_count);
+        $quiz->setAttribute('quiz_attempts_count', $attemptsCount);
 
-        // Return the response
         return response()->json([
             'success' => true,
             'message' => 'Quiz retrieved successfully',
             'data' => $quiz,
         ], 200);
     }
+
     /**
      * @OA\Get(
      *     path="/v1.0/quizzes/{id}",
