@@ -153,8 +153,12 @@ class QuizController extends Controller
         if ($userId) {
             // Use the relationship so it benefits from eager-loaded data if present
             $attemptsCount = $quiz->quiz_attempts
-                ? $quiz->quiz_attempts->where('user_id', $userId)->count()
-                : QuizAttempt::where('quiz_id', $quiz->id)->where('user_id', $userId)->count();
+                ? $quiz->quiz_attempts->where('user_id', $userId)
+                ->where('quiz_id', $quiz->id)
+                ->count()
+                : QuizAttempt::where('quiz_id', $quiz->id)
+                ->where('user_id', $userId)
+                ->count();
         }
 
         $quiz->setAttribute('quiz_attempts_count', $attemptsCount);

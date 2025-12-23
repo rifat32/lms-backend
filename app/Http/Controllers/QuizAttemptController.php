@@ -359,8 +359,9 @@ class QuizAttemptController extends Controller
             $attempt->save();
 
             // Count attempts (include this expired one)
-            $attempts_count = QuizAttempt::where('quiz_id', $quiz->id)
+            $attempts_count = QuizAttempt::where('quiz_id', $request->quiz_id)
                 ->where('user_id', $user->id)
+                ->where('course_id', $request->course_id)
                 ->count();
 
             // Recalculate course progress even on timeout (per your request)
