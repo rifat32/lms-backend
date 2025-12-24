@@ -404,6 +404,9 @@ class UserController extends Controller
         $summary["total_students"] =   User::whereHas('roles', function ($q) {
             $q->where('roles.name', 'student');
         })->count();
+        $summary["total_admin"] =   User::whereHas('roles', function ($q) {
+            $q->where('roles.name', 'admin');
+        })->count();
 
         // SEND RESPONSE
         return response()->json([
