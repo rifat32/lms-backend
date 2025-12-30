@@ -9,6 +9,7 @@ use App\Models\Sectionable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use getID3;
 
 /**
  * @OA\Tag(
@@ -364,6 +365,17 @@ class LessonController extends Controller
                     $preview_video_url_filename = $file->getClientOriginalName();
                     $file->storeAs("business_1/lesson_{$lesson->id}", $preview_video_url_filename, 'public');
                     $preview_video_url = $preview_video_url_filename;
+
+                    // Extract video duration if content_type is video
+                    if (isset($request_payload['content_type']) && $request_payload['content_type'] === 'video') {
+                        $path = Storage::disk('public')->path("business_1/lesson_{$lesson->id}/$preview_video_url_filename");
+                        $getID3 = new getID3;
+                        $fileinfo = $getID3->analyze($path);
+                        $duration_seconds = $fileinfo['playtime_seconds'] ?? null;
+                        if ($duration_seconds) {
+                            $lesson->duration = round($duration_seconds / 60); // Convert to minutes
+                        }
+                    }
                 }
 
                 // IF EXISTING FILE URL
@@ -740,21 +752,21 @@ class LessonController extends Controller
                 ], 404);
             }
 
-// Check if any lesson has progress
-        $lessons_with_progress = $lessons->filter(function ($lesson) {
-            return $lesson->all_lesson_progress()->exists();
-        });
+            // Check if any lesson has progress
+            $lessons_with_progress = $lessons->filter(function ($lesson) {
+                return $lesson->all_lesson_progress()->exists();
+            });
 
-        if ($lessons_with_progress->count() > 0) {
-            $ids_with_progress = $lessons_with_progress->pluck('id')->toArray();
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete lesson(s) with existing progress',
-                'data' => [
-                    'lesson_ids' => $ids_with_progress
-                ]
-            ], 400);
-        }
+            if ($lessons_with_progress->count() > 0) {
+                $ids_with_progress = $lessons_with_progress->pluck('id')->toArray();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete lesson(s) with existing progress',
+                    'data' => [
+                        'lesson_ids' => $ids_with_progress
+                    ]
+                ], 400);
+            }
 
 
             // Delete lesson files (use raw DB value, not accessor!)
@@ -782,12 +794,12 @@ class LessonController extends Controller
                         }
                     }
                 }
-// Delete the sectionable
-        Sectionable::where([
-        'sectionable_id' => $lesson->id,
-        'sectionable_type' => Lesson::class,
-        ])
-        ->delete();
+                // Delete the sectionable
+                Sectionable::where([
+                    'sectionable_id' => $lesson->id,
+                    'sectionable_type' => Lesson::class,
+                ])
+                    ->delete();
             }
 
 

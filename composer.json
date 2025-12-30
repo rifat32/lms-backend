@@ -12,6 +12,7 @@
         "fruitcake/laravel-cors": "^2.0",
         "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.0.1",
+        "james-heinrich/getid3": "^1.9",
         "laravel/cashier": "^13.17",
         "laravel/framework": "^8.75",
         "laravel/passport": "^10.4",
